@@ -1,0 +1,16 @@
+name: build
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  cargo:
+    runs-on: ubuntu-latest
+    env:
+      CARGO_TERM_COLOR: always
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup toolchain install nightly
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build --release
