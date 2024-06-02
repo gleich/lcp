@@ -1,5 +1,7 @@
+use anyhow::Context;
 use dotenv::dotenv;
 use rocket::{launch, routes, Config};
+use steam::games::fetch_recent;
 use tracing::{info, Level};
 use tracing_subscriber::FmtSubscriber;
 
@@ -28,5 +30,9 @@ async fn rocket() -> _ {
     //     ],
     // );
     rocket_config = rocket_config.mount("/steam", routes![steam::cache::endpoint]);
+    let client = reqwest::Client::new();
+    dbg!(fetch_recent(&client)
+        .await
+        .expect("fetching recent activities failed="));
     rocket_config
 }
