@@ -1,7 +1,9 @@
-use anyhow::Context;
+use std::thread;
+
+use anyhow::{Context, Result};
 use dotenv::dotenv;
+use reqwest::Client;
 use rocket::{launch, routes, Config};
-use steam::games::fetch_recent;
 use tracing::{info, Level};
 use tracing_subscriber::FmtSubscriber;
 
@@ -16,23 +18,33 @@ async fn rocket() -> _ {
         .finish();
     tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
     info!("booted");
+
     dotenv().expect("Failed to load dotenv");
-    // strava::event::update()
-    //     .await
-    //     .expect("failed to do initial update on strava");
-    let mut rocket_config = rocket::custom(Config::figment().merge(("address", "0.0.0.0")));
-    // rocket_config = rocket_config.mount(
-    //     "/strava",
-    //     routes![
-    //         strava::event::endpoint,
-    //         strava::challenge::endpoint,
-    //         strava::cache::endpoint
-    //     ],
-    // );
-    rocket_config = rocket_config.mount("/steam", routes![steam::cache::endpoint]);
-    let client = reqwest::Client::new();
-    dbg!(fetch_recent(&client)
+    initialize_caches()
         .await
-        .expect("fetching recent activities failed="));
+        .expect("initializing caches failed");
+
+    let mut rocket_config = rocket::custom(Config::figment().merge(("address", "0.0.0.0")));
+    rocket_config = rocket_config.mount(
+        "/strava",
+        routes![
+            strava::event::endpoint,
+            strava::challenge::endpoint,
+            strava::cache::endpoint
+        ],
+    );
+    rocket_config = rocket_config.mount("/steam", routes![steam::cache::endpoint]);
+    thread::spawn(steam::update::periodic_update);
     rocket_config
+}
+
+async fn initialize_caches() -> Result<()> {
+    let client = Client::new();
+    strava::event::update(&client)
+        .await
+        .context("failed to do initial cache on strava")?;
+    steam::update::cache(&client)
+        .await
+        .context("failed to do initial cache of steam")?;
+    Ok(())
 }

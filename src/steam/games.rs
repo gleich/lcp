@@ -40,7 +40,7 @@ pub struct Playtime {
     pub minutes_forever: u32,
 }
 
-pub async fn fetch_recent(client: &Client) -> Result<Vec<Game>> {
+pub async fn fetch_recently_played(client: &Client) -> Result<Vec<Game>> {
     let mut resp: MainSteamResponse = client
         .get("http://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v0001/")
         .query(&[
