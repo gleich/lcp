@@ -34,7 +34,7 @@ async fn rocket() -> _ {
         ],
     );
     rocket_config = rocket_config.mount("/steam", routes![steam::cache::endpoint]);
-    thread::spawn(steam::update::periodic_update);
+    thread::spawn(|| steam::update::periodic_update());
     rocket_config
 }
 
