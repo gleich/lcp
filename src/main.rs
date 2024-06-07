@@ -1,3 +1,5 @@
+use std::process::exit;
+
 use anyhow::{Context, Result};
 use dotenv::dotenv;
 use reqwest::Client;
@@ -9,6 +11,7 @@ mod auth;
 mod resp;
 mod steam;
 mod strava;
+mod vercel;
 
 #[rocket::main]
 async fn main() {
