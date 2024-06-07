@@ -25,9 +25,10 @@ pub fn update<'a>(
     recent_games: Vec<Game>,
 ) -> Result<(), PoisonError<MutexGuard<'a, Response<Vec<Game>>>>> {
     let mut changer = GAMES.lock()?;
-    if changer.data != recent_games {
+    if *changer.data != recent_games {
         changer.data = recent_games;
         changer.last_updated = Utc::now();
+        info!("steam cache updated")
     }
     Ok(())
 }
