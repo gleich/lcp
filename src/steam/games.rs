@@ -30,7 +30,9 @@ pub struct RawGame {
 pub struct Game {
     pub name: String,
     pub app_id: u32,
+    pub url: String,
     pub icon_url: String,
+    pub header_url: String,
     pub playtime: Playtime,
 }
 
@@ -66,9 +68,14 @@ pub async fn fetch_recently_played(client: &Client) -> Result<Vec<Game>> {
         .iter_mut()
         .map(|g| Game {
             name: g.name.to_owned(),
+            url: format!("https://store.steampowered.com/app/{}/", &g.appid),
             icon_url: format!(
                 "http://media.steampowered.com/steamcommunity/public/images/apps/{}/{}.jpg",
                 &g.appid, g.img_icon_url
+            ),
+            header_url: format!(
+                "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{}/header.jpg",
+                &g.appid,
             ),
             app_id: g.appid,
             playtime: Playtime {

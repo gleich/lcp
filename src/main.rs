@@ -18,7 +18,7 @@ async fn main() {
     tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
     info!("booted");
 
-    dotenv().expect("Failed to load dotenv");
+    dotenv().expect("setting env vars from .env failed");
     initialize_caches().await.expect("setting up caches failed");
 
     tokio::spawn(async {

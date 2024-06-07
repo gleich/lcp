@@ -1,4 +1,4 @@
-use std::{thread, time::Duration};
+use std::time::Duration;
 
 use anyhow::{Context, Result};
 use reqwest::Client;
