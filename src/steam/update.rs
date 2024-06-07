@@ -2,6 +2,7 @@ use std::{thread, time::Duration};
 
 use anyhow::{Context, Result};
 use reqwest::Client;
+use rocket::tokio;
 
 use super::{cache, games::fetch_recently_played};
 
@@ -19,6 +20,6 @@ pub async fn periodic_update() -> Result<()> {
         cache(&client)
             .await
             .context("requesting recent games or updating cache failed")?;
-        thread::sleep(Duration::from_secs(60));
+        tokio::time::sleep(Duration::from_secs(60)).await;
     }
 }

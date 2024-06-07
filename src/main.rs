@@ -36,8 +36,9 @@ async fn main() {
             strava::cache::endpoint
         ],
     );
+    rocket_config = rocket_config.mount("/steam", routes![steam::cache::endpoint]);
+
     rocket_config
-        .mount("/steam", routes![steam::cache::endpoint])
         .launch()
         .await
         .expect("failed to launch rocket");
