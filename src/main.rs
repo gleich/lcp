@@ -1,9 +1,8 @@
 use std::thread;
 
-use anyhow::{Context, Result};
 use dotenv::dotenv;
 use reqwest::Client;
-use rocket::{launch, routes, Config};
+use rocket::{routes, tokio, Config};
 use tracing::{info, Level};
 use tracing_subscriber::FmtSubscriber;
 
@@ -11,8 +10,11 @@ mod auth;
 mod steam;
 mod strava;
 
-#[launch]
-async fn rocket() -> _ {
+#[rocket::main]
+async fn main() {
+    tokio::spawn(async {
+        initialize_caches().await;
+    });
     let subscriber = FmtSubscriber::builder()
         .with_max_level(Level::INFO)
         .finish();
@@ -20,9 +22,9 @@ async fn rocket() -> _ {
     info!("booted");
 
     dotenv().expect("Failed to load dotenv");
-    initialize_caches()
-        .await
-        .expect("initializing caches failed");
+    initialize_caches().await;
+
+    thread::spawn(steam::update::periodic_update);
 
     let mut rocket_config = rocket::custom(Config::figment().merge(("address", "0.0.0.0")));
     rocket_config = rocket_config.mount(
@@ -33,18 +35,20 @@ async fn rocket() -> _ {
             strava::cache::endpoint
         ],
     );
-    rocket_config = rocket_config.mount("/steam", routes![steam::cache::endpoint]);
-    thread::spawn(|| steam::update::periodic_update());
     rocket_config
+        .mount("/steam", routes![steam::cache::endpoint])
+        .launch()
+        .await
+        .expect("failed to launch rocket");
 }
 
-async fn initialize_caches() -> Result<()> {
+async fn initialize_caches() {
     let client = Client::new();
     strava::event::update(&client)
         .await
-        .context("failed to do initial cache on strava")?;
+        .expect("failed to do initial cache on strava");
     steam::update::cache(&client)
         .await
-        .context("failed to do initial cache of steam")?;
-    Ok(())
+        .expect("failed to do initial cache of steam");
+    info!("initialized caches")
 }
