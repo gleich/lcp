@@ -20,7 +20,6 @@ pub async fn periodic_update() -> Result<()> {
         cache(&client)
             .await
             .context("requesting recent games or updating cache failed")?;
-        info!("polled steam API");
         thread::sleep(Duration::from_secs(60));
     }
 }
