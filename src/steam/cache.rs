@@ -28,7 +28,7 @@ pub fn update<'a>(
     if *changer.data != recent_games {
         changer.data = recent_games;
         changer.last_updated = Utc::now();
-        info!("steam cache updated")
+        info!("steam cache updated");
     }
     Ok(())
 }
