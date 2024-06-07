@@ -7,6 +7,7 @@ use tracing::{info, Level};
 use tracing_subscriber::FmtSubscriber;
 
 mod auth;
+mod resp;
 mod steam;
 mod strava;
 

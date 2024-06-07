@@ -1,27 +1,33 @@
 use std::sync::{Arc, Mutex, MutexGuard, PoisonError};
 
+use chrono::Utc;
 use lazy_static::lazy_static;
 use rocket::{get, serde::json::Json};
 use tracing::info;
 
-use crate::auth;
+use crate::{auth, resp::Response};
 
 use super::games::Game;
 
 lazy_static! {
-    static ref GAMES: Arc<Mutex<Vec<Game>>> = Arc::new(Mutex::new(vec![]));
+    static ref GAMES: Arc<Mutex<Response<Vec<Game>>>> = Arc::new(Mutex::new(Response::new(vec![])));
 }
 
 #[get("/cache")]
-pub fn endpoint(_token: auth::Token) -> Json<Vec<Game>> {
+pub fn endpoint(_token: auth::Token) -> Json<Response<Vec<Game>>> {
     let arc_ref = Arc::clone(&GAMES);
     let recent_games = arc_ref.lock().unwrap();
     info!("steam cache endpoint hit");
-    Json((recent_games.clone()).to_vec())
+    Json(recent_games.clone())
 }
 
-pub fn update<'a>(recent_games: Vec<Game>) -> Result<(), PoisonError<MutexGuard<'a, Vec<Game>>>> {
+pub fn update<'a>(
+    recent_games: Vec<Game>,
+) -> Result<(), PoisonError<MutexGuard<'a, Response<Vec<Game>>>>> {
     let mut changer = GAMES.lock()?;
-    *changer = recent_games;
+    if changer.data != recent_games {
+        changer.data = recent_games;
+        changer.last_updated = Utc::now();
+    }
     Ok(())
 }
