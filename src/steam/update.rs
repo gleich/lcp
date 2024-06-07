@@ -2,7 +2,6 @@ use std::{thread, time::Duration};
 
 use anyhow::{Context, Result};
 use reqwest::Client;
-use tracing::info;
 
 use super::{cache, games::fetch_recently_played};
 

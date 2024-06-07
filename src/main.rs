@@ -1,5 +1,3 @@
-use std::thread;
-
 use anyhow::{Context, Result};
 use dotenv::dotenv;
 use reqwest::Client;
