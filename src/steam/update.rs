@@ -7,7 +7,7 @@ use tracing::info;
 use super::{cache, games::fetch_recently_played};
 
 pub async fn cache(client: &Client) -> Result<()> {
-    let recently_played_games = fetch_recently_played(&client)
+    let recently_played_games = fetch_recently_played(client)
         .await
         .context("fetching recently played games failed")?;
     cache::update(recently_played_games).expect("updating steam cache failed");

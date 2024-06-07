@@ -33,10 +33,10 @@ pub async fn endpoint(event: Json<Event>) -> Status {
 pub async fn update(client: &Client) -> Result<()> {
     let mut token_data = TokenData::new().context("getting strava token data failed")?;
     token_data
-        .fetch_if_expired(&client)
+        .fetch_if_expired(client)
         .await
         .context("fetching new strava token data if expired failed")?;
-    let recent_activities = activities::fetch_recent(&token_data, &client)
+    let recent_activities = activities::fetch_recent(&token_data, client)
         .await
         .context("fetching strava recent activities failed")?;
     cache::update(recent_activities).expect("updating strava cache failed");
