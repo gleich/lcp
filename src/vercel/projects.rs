@@ -20,6 +20,7 @@ pub struct RawProject {
     pub framework: Option<String>,
     #[serde(rename = "latestDeployments")]
     pub latest_deployments: Vec<Deployment>,
+    pub link: Option<Link>,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
@@ -33,12 +34,20 @@ pub struct Deployment {
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
+pub struct Link {
+    pub repo: String,
+    pub org: String,
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 pub struct Project {
     pub name: String,
     pub updated_at: DateTime<Utc>,
     pub framework: Option<String>,
     pub ready_state: String,
     pub time_building: i64,
+    pub github_repo: Option<String>,
+    pub github_owner: Option<String>,
 }
 
 pub async fn fetch_recent(client: &Client) -> Result<Vec<Project>> {
@@ -68,6 +77,16 @@ pub async fn fetch_recent(client: &Client) -> Result<Vec<Project>> {
                 framework: p.framework.to_owned(),
                 ready_state: deployment.ready_state.to_owned(),
                 time_building: deployment.ready_at - deployment.building_at,
+                github_repo: if p.link.is_some() {
+                    Some(p.link.as_ref().unwrap().repo.to_owned())
+                } else {
+                    None
+                },
+                github_owner: if p.link.is_some() {
+                    Some(p.link.as_ref().unwrap().org.to_owned())
+                } else {
+                    None
+                },
             }
         })
         .collect())

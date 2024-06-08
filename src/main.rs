@@ -22,6 +22,14 @@ async fn main() {
     info!("booted");
 
     dotenv().expect("setting env vars from .env failed");
+
+    let client = Client::new();
+    let projects = vercel::projects::fetch_recent(&client)
+        .await
+        .expect("failed to fetch recent vercel projects");
+    dbg!(projects);
+    exit(0);
+
     initialize_caches().await.expect("setting up caches failed");
 
     tokio::spawn(async {
