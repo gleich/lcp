@@ -23,12 +23,13 @@ pub fn endpoint(_token: auth::Token) -> Json<Response<Vec<Game>>> {
 
 pub fn update<'a>(
     recent_games: Vec<Game>,
-) -> Result<(), PoisonError<MutexGuard<'a, Response<Vec<Game>>>>> {
+) -> Result<bool, PoisonError<MutexGuard<'a, Response<Vec<Game>>>>> {
     let mut changer = GAMES.lock()?;
     if *changer.data != recent_games {
         changer.data = recent_games;
         changer.last_updated = Utc::now();
         info!("steam cache updated");
+        return Ok(true);
     }
-    Ok(())
+    Ok(false)
 }

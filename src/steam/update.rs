@@ -4,13 +4,20 @@ use anyhow::{Context, Result};
 use reqwest::Client;
 use rocket::tokio;
 
+use crate::reval;
+
 use super::{cache, games::fetch_recently_played};
 
 pub async fn cache(client: &Client) -> Result<()> {
     let recently_played_games = fetch_recently_played(client)
         .await
         .context("fetching recently played games failed")?;
-    cache::update(recently_played_games).expect("updating steam cache failed");
+    let updated_cache = cache::update(recently_played_games).expect("updating steam cache failed");
+    if updated_cache {
+        reval::call_for_revalidate(client)
+            .await
+            .context("calling for website revalidation failed")?;
+    }
     Ok(())
 }
 

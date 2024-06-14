@@ -23,14 +23,15 @@ pub fn endpoint(_token: auth::Token) -> Json<Response<Vec<Activity>>> {
     Json(recent_activities.clone())
 }
 
-pub fn update<'a>(
+pub async fn update<'a>(
     recent_activities: Vec<Activity>,
-) -> Result<(), PoisonError<MutexGuard<'a, Response<Vec<Activity>>>>> {
+) -> Result<bool, PoisonError<MutexGuard<'a, Response<Vec<Activity>>>>> {
     let mut changer = ACTIVITIES.lock()?;
     if *changer.data != recent_activities {
         changer.data = recent_activities;
         changer.last_updated = Utc::now();
         info!("strava cache updated");
+        return Ok(true);
     }
-    Ok(())
+    Ok(false)
 }

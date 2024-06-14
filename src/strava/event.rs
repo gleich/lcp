@@ -5,7 +5,10 @@ use reqwest::Client;
 use rocket::{http::Status, post, serde::json::Json};
 use serde::Deserialize;
 
-use crate::strava::{activities, cache, token::TokenData};
+use crate::{
+    reval,
+    strava::{activities, cache, token::TokenData},
+};
 
 #[derive(Debug, PartialEq, Deserialize)]
 pub struct Event {
@@ -39,6 +42,13 @@ pub async fn update(client: &Client) -> Result<()> {
     let recent_activities = activities::fetch_recent(&token_data, client)
         .await
         .context("fetching strava recent activities failed")?;
-    cache::update(recent_activities).expect("updating strava cache failed");
+    let updated_cache = cache::update(recent_activities)
+        .await
+        .expect("updating strava cache failed");
+    if updated_cache {
+        reval::call_for_revalidate(client)
+            .await
+            .context("calling for website revalidation failed")?;
+    }
     Ok(())
 }
