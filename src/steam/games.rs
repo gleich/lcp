@@ -1,6 +1,7 @@
 use std::env;
 
 use anyhow::{Context, Result};
+use chrono::{DateTime, Utc};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
@@ -22,7 +23,7 @@ pub struct RawGame {
     pub name: String,
     pub appid: u32,
     pub img_icon_url: String,
-    pub playtime_2weeks: u32,
+    pub rtime_last_played: DateTime<Utc>,
     pub playtime_forever: u32,
 }
 
@@ -34,18 +35,13 @@ pub struct Game {
     pub icon_url: String,
     pub header_url: String,
     pub library_url: String,
-    pub playtime: Playtime,
-}
-
-#[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
-pub struct Playtime {
-    pub minutes_last_2weeks: u32,
-    pub minutes_forever: u32,
+    pub playtime_forever: u32,
+    pub rtime_last_played: DateTime<Utc>,
 }
 
 pub async fn fetch_recently_played(client: &Client) -> Result<Vec<Game>> {
     let mut resp: MainSteamResponse = client
-        .get("http://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v0001/")
+        .get("https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/")
         .query(&[
             (
                 "key",
@@ -55,6 +51,7 @@ pub async fn fetch_recently_played(client: &Client) -> Result<Vec<Game>> {
                 "steamid",
                 env::var(STEAM_ID).context("fetching steam id env var failed")?,
             ),
+            ("include_appinfo", String::from("true")),
             ("format", String::from("json")),
         ])
         .send()
@@ -63,7 +60,7 @@ pub async fn fetch_recently_played(client: &Client) -> Result<Vec<Game>> {
         .json()
         .await
         .context("reading json failed from request to get recent games")?;
-    Ok(resp
+    let mut games: Vec<Game> = resp
         .response
         .games
         .iter_mut()
@@ -83,10 +80,10 @@ pub async fn fetch_recently_played(client: &Client) -> Result<Vec<Game>> {
                 &g.appid,
             ),
             app_id: g.appid,
-            playtime: Playtime {
-                minutes_last_2weeks: g.playtime_2weeks,
-                minutes_forever: g.playtime_forever,
-            },
+            playtime_forever: g.playtime_forever,
+            rtime_last_played: g.rtime_last_played
         })
-        .collect())
+        .collect();
+    games.sort_by(|a, b| b.rtime_last_played.cmp(&a.rtime_last_played));
+    Ok(games)
 }
