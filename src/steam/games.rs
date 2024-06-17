@@ -33,6 +33,7 @@ pub struct Game {
     pub url: String,
     pub icon_url: String,
     pub header_url: String,
+    pub library_url: String,
     pub playtime: Playtime,
 }
 
@@ -72,6 +73,10 @@ pub async fn fetch_recently_played(client: &Client) -> Result<Vec<Game>> {
             icon_url: format!(
                 "http://media.steampowered.com/steamcommunity/public/images/apps/{}/{}.jpg",
                 &g.appid, g.img_icon_url
+            ),
+            library_url: format!(
+                "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{}/library_600x900.jpg",
+                &g.appid,
             ),
             header_url: format!(
                 "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{}/header.jpg",
