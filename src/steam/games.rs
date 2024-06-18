@@ -34,7 +34,7 @@ pub struct Game {
     pub url: String,
     pub icon_url: String,
     pub header_url: String,
-    pub library_url: String,
+    pub library_url: Option<String>,
     pub playtime_forever: u32,
     pub rtime_last_played: DateTime<Utc>,
 }
@@ -60,30 +60,34 @@ pub async fn fetch_recently_played(client: &Client) -> Result<Vec<Game>> {
         .json()
         .await
         .context("reading json failed from request to get recent games")?;
-    let mut games: Vec<Game> = resp
-        .response
-        .games
-        .iter_mut()
-        .map(|g| Game {
-            name: g.name.to_owned(),
-            url: format!("https://store.steampowered.com/app/{}/", &g.appid),
+    let mut games: Vec<Game> = vec![];
+    for game in resp.response.games.iter_mut() {
+        let library_url = format!(
+                "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{}/library_600x900.jpg",
+                &game.appid,
+            );
+        let library_url_exists = client.get(&library_url).send().await.is_ok();
+        games.push(Game {
+            name: game.name.to_owned(),
+            url: format!("https://store.steampowered.com/app/{}/", &game.appid),
             icon_url: format!(
                 "http://media.steampowered.com/steamcommunity/public/images/apps/{}/{}.jpg",
-                &g.appid, g.img_icon_url
+                &game.appid, game.img_icon_url
             ),
-            library_url: format!(
-                "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{}/library_600x900.jpg",
-                &g.appid,
-            ),
+            library_url: if library_url_exists {
+                Some(library_url)
+            } else {
+                None
+            },
             header_url: format!(
                 "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{}/header.jpg",
-                &g.appid,
+                &game.appid,
             ),
-            app_id: g.appid,
-            playtime_forever: g.playtime_forever,
-            rtime_last_played: Utc.timestamp_opt(g.rtime_last_played, 0).unwrap()
+            app_id: game.appid,
+            playtime_forever: game.playtime_forever,
+            rtime_last_played: Utc.timestamp_opt(game.rtime_last_played, 0).unwrap(),
         })
-        .collect();
+    }
     games.sort_by(|a, b| b.rtime_last_played.cmp(&a.rtime_last_played));
     Ok(games)
 }
