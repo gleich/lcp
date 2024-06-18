@@ -27,6 +27,6 @@ pub async fn periodic_update() -> Result<()> {
         cache(&client)
             .await
             .context("requesting recent games or updating cache failed")?;
-        tokio::time::sleep(Duration::from_secs(60)).await;
+        tokio::time::sleep(Duration::from_secs(300)).await; // reload every 5 minutes
     }
 }
