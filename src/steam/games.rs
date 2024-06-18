@@ -2,7 +2,7 @@ use std::env;
 
 use anyhow::{Context, Result};
 use chrono::{DateTime, TimeZone, Utc};
-use reqwest::{Client, StatusCode};
+use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
 const STEAM_TOKEN: &str = "STEAM_ACCESS_TOKEN";
