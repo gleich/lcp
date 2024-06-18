@@ -2,7 +2,7 @@ use std::env;
 
 use anyhow::{Context, Result};
 use chrono::{DateTime, TimeZone, Utc};
-use reqwest::Client;
+use reqwest::{Client, StatusCode};
 use serde::{Deserialize, Serialize};
 
 const STEAM_TOKEN: &str = "STEAM_ACCESS_TOKEN";
@@ -66,7 +66,13 @@ pub async fn fetch_recently_played(client: &Client) -> Result<Vec<Game>> {
                 "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{}/library_600x900.jpg",
                 &game.appid,
             );
-        let library_url_exists = client.get(&library_url).send().await.is_ok();
+        let library_url_exists = client
+            .get(&library_url)
+            .send()
+            .await
+            .context(format!("checking library url for {} failed", &game.name))?
+            .status()
+            == 200;
         games.push(Game {
             name: game.name.to_owned(),
             url: format!("https://store.steampowered.com/app/{}/", &game.appid),
