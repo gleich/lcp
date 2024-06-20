@@ -10,6 +10,8 @@ use crate::{
     strava::{activities, cache, token::TokenData},
 };
 
+use super::map;
+
 #[derive(Debug, PartialEq, Deserialize)]
 pub struct Event {
     pub aspect_type: String,
@@ -42,10 +44,25 @@ pub async fn update(client: &Client) -> Result<()> {
     let recent_activities = activities::fetch_recent(&token_data, client)
         .await
         .context("fetching strava recent activities failed")?;
-    let updated_cache = cache::update(recent_activities)
+    let updated_cache = cache::update(recent_activities.clone())
         .await
         .expect("updating strava cache failed");
     if updated_cache {
+        // generate mapbox images and upload them to S3
+        let s3_config = aws_config::load_from_env().await;
+        let s3_client = aws_sdk_s3::Client::new(&s3_config);
+        map::clear_mapbox_folder(&s3_client)
+            .await
+            .context("clearing out mapbox folder filled with old maps failed")?;
+        for activity in recent_activities {
+            let map = map::fetch_from_mapbox(client, &activity.map.summary_polyline)
+                .await
+                .context("fetching map from mapbox failed")?;
+            map::upload_to_s3(&s3_client, map, activity.id)
+                .await
+                .context("uploading map to S3 failed")?;
+        }
+
         reval::call_for_revalidate(client)
             .await
             .context("calling for website revalidation failed")?;
