@@ -13,9 +13,9 @@ pub enum Service {
 
 impl Display for Service {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            &Self::Steam => write!(f, "steam"),
-            &Self::Strava => write!(f, "strava"),
+        match *self {
+            Self::Steam => write!(f, "steam"),
+            Self::Strava => write!(f, "strava"),
         }
     }
 }
