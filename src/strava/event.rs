@@ -6,7 +6,7 @@ use rocket::{http::Status, post, serde::json::Json};
 use serde::Deserialize;
 
 use crate::{
-    reval,
+    reval::{self, Service},
     strava::{activities, cache, token::TokenData},
 };
 
@@ -63,7 +63,7 @@ pub async fn update(client: &Client) -> Result<()> {
                 .context("uploading map to S3 failed")?;
         }
 
-        reval::call_for_revalidate(client)
+        reval::call_for_revalidate(client, Service::Strava)
             .await
             .context("calling for website revalidation failed")?;
     }

@@ -6,9 +6,26 @@ use tracing::info;
 
 const REVALIDATE_TOKEN: &str = "REVALIDATE_ACCESS_TOKEN";
 
-pub async fn call_for_revalidate(client: &Client) -> Result<()> {
+pub enum Service {
+    Strava,
+    Steam,
+}
+
+impl ToString for Service {
+    fn to_string(&self) -> String {
+        match self {
+            &Self::Steam => String::from("steam"),
+            &Self::Strava => String::from("strava"),
+        }
+    }
+}
+
+pub async fn call_for_revalidate(client: &Client, service: Service) -> Result<()> {
     client
-        .post("https://beta.mattglei.ch/revalidate")
+        .post(format!(
+            "https://beta.mattglei.ch/revalidate/{}",
+            service.to_string()
+        ))
         .bearer_auth(env::var(REVALIDATE_TOKEN).context("getting revalidate token env var failed")?)
         .send()
         .await
