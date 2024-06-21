@@ -1,4 +1,4 @@
-use std::env;
+use std::{env, fmt::Display};
 
 use anyhow::{Context, Result};
 use reqwest::Client;
@@ -11,25 +11,22 @@ pub enum Service {
     Steam,
 }
 
-impl ToString for Service {
-    fn to_string(&self) -> String {
+impl Display for Service {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            &Self::Steam => String::from("steam"),
-            &Self::Strava => String::from("strava"),
+            &Self::Steam => write!(f, "steam"),
+            &Self::Strava => write!(f, "strava"),
         }
     }
 }
 
 pub async fn call_for_revalidate(client: &Client, service: Service) -> Result<()> {
     client
-        .post(format!(
-            "https://beta.mattglei.ch/revalidate/{}",
-            service.to_string()
-        ))
+        .post(format!("https://beta.mattglei.ch/revalidate/{}", service))
         .bearer_auth(env::var(REVALIDATE_TOKEN).context("getting revalidate token env var failed")?)
         .send()
         .await
         .context("sending request to revalidate website cache failed")?;
-    info!("made call to website to revalidate cache");
+    info!("made call to website to revalidate cache for {}", service);
     Ok(())
 }
