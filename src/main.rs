@@ -1,3 +1,5 @@
+use std::env;
+
 use anyhow::{Context, Result};
 use dotenv::dotenv;
 use reqwest::Client;
@@ -13,6 +15,14 @@ mod strava;
 
 #[rocket::main]
 async fn main() {
+    // setup logging and reports
+    let _guard = sentry::init((
+        env::var("SENTRY_URL").expect("getting sentry URL failed"),
+        sentry::ClientOptions {
+            release: sentry::release_name!(),
+            ..Default::default()
+        },
+    ));
     let subscriber = FmtSubscriber::builder()
         .with_max_level(Level::INFO)
         .finish();
