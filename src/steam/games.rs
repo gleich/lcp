@@ -1,7 +1,6 @@
 use std::env;
 
 use anyhow::{Context, Result};
-use chrono::{DateTime, TimeZone, Utc};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
@@ -35,8 +34,8 @@ pub struct Game {
     pub icon_url: String,
     pub header_url: String,
     pub library_url: Option<String>,
-    pub playtime_forever: u32,
-    pub rtime_last_played: DateTime<Utc>,
+    // pub playtime_forever: u32,
+    // pub rtime_last_played: DateTime<Utc>,
 }
 
 pub async fn fetch_recently_played(client: &Client) -> Result<Vec<Game>> {
@@ -60,6 +59,9 @@ pub async fn fetch_recently_played(client: &Client) -> Result<Vec<Game>> {
         .json()
         .await
         .context("reading json failed from request to get recent games")?;
+    resp.response
+        .games
+        .sort_by(|a, b| b.rtime_last_played.cmp(&a.rtime_last_played));
     let mut games: Vec<Game> = vec![];
     for game in resp.response.games.iter_mut() {
         let library_url = format!(
@@ -90,10 +92,9 @@ pub async fn fetch_recently_played(client: &Client) -> Result<Vec<Game>> {
                 &game.appid,
             ),
             app_id: game.appid,
-            playtime_forever: game.playtime_forever,
-            rtime_last_played: Utc.timestamp_opt(game.rtime_last_played, 0).unwrap(),
+            // playtime_forever: game.playtime_forever,
+            // rtime_last_played: Utc.timestamp_opt(game.rtime_last_played, 0).unwrap(),
         })
     }
-    games.sort_by(|a, b| b.rtime_last_played.cmp(&a.rtime_last_played));
     Ok(games)
 }
