@@ -39,7 +39,7 @@ pub struct Game {
 }
 
 pub async fn fetch_recently_played(client: &Client) -> Result<Vec<Game>> {
-    let mut resp: MainSteamResponse = client
+    let resp: reqwest::Response = client
         .get("https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/")
         .query(&[
             (
@@ -55,15 +55,20 @@ pub async fn fetch_recently_played(client: &Client) -> Result<Vec<Game>> {
         ])
         .send()
         .await
-        .context("sending request for recent games failed")?
-        .json()
+        .context("sending request for recent games failed")?;
+    let resp_text = resp
+        .text()
         .await
-        .context("reading json failed from request to get recent games")?;
-    resp.response
+        .context("getting raw response text failed")?;
+    let mut data: MainSteamResponse = serde_json::from_str(&resp_text).context(format!(
+        "reading json failed from request to get recent games: response: {}",
+        resp_text
+    ))?;
+    data.response
         .games
         .sort_by(|a, b| b.rtime_last_played.cmp(&a.rtime_last_played));
     let mut games: Vec<Game> = vec![];
-    for game in resp.response.games.iter_mut() {
+    for game in data.response.games.iter_mut() {
         let library_url = format!(
                 "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{}/library_600x900.jpg",
                 &game.appid,
