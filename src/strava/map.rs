@@ -12,7 +12,7 @@ const S3_FOLDER_NAME: &str = "mapbox-maps/";
 pub async fn fetch_from_mapbox(client: &reqwest::Client, polyline: &str) -> Result<Bytes> {
     let line_width = 2.0;
     let line_color = "000";
-    let size = 200;
+    let size = 350;
     let resp = client
         .get(format!(
         "https://api.mapbox.com/styles/v1/mattgleich/clxxsfdfm002401qj7jcxh47e/static/path-{}+{}({})/auto/{}x{}@2x",
