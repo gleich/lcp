@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Local, Utc};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
@@ -10,6 +10,7 @@ pub struct Activity {
     pub name: String,
     pub sport_type: String,
     pub start_date: DateTime<Utc>,
+    pub start_date_local: DateTime<Local>,
     pub map: Map,
     pub trainer: bool,
     pub commute: bool,
