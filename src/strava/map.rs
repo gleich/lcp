@@ -15,7 +15,7 @@ pub async fn fetch_from_mapbox(client: &reqwest::Client, polyline: &str) -> Resu
     let size = 200;
     let resp = client
         .get(format!(
-        "https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/path-{}+{}({})/auto/{}x{}@2x",
+        "https://api.mapbox.com/styles/v1/mattgleich/clxxsfdfm002401qj7jcxh47e/static/path-{}+{}({})/auto/{}x{}@2x",
         line_width, line_color, urlencoding::encode(polyline), size, size
     ))
         .query(&[(
