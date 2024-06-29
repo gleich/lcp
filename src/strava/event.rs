@@ -4,6 +4,7 @@ use anyhow::{Context, Result};
 use reqwest::Client;
 use rocket::{http::Status, post, serde::json::Json};
 use serde::Deserialize;
+use tracing::info;
 
 use crate::{
     reval::{self, Service},
@@ -54,7 +55,7 @@ pub async fn update(client: &Client) -> Result<()> {
         map::clear_mapbox_folder(&s3_client)
             .await
             .context("clearing out mapbox folder filled with old maps failed")?;
-        for activity in recent_activities {
+        for activity in &recent_activities {
             let map = map::fetch_from_mapbox(client, &activity.map.summary_polyline)
                 .await
                 .context("fetching map from mapbox failed")?;
@@ -62,6 +63,7 @@ pub async fn update(client: &Client) -> Result<()> {
                 .await
                 .context("uploading map to S3 failed")?;
         }
+        info!("uploaded {} mapbox images to S3", recent_activities.len());
 
         reval::call_for_revalidate(client, Service::Strava)
             .await

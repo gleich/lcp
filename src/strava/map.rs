@@ -3,6 +3,7 @@ use std::env;
 use anyhow::{Context, Result};
 use aws_sdk_s3::primitives::ByteStream;
 use rocket::http::hyper::body::Bytes;
+use tracing::info;
 
 const MAPBOX_TOKEN: &str = "MAPBOX_ACCESS_TOKEN";
 
@@ -49,6 +50,7 @@ pub async fn clear_mapbox_folder(client: &aws_sdk_s3::Client) -> Result<()> {
                 .await?;
         }
     }
+    info!("reset mapbox S3 bucket");
     Ok(())
 }
 
