@@ -10,7 +10,7 @@ pub struct Activity {
     pub name: String,
     pub sport_type: String,
     pub start_date: DateTime<Utc>,
-    pub start_date_local: DateTime<Local>,
+    pub timezone: String,
     pub map: Map,
     pub trainer: bool,
     pub commute: bool,
