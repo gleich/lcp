@@ -13,9 +13,8 @@ const S3_FOLDER_NAME: &str = "mapbox-maps/";
 pub async fn fetch_from_mapbox(client: &reqwest::Client, polyline: &str) -> Result<Bytes> {
     let line_width = 2.0;
     let line_color = "000";
-    let resolution_ratio = 1.15; // image generated : image on website
-    let width = 250.0 * resolution_ratio;
-    let height = 210.0 * resolution_ratio;
+    let width = 287;
+    let height = 241;
     let resp = client
         .get(format!(
         "https://api.mapbox.com/styles/v1/mattgleich/clxxsfdfm002401qj7jcxh47e/static/path-{}+{}({})/auto/{}x{}@2x",
