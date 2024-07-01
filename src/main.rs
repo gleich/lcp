@@ -36,7 +36,12 @@ async fn main() {
     tokio::spawn(async {
         steam::update::periodic_update()
             .await
-            .expect("periodic update to caches failed");
+            .expect("periodic update to steam cache failed");
+    });
+    tokio::spawn(async {
+        github::update::periodic_update()
+            .await
+            .expect("periodic update to github cache failed");
     });
 
     let mut rocket_config = rocket::custom(Config::figment().merge(("address", "0.0.0.0")));
@@ -49,6 +54,7 @@ async fn main() {
         ],
     );
     rocket_config = rocket_config.mount("/steam", routes![steam::cache::endpoint]);
+    rocket_config = rocket_config.mount("/github", routes![github::cache::endpoint]);
 
     rocket_config
         .launch()
@@ -64,6 +70,9 @@ async fn initialize_caches() -> Result<()> {
     steam::update::cache(&client)
         .await
         .context("failed to do initial cache of steam")?;
+    github::update::cache(&client)
+        .await
+        .context("failed to do initial cache on github")?;
     info!("initialized caches");
     Ok(())
 }
