@@ -51,5 +51,5 @@ pub async fn fetch_recent(token_data: &TokenData, client: &Client) -> Result<Vec
         .json()
         .await
         .context("reading json failed from request to get recent activities")?;
-    Ok(resp)
+    Ok(resp[0..6].to_vec())
 }
