@@ -8,6 +8,7 @@ use tracing::{info, Level};
 use tracing_subscriber::FmtSubscriber;
 
 mod auth;
+mod github;
 mod resp;
 mod reval;
 mod steam;
