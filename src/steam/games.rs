@@ -1,6 +1,7 @@
 use std::env;
 
 use anyhow::{Context, Result};
+use chrono::{TimeZone, Utc};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
@@ -34,8 +35,8 @@ pub struct Game {
     pub icon_url: String,
     pub header_url: String,
     pub library_url: Option<String>,
-    // pub playtime_forever: u32,
-    // pub rtime_last_played: DateTime<Utc>,
+    pub playtime_forever: u32,
+    pub rtime_last_played: DateTime<Utc>,
 }
 
 pub async fn fetch_recently_played(client: &Client) -> Result<Vec<Game>> {
@@ -97,8 +98,8 @@ pub async fn fetch_recently_played(client: &Client) -> Result<Vec<Game>> {
                 &game.appid,
             ),
             app_id: game.appid,
-            // playtime_forever: game.playtime_forever,
-            // rtime_last_played: Utc.timestamp_opt(game.rtime_last_played, 0).unwrap(),
+            playtime_forever: game.playtime_forever,
+            rtime_last_played: Utc.timestamp_opt(game.rtime_last_played, 0).unwrap(),
         })
     }
     Ok(games)
