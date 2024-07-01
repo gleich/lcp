@@ -14,7 +14,7 @@ pub async fn fetch_from_mapbox(client: &reqwest::Client, polyline: &str) -> Resu
     let line_width = 2.0;
     let line_color = "000";
     let width = 440;
-    let height = 230;
+    let height = 240;
     let resp = client
         .get(format!(
         "https://api.mapbox.com/styles/v1/mattgleich/clxxsfdfm002401qj7jcxh47e/static/path-{}+{}({})/auto/{}x{}@2x",
