@@ -1,7 +1,7 @@
 use std::env;
 
 use anyhow::{Context, Result};
-use chrono::{TimeZone, Utc};
+use chrono::{DateTime, TimeZone, Utc};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
