@@ -14,4 +14,4 @@ jobs:
           echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u gleich --password-stdin
           docker build -t ghcr.io/gleich/lcp .
           docker push ghcr.io/gleich/lcp
-      - run: docker run caprover/cli-caprover:2.3.0 caprover deploy --caproverUrl https://api.mattglei.ch --caproverPassword ${{ secrets.CAPROVER_PASSWORD }} --caproverApp lcp --imageName ghcr.io/gleich/lcp
+      - run: "curl --request GET '${{ secrets.COOLIFY_WEBHOOK }}' --header 'Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}'"
