@@ -9,6 +9,7 @@ use tracing_subscriber::FmtSubscriber;
 
 mod auth;
 mod github;
+mod health;
 mod resp;
 mod reval;
 mod steam;
@@ -45,6 +46,7 @@ async fn main() {
     });
 
     let mut rocket_config = rocket::custom(Config::figment().merge(("address", "0.0.0.0")));
+    rocket_config = rocket_config.mount("/", routes![health::endpoint]);
     rocket_config = rocket_config.mount(
         "/strava",
         routes![
