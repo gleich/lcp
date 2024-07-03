@@ -26,6 +26,7 @@ pub struct Event {
 
 #[post("/", data = "<event>")]
 pub async fn endpoint(event: Json<Event>) -> Status {
+    dbg!(&event);
     if event.subscription_id.to_string() != env::var("STRAVA_SUBSCRIPTION_ID").unwrap() {
         return Status::Forbidden;
     }
