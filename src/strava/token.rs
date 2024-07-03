@@ -6,6 +6,7 @@ use std::{
 use anyhow::{Context, Result};
 use reqwest::Client;
 use serde::Deserialize;
+use tracing::info;
 
 #[derive(Debug, Deserialize)]
 pub struct TokenData {
@@ -64,6 +65,7 @@ impl TokenData {
         self.refresh_token = resp.refresh_token;
         self.expires_at = resp.expires_at;
 
+        info!("loaded new token data");
         dbg!(self);
 
         Ok(())
