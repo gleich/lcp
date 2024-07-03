@@ -42,14 +42,19 @@ pub struct Map {
 }
 
 pub async fn fetch_recent(token_data: &TokenData, client: &Client) -> Result<Vec<Activity>> {
-    let resp: Vec<Activity> = client
+    let resp: reqwest::Response = client
         .get("https://www.strava.com/api/v3/athlete/activities")
         .query(&[("access_token", &token_data.access_token)])
         .send()
         .await
-        .context("sending request for recent activities failed")?
-        .json()
+        .context("sending request for recent activities failed")?;
+    let resp_text = resp
+        .text()
         .await
-        .context("reading json failed from request to get recent activities")?;
-    Ok(resp[0..6].to_vec())
+        .context("getting raw response text failed")?;
+    let data: Vec<Activity> = serde_json::from_str(&resp_text).context(format!(
+        "reading json failed from request to get activities: response: {}",
+        resp_text
+    ))?;
+    Ok(data[0..6].to_vec())
 }
