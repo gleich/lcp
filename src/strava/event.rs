@@ -42,7 +42,6 @@ pub async fn endpoint(event: Json<Event>) -> Status {
 
 pub async fn update(client: &Client) -> Result<()> {
     let mut token_data = TokenData::new().context("getting strava token data failed")?;
-    dbg!("initial token data: {}", &token_data);
     token_data
         .fetch_if_expired(client)
         .await

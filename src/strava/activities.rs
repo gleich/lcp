@@ -44,7 +44,7 @@ pub struct Map {
 pub async fn fetch_recent(token_data: &TokenData, client: &Client) -> Result<Vec<Activity>> {
     let resp: reqwest::Response = client
         .get("https://www.strava.com/api/v3/athlete/activities")
-        .query(&[("access_token", &token_data.access_token)])
+        .bearer_auth(&token_data.access_token)
         .send()
         .await
         .context("sending request for recent activities failed")?;
