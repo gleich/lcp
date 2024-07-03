@@ -27,7 +27,10 @@ pub struct Event {
 #[post("/", data = "<event>")]
 pub async fn endpoint(event: Json<Event>) -> Status {
     dbg!(&event);
-    if event.subscription_id.to_string() != env::var("STRAVA_SUBSCRIPTION_ID").unwrap() {
+    let event_sub_id = event.subscription_id.to_string();
+    let expected_sub_id = env::var("STRAVA_SUBSCRIPTION_ID").unwrap();
+    if event_sub_id != expected_sub_id {
+        info!("subscription_id of {} did not match {}; returning forbidden to request that called endpoint", event_sub_id, expected_sub_id);
         return Status::Forbidden;
     }
     let client = Client::new();
