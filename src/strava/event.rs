@@ -26,7 +26,6 @@ pub struct Event {
 
 #[post("/", data = "<event>")]
 pub async fn endpoint(event: Json<Event>) -> Status {
-    dbg!(&event);
     let event_sub_id = event.subscription_id.to_string();
     let expected_sub_id = env::var("STRAVA_SUBSCRIPTION_ID").unwrap();
     if event_sub_id != expected_sub_id {
