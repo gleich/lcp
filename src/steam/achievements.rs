@@ -33,6 +33,7 @@ pub async fn fetch_game_achievements(app_id: u32, client: &Client) -> Result<Vec
                 env::var(STEAM_ID).context("fetching steam id env var failed")?,
             ),
             ("appid", app_id.to_string()),
+            ("format", String::from("json")),
         ])
         .send()
         .await
