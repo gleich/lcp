@@ -1,7 +1,6 @@
 use std::env;
 
 use anyhow::{Context, Result};
-use chrono::{DateTime, Utc};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
@@ -23,7 +22,6 @@ pub struct Achievement {
     #[serde(rename = "apiname")]
     pub api_name: String,
     pub achieved: u32,
-    pub unlocktime: DateTime<Utc>,
 }
 
 pub async fn fetch_game_achievements(app_id: u32, client: &Client) -> Result<Vec<Achievement>> {
