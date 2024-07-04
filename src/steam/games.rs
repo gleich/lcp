@@ -85,7 +85,7 @@ pub async fn fetch_recently_played(client: &Client) -> Result<Vec<Game>> {
             name: game.name.to_owned(),
             url: format!("https://store.steampowered.com/app/{}/", &game.appid),
             icon_url: format!(
-                "http://media.steampowered.com/steamcommunity/public/images/apps/{}/{}.jpg",
+                "https://media.steampowered.com/steamcommunity/public/images/apps/{}/{}.jpg",
                 &game.appid, game.img_icon_url
             ),
             library_url: if library_url_exists {
