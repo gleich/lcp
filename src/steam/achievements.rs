@@ -22,7 +22,7 @@ pub struct Achievement {
 
 pub async fn fetch_game_achievements(app_id: u32, client: &Client) -> Result<Vec<Achievement>> {
     let resp: reqwest::Response = client
-        .get(" https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v0001/")
+        .get("https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v0001/")
         .query(&[
             (
                 "key",
