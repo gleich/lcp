@@ -14,7 +14,7 @@ pub struct MainResponse {
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct PlayerStats {
-    achievements: Vec<Achievement>,
+    achievements: Option<Vec<Achievement>>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -56,5 +56,5 @@ pub async fn fetch_game_achievements(
         "reading json failed from request to get achievements for {}: response: {}",
         app_id, resp_text
     ))?;
-    Ok(Some(data.player_stats.achievements))
+    Ok(data.player_stats.achievements)
 }
