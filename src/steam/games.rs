@@ -110,7 +110,10 @@ pub async fn fetch_recently_played(client: &Client) -> Result<Vec<Game>> {
             playtime_forever: game.playtime_forever,
             rtime_last_played: Utc.timestamp_opt(game.rtime_last_played, 0).unwrap(),
             achievement_progress: if achievements_data.is_some() {
-                Some(achievements_data.unwrap().len() as f32 / completed_achievements as f32)
+                Some(
+                    (completed_achievements as f32 / achievements_data.unwrap().len() as f32)
+                        * 100.0,
+                )
             } else {
                 None
             },
