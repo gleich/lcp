@@ -11,7 +11,6 @@ mod auth;
 mod github;
 mod health;
 mod resp;
-mod reval;
 mod steam;
 mod strava;
 
