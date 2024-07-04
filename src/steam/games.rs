@@ -84,7 +84,7 @@ pub async fn fetch_recently_played(client: &Client) -> Result<Vec<Game>> {
         let achievements_data = achievements::fetch_game_achievements(game.appid, client).await?;
         let mut completed_achievements = 0;
         achievements_data.iter().for_each(|a| {
-            if a.achieved {
+            if a.achieved == 1 {
                 completed_achievements += 1
             }
         });

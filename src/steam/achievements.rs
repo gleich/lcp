@@ -22,7 +22,7 @@ pub struct PlayerStats {
 pub struct Achievement {
     #[serde(rename = "apiname")]
     pub api_name: String,
-    pub achieved: bool,
+    pub achieved: u32,
     pub unlocktime: DateTime<Utc>,
 }
 
