@@ -8,6 +8,12 @@ use serde::{Deserialize, Serialize};
 use super::{STEAM_ID, STEAM_TOKEN};
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct MainResponse {
+    #[serde(rename = "playerstats")]
+    player_stats: PlayerStats,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct PlayerStats {
     achievements: Vec<Achievement>,
 }
@@ -42,9 +48,9 @@ pub async fn fetch_game_achievements(app_id: u32, client: &Client) -> Result<Vec
         .text()
         .await
         .context("getting raw response text failed")?;
-    let data: PlayerStats = serde_json::from_str(&resp_text).context(format!(
+    let data: MainResponse = serde_json::from_str(&resp_text).context(format!(
         "reading json failed from request to get achievements for {}: response: {}",
         app_id, resp_text
     ))?;
-    Ok(data.achievements)
+    Ok(data.player_stats.achievements)
 }
