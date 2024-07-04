@@ -24,7 +24,10 @@ pub struct Achievement {
     pub achieved: u32,
 }
 
-pub async fn fetch_game_achievements(app_id: u32, client: &Client) -> Result<Vec<Achievement>> {
+pub async fn fetch_game_achievements(
+    app_id: u32,
+    client: &Client,
+) -> Result<Option<Vec<Achievement>>> {
     let resp: reqwest::Response = client
         .get("https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v0001/")
         .query(&[
@@ -46,9 +49,12 @@ pub async fn fetch_game_achievements(app_id: u32, client: &Client) -> Result<Vec
         .text()
         .await
         .context("getting raw response text failed")?;
+    if resp_text == r#"{"playerstats":{"error":"Requested app has no stats","success":false}}"# {
+        return Ok(None);
+    }
     let data: MainResponse = serde_json::from_str(&resp_text).context(format!(
         "reading json failed from request to get achievements for {}: response: {}",
         app_id, resp_text
     ))?;
-    Ok(data.player_stats.achievements)
+    Ok(Some(data.player_stats.achievements))
 }
