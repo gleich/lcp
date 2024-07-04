@@ -5,8 +5,7 @@ use chrono::{DateTime, TimeZone, Utc};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
-const STEAM_TOKEN: &str = "STEAM_ACCESS_TOKEN";
-const STEAM_ID: &str = "STEAM_ID";
+use super::{achievements, STEAM_ID, STEAM_TOKEN};
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 pub struct MainSteamResponse {
@@ -37,6 +36,7 @@ pub struct Game {
     pub library_url: Option<String>,
     pub playtime_forever: u32,
     pub rtime_last_played: DateTime<Utc>,
+    pub achievement_progress: f32,
 }
 
 pub async fn fetch_recently_played(client: &Client) -> Result<Vec<Game>> {
@@ -81,6 +81,13 @@ pub async fn fetch_recently_played(client: &Client) -> Result<Vec<Game>> {
             .context(format!("checking library url for {} failed", &game.name))?
             .status()
             == 200;
+        let achievements_data = achievements::fetch_game_achievements(game.appid, client).await?;
+        let mut completed_achievements = 0;
+        achievements_data.iter().for_each(|a| {
+            if a.achieved {
+                completed_achievements += 1
+            }
+        });
         games.push(Game {
             name: game.name.to_owned(),
             url: format!("https://store.steampowered.com/app/{}/", &game.appid),
@@ -100,6 +107,7 @@ pub async fn fetch_recently_played(client: &Client) -> Result<Vec<Game>> {
             app_id: game.appid,
             playtime_forever: game.playtime_forever,
             rtime_last_played: Utc.timestamp_opt(game.rtime_last_played, 0).unwrap(),
+            achievement_progress: achievements_data.len() as f32 / completed_achievements as f32,
         })
     }
     Ok(games)

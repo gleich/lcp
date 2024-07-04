@@ -1,0 +1,49 @@
+use std::env;
+
+use anyhow::{Context, Result};
+use chrono::{DateTime, Utc};
+use reqwest::Client;
+use serde::{Deserialize, Serialize};
+
+use super::{STEAM_ID, STEAM_TOKEN};
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct PlayerStats {
+    achievements: Vec<Achievement>,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct Achievement {
+    #[serde(rename = "apiname")]
+    pub api_name: String,
+    pub achieved: bool,
+    pub unlocktime: DateTime<Utc>,
+}
+
+pub async fn fetch_game_achievements(app_id: u32, client: &Client) -> Result<Vec<Achievement>> {
+    let resp: reqwest::Response = client
+        .get(" https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v0001/")
+        .query(&[
+            (
+                "key",
+                env::var(STEAM_TOKEN).context("fetching steam token env var failed")?,
+            ),
+            (
+                "steamid",
+                env::var(STEAM_ID).context("fetching steam id env var failed")?,
+            ),
+            ("appid", app_id.to_string()),
+        ])
+        .send()
+        .await
+        .context("getting response for activity failed")?;
+    let resp_text = resp
+        .text()
+        .await
+        .context("getting raw response text failed")?;
+    let data: PlayerStats = serde_json::from_str(&resp_text).context(format!(
+        "reading json failed from request to get achievements for {}: response: {}",
+        app_id, resp_text
+    ))?;
+    Ok(data.achievements)
+}
