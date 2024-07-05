@@ -43,6 +43,8 @@ pub mod raw {
         pub updated_at: DateTime<Utc>,
         #[serde(rename = "stargazerCount")]
         pub stargazer_count: u32,
+        pub url: String,
+        pub id: String,
     }
 
     #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
@@ -66,6 +68,8 @@ pub struct Repository {
     pub description: String,
     pub updated_at: DateTime<Utc>,
     pub stargazers: u32,
+    pub id: String,
+    pub url: String,
 }
 
 pub async fn fetch_pinned_repos(client: &Client) -> Result<Vec<Repository>> {
@@ -73,7 +77,7 @@ pub async fn fetch_pinned_repos(client: &Client) -> Result<Vec<Repository>> {
         .post("https://api.github.com/graphql")
         .bearer_auth(env::var(GITHUB_TOKEN).context("loading GITHUB access token failed")?)
         .header(USER_AGENT, "lcp/1.0")
-        .body(r#"{"query": "query{viewer{pinnedItems(first:6,types:REPOSITORY){nodes{... on Repository{name owner{login}primaryLanguage{name color}description updatedAt stargazerCount isPrivate}}}}}","variables": {}}"#,
+        .body(r#"{"query": "query{viewer{pinnedItems(first:6,types:REPOSITORY){nodes{... on Repository{name owner{login}primaryLanguage{name color}description updatedAt stargazerCount isPrivate id url}}}}}","variables": {}}"#,
         )
         .send()
         .await
@@ -102,6 +106,8 @@ pub async fn fetch_pinned_repos(client: &Client) -> Result<Vec<Repository>> {
             description: a.description.to_owned(),
             updated_at: a.updated_at,
             stargazers: a.stargazer_count,
+            id: a.id.to_owned(),
+            url: a.url.to_owned(),
         })
         .collect())
 }
