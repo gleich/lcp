@@ -83,8 +83,8 @@ pub async fn fetch_recently_played(client: &Client) -> Result<Vec<Game>> {
             == 200;
         let achievements_data = achievements::fetch_game_achievements(game.appid, client).await?;
         let mut completed_achievements = 0;
-        if achievements_data.is_some() {
-            achievements_data.as_ref().unwrap().iter().for_each(|a| {
+        if let Some(achievements_data) = &achievements_data {
+            achievements_data.iter().for_each(|a| {
                 if a.achieved == 1 {
                     completed_achievements += 1
                 }
@@ -109,14 +109,9 @@ pub async fn fetch_recently_played(client: &Client) -> Result<Vec<Game>> {
             app_id: game.appid,
             playtime_forever: game.playtime_forever,
             rtime_last_played: Utc.timestamp_opt(game.rtime_last_played, 0).unwrap(),
-            achievement_progress: if achievements_data.is_some() {
-                Some(
-                    (completed_achievements as f32 / achievements_data.unwrap().len() as f32)
-                        * 100.0,
-                )
-            } else {
-                None
-            },
+            achievement_progress: achievements_data.as_ref().map(|achievements_data| {
+                (completed_achievements as f32 / achievements_data.len() as f32) * 100.0
+            }),
         })
     }
     Ok(games)
