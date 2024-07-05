@@ -3,6 +3,7 @@ use std::time::Duration;
 use anyhow::{Context, Result};
 use reqwest::Client;
 use rocket::tokio;
+use tracing::warn;
 
 use super::{cache, games::fetch_recently_played};
 
@@ -17,9 +18,15 @@ pub async fn cache(client: &Client) -> Result<()> {
 pub async fn periodic_update() -> Result<()> {
     let client = Client::new();
     loop {
-        cache(&client)
+        match cache(&client)
             .await
-            .context("requesting recent games or updating cache failed")?;
+            .context("requesting recent games or updating cache failed")
+        {
+            Ok(()) => {}
+            Err(err) => {
+                warn!("encountered error trying to update cache: {}", err);
+            }
+        }
         tokio::time::sleep(Duration::from_secs(300)).await; // reload every 5 minutes
     }
 }
