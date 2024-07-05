@@ -4,6 +4,7 @@ use anyhow::{Context, Result};
 use reqwest::Client;
 use rocket::tokio;
 use tracing::warn;
+use tracing_error::SpanTrace;
 
 use super::{cache, repos::fetch_pinned_repos};
 
@@ -11,10 +12,7 @@ pub async fn cache(client: &Client) -> Result<()> {
     let pinned_repos = fetch_pinned_repos(client)
         .await
         .context("fetching pinned repos failed")?;
-    let updated_cache = cache::update(pinned_repos).expect("updating github cache failed");
-    if updated_cache {
-        // revalidation logic will go here in future
-    }
+    cache::update(pinned_repos).expect("updating github cache failed");
     Ok(())
 }
 
@@ -27,7 +25,11 @@ pub async fn periodic_update() -> Result<()> {
         {
             Ok(()) => {}
             Err(err) => {
-                warn!("encountered error trying to update cache: {}", err)
+                let span_trace = SpanTrace::capture();
+                warn!(
+                    "encountered error trying to update cache: {}",
+                    err.context(span_trace)
+                );
             }
         }
         tokio::time::sleep(Duration::from_secs(300)).await; // reload every 5 minutes

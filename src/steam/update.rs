@@ -4,6 +4,7 @@ use anyhow::{Context, Result};
 use reqwest::Client;
 use rocket::tokio;
 use tracing::warn;
+use tracing_error::SpanTrace;
 
 use super::{cache, games::fetch_recently_played};
 
@@ -24,7 +25,11 @@ pub async fn periodic_update() -> Result<()> {
         {
             Ok(()) => {}
             Err(err) => {
-                warn!("encountered error trying to update cache: {}", err);
+                let span_trace = SpanTrace::capture();
+                warn!(
+                    "encountered error trying to update cache: {}",
+                    err.context(span_trace)
+                );
             }
         }
         tokio::time::sleep(Duration::from_secs(300)).await; // reload every 5 minutes
