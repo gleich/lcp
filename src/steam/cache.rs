@@ -17,7 +17,6 @@ lazy_static! {
 pub fn endpoint(_token: auth::Token) -> Json<Response<Vec<Game>>> {
     let arc_ref = Arc::clone(&GAMES);
     let recent_games = arc_ref.lock().unwrap();
-    info!("steam cache endpoint hit");
     Json(recent_games.clone())
 }
 

@@ -16,7 +16,6 @@ lazy_static! {
 pub fn endpoint(_token: auth::Token) -> Json<Response<Vec<Repository>>> {
     let arc_ref = Arc::clone(&PINNED_REPOS);
     let pinned_repos = arc_ref.lock().unwrap();
-    info!("github cache endpoint hit");
     Json(pinned_repos.clone())
 }
 
