@@ -3,7 +3,7 @@ use std::env;
 use anyhow::{Context, Result};
 use dotenv::dotenv;
 use reqwest::Client;
-use rocket::{routes, tokio, Config};
+use rocket::{get, response::Redirect, routes, tokio, Config};
 use tracing::{info, Level};
 use tracing_subscriber::FmtSubscriber;
 
@@ -45,7 +45,7 @@ async fn main() {
     });
 
     let mut rocket_config = rocket::custom(Config::figment().merge(("address", "0.0.0.0")));
-    rocket_config = rocket_config.mount("/", routes![health::endpoint]);
+    rocket_config = rocket_config.mount("/", routes![root_redirect, health::endpoint]);
     rocket_config = rocket_config.mount(
         "/strava",
         routes![
@@ -76,4 +76,9 @@ async fn initialize_caches() -> Result<()> {
         .context("failed to do initial cache on github")?;
     info!("initialized caches");
     Ok(())
+}
+
+#[get("/")]
+fn root_redirect() -> Redirect {
+    Redirect::temporary("https://mattglei.ch/lcp")
 }
