@@ -69,7 +69,7 @@ pub async fn fetch_recently_played(client: &Client) -> Result<Vec<Game>> {
         .games
         .sort_by(|a, b| b.rtime_last_played.cmp(&a.rtime_last_played));
     let mut games: Vec<Game> = vec![];
-    for game in data.response.games.iter_mut() {
+    for game in data.response.games[0..20].iter_mut() {
         let library_url = format!(
                 "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{}/library_600x900.jpg",
                 &game.appid,
