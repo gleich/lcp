@@ -5,7 +5,7 @@ use lazy_static::lazy_static;
 use rocket::{get, serde::json::Json};
 use tracing::info;
 
-use crate::{auth, resp::Response};
+use crate::{auth, metrics, resp::Response};
 
 use super::games::Game;
 
@@ -17,6 +17,8 @@ lazy_static! {
 pub fn endpoint(_token: auth::Token) -> Json<Response<Vec<Game>>> {
     let arc_ref = Arc::clone(&GAMES);
     let recent_games = arc_ref.lock().unwrap();
+    metrics::SUCCESSFUL_REQUEST_COUNTER.inc();
+    metrics::STEAM_CACHE_REQUEST_COUNTER.inc();
     Json(recent_games.clone())
 }
 
@@ -27,6 +29,7 @@ pub fn update<'a>(
     if *changer.data != recent_games {
         changer.data = recent_games;
         changer.last_updated = Utc::now();
+        metrics::STEAM_CACHE_UPDATE_COUNTER.inc();
         info!("steam cache updated");
         return Ok(true);
     }

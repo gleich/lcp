@@ -3,13 +3,13 @@ use std::env;
 use anyhow::{Context, Result};
 use dotenv::dotenv;
 use reqwest::Client;
-use rocket::{get, response::Redirect, routes, tokio, Config};
+use rocket::{fairing::AdHoc, get, response::Redirect, routes, tokio, Config};
 use tracing::{info, Level};
 use tracing_subscriber::FmtSubscriber;
 
 mod auth;
 mod github;
-mod health;
+mod metrics;
 mod resp;
 mod steam;
 mod strava;
@@ -45,7 +45,7 @@ async fn main() {
     });
 
     let mut rocket_config = rocket::custom(Config::figment().merge(("address", "0.0.0.0")));
-    rocket_config = rocket_config.mount("/", routes![root_redirect, health::endpoint]);
+    rocket_config = rocket_config.mount("/", routes![root_redirect, metrics::endpoint]);
     rocket_config = rocket_config.mount(
         "/strava",
         routes![
@@ -56,6 +56,10 @@ async fn main() {
     );
     rocket_config = rocket_config.mount("/steam", routes![steam::cache::endpoint]);
     rocket_config = rocket_config.mount("/github", routes![github::cache::endpoint]);
+
+    rocket_config = rocket_config.attach(AdHoc::on_request("Increment Metric", |_, _| {
+        Box::pin(async move { metrics::REQUEST_COUNTER.inc() })
+    }));
 
     rocket_config
         .launch()

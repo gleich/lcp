@@ -6,9 +6,9 @@ use rocket::get;
 use rocket::serde::json::Json;
 use tracing::info;
 
-use crate::auth;
 use crate::resp::Response;
 use crate::strava::activities::Activity;
+use crate::{auth, metrics};
 
 lazy_static! {
     static ref ACTIVITIES: Arc<Mutex<Response<Vec<Activity>>>> =
@@ -19,6 +19,8 @@ lazy_static! {
 pub fn endpoint(_token: auth::Token) -> Json<Response<Vec<Activity>>> {
     let arc_ref = Arc::clone(&ACTIVITIES);
     let recent_activities = arc_ref.lock().unwrap();
+    metrics::SUCCESSFUL_REQUEST_COUNTER.inc();
+    metrics::STRAVA_CACHE_REQUEST_COUNTER.inc();
     Json(recent_activities.clone())
 }
 
@@ -29,6 +31,7 @@ pub async fn update<'a>(
     if *changer.data != recent_activities {
         changer.data = recent_activities;
         changer.last_updated = Utc::now();
+        metrics::STRAVA_CACHE_UPDATE_COUNTER.get();
         info!("strava cache updated");
         return Ok(true);
     }
