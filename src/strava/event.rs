@@ -6,7 +6,10 @@ use rocket::{http::Status, post, serde::json::Json};
 use serde::Deserialize;
 use tracing::info;
 
-use crate::strava::{activities, cache, token::TokenData};
+use crate::{
+    metrics,
+    strava::{activities, cache, token::TokenData},
+};
 
 use super::map;
 
@@ -33,6 +36,7 @@ pub async fn endpoint(event: Json<Event>) -> Status {
     update(&client)
         .await
         .expect("updating list of activities failed");
+    metrics::SUCCESSFUL_REQUEST_COUNTER.inc();
     Status::Ok
 }
 

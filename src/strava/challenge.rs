@@ -7,6 +7,8 @@ use rocket::{
 };
 use tracing::info;
 
+use crate::metrics;
+
 #[derive(Debug, PartialEq, FromForm)]
 pub struct Parameters<'r> {
     pub mode: &'r str,
@@ -28,6 +30,7 @@ pub fn endpoint(hub: Parameters) -> Json<Option<Response>> {
         return Json(None);
     }
     info!("received valid verify token of {}", hub.verify_token);
+    metrics::SUCCESSFUL_REQUEST_COUNTER.inc();
     Json(Some(Response {
         challenge: hub.challenge,
     }))
