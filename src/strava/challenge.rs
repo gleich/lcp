@@ -30,7 +30,7 @@ pub fn endpoint(hub: Parameters) -> Json<Option<Response>> {
         return Json(None);
     }
     info!("received valid verify token of {}", hub.verify_token);
-    metrics::REQUEST_SUCCESSFUL_COUNTER.inc();
+    metrics::REQUEST_SUCCESSFUL_COUNT.inc();
     Json(Some(Response {
         challenge: hub.challenge,
     }))

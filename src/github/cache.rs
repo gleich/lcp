@@ -16,8 +16,8 @@ lazy_static! {
 pub fn endpoint(_token: auth::Token) -> Json<Response<Vec<Repository>>> {
     let arc_ref = Arc::clone(&PINNED_REPOS);
     let pinned_repos = arc_ref.lock().unwrap();
-    metrics::REQUEST_SUCCESSFUL_COUNTER.inc();
-    metrics::GITHUB_CACHE_REQUEST_COUNTER.inc();
+    metrics::REQUEST_SUCCESSFUL_COUNT.inc();
+    metrics::GITHUB_CACHE_REQUEST_COUNT.inc();
     Json(pinned_repos.clone())
 }
 
@@ -28,7 +28,7 @@ pub fn update<'a>(
     if *changer.data != pinned_repos {
         changer.data = pinned_repos;
         changer.last_updated = Utc::now();
-        metrics::GITHUB_CACHE_UPDATE_COUNTER.inc();
+        metrics::GITHUB_CACHE_UPDATE_COUNT.inc();
         info!("github cache updated");
         return Ok(true);
     }

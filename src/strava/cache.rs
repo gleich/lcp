@@ -19,8 +19,8 @@ lazy_static! {
 pub fn endpoint(_token: auth::Token) -> Json<Response<Vec<Activity>>> {
     let arc_ref = Arc::clone(&ACTIVITIES);
     let recent_activities = arc_ref.lock().unwrap();
-    metrics::REQUEST_SUCCESSFUL_COUNTER.inc();
-    metrics::STRAVA_CACHE_REQUEST_COUNTER.inc();
+    metrics::REQUEST_SUCCESSFUL_COUNT.inc();
+    metrics::STRAVA_CACHE_REQUEST_COUNT.inc();
     Json(recent_activities.clone())
 }
 
@@ -31,7 +31,7 @@ pub async fn update<'a>(
     if *changer.data != recent_activities {
         changer.data = recent_activities;
         changer.last_updated = Utc::now();
-        metrics::STRAVA_CACHE_UPDATE_COUNTER.inc();
+        metrics::STRAVA_CACHE_UPDATE_COUNT.inc();
         info!("strava cache updated");
         return Ok(true);
     }

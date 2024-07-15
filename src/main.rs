@@ -57,7 +57,7 @@ async fn main() {
         .mount("/steam", routes![steam::cache::endpoint])
         .mount("/github", routes![github::cache::endpoint])
         .attach(AdHoc::on_request("Increment Requests Metric", |_, _| {
-            Box::pin(async move { metrics::REQUEST_COUNTER.inc() })
+            Box::pin(async move { metrics::REQUEST_COUNT.inc() })
         }))
         .launch()
         .await

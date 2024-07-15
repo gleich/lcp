@@ -17,8 +17,8 @@ lazy_static! {
 pub fn endpoint(_token: auth::Token) -> Json<Response<Vec<Game>>> {
     let arc_ref = Arc::clone(&GAMES);
     let recent_games = arc_ref.lock().unwrap();
-    metrics::REQUEST_SUCCESSFUL_COUNTER.inc();
-    metrics::STEAM_CACHE_REQUEST_COUNTER.inc();
+    metrics::REQUEST_SUCCESSFUL_COUNT.inc();
+    metrics::STEAM_CACHE_REQUEST_COUNT.inc();
     Json(recent_games.clone())
 }
 
@@ -29,7 +29,7 @@ pub fn update<'a>(
     if *changer.data != recent_games {
         changer.data = recent_games;
         changer.last_updated = Utc::now();
-        metrics::STEAM_CACHE_UPDATE_COUNTER.inc();
+        metrics::STEAM_CACHE_UPDATE_COUNT.inc();
         info!("steam cache updated");
         return Ok(true);
     }

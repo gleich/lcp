@@ -36,7 +36,7 @@ pub async fn endpoint(event: Json<Event>) -> Status {
     update(&client)
         .await
         .expect("updating list of activities failed");
-    metrics::REQUEST_SUCCESSFUL_COUNTER.inc();
+    metrics::REQUEST_SUCCESSFUL_COUNT.inc();
     Status::Ok
 }
 
