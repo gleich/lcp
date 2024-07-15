@@ -31,7 +31,7 @@ pub async fn update<'a>(
     if *changer.data != recent_activities {
         changer.data = recent_activities;
         changer.last_updated = Utc::now();
-        metrics::STRAVA_CACHE_UPDATE_COUNTER.get();
+        metrics::STRAVA_CACHE_UPDATE_COUNTER.inc();
         info!("strava cache updated");
         return Ok(true);
     }
