@@ -44,24 +44,21 @@ async fn main() {
             .expect("periodic update to github cache failed");
     });
 
-    let mut rocket_config = rocket::custom(Config::figment().merge(("address", "0.0.0.0")));
-    rocket_config = rocket_config.mount("/", routes![root_redirect, metrics::endpoint]);
-    rocket_config = rocket_config.mount(
-        "/strava",
-        routes![
-            strava::event::endpoint,
-            strava::challenge::endpoint,
-            strava::cache::endpoint
-        ],
-    );
-    rocket_config = rocket_config.mount("/steam", routes![steam::cache::endpoint]);
-    rocket_config = rocket_config.mount("/github", routes![github::cache::endpoint]);
-
-    rocket_config = rocket_config.attach(AdHoc::on_request("Increment Metric", |_, _| {
-        Box::pin(async move { metrics::REQUEST_COUNTER.inc() })
-    }));
-
-    rocket_config
+    rocket::custom(Config::figment().merge(("address", "0.0.0.0")))
+        .mount("/", routes![root_redirect, metrics::endpoint])
+        .mount(
+            "/strava",
+            routes![
+                strava::event::endpoint,
+                strava::challenge::endpoint,
+                strava::cache::endpoint
+            ],
+        )
+        .mount("/steam", routes![steam::cache::endpoint])
+        .mount("/github", routes![github::cache::endpoint])
+        .attach(AdHoc::on_request("Increment Requests Metric", |_, _| {
+            Box::pin(async move { metrics::REQUEST_COUNTER.inc() })
+        }))
         .launch()
         .await
         .expect("failed to launch rocket");
