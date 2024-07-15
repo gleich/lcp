@@ -19,7 +19,7 @@ lazy_static! {
 pub fn endpoint(_token: auth::Token) -> Json<Response<Vec<Activity>>> {
     let arc_ref = Arc::clone(&ACTIVITIES);
     let recent_activities = arc_ref.lock().unwrap();
-    metrics::SUCCESSFUL_REQUEST_COUNTER.inc();
+    metrics::REQUEST_SUCCESSFUL_COUNTER.inc();
     metrics::STRAVA_CACHE_REQUEST_COUNTER.inc();
     Json(recent_activities.clone())
 }
