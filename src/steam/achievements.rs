@@ -49,7 +49,7 @@ pub struct PlayerAchievement {
     pub api_name: String,
     pub achieved: u32,
     #[serde(rename = "unlock_time")]
-    pub unlock_time: DateTime<Utc>,
+    pub unlock_time: Option<DateTime<Utc>>,
 }
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
@@ -59,7 +59,7 @@ pub struct Achievement {
     pub icon: String,
     pub display_name: String,
     pub description: Option<String>,
-    pub unlock_time: DateTime<Utc>,
+    pub unlock_time: Option<DateTime<Utc>>,
 }
 
 pub async fn fetch_game_achievements(
