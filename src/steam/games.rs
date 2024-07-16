@@ -5,7 +5,10 @@ use chrono::{DateTime, TimeZone, Utc};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
-use super::{achievements, STEAM_ID, STEAM_TOKEN};
+use super::{
+    achievements::{self, Achievement},
+    STEAM_ID, STEAM_TOKEN,
+};
 
 #[derive(Debug, PartialEq, Deserialize, Serialize, Clone)]
 pub struct MainSteamResponse {
@@ -37,6 +40,7 @@ pub struct Game {
     pub playtime_forever: u32,
     pub rtime_last_played: DateTime<Utc>,
     pub achievement_progress: Option<f32>,
+    pub achievements: Option<Vec<Achievement>>,
 }
 
 pub async fn fetch_recently_played(client: &Client) -> Result<Vec<Game>> {
@@ -85,7 +89,7 @@ pub async fn fetch_recently_played(client: &Client) -> Result<Vec<Game>> {
         let mut completed_achievements = 0;
         if let Some(achievements_data) = &achievements_data {
             achievements_data.iter().for_each(|a| {
-                if a.achieved == 1 {
+                if a.achieved {
                     completed_achievements += 1
                 }
             });
@@ -112,6 +116,7 @@ pub async fn fetch_recently_played(client: &Client) -> Result<Vec<Game>> {
             achievement_progress: achievements_data.as_ref().map(|achievements_data| {
                 (completed_achievements as f32 / achievements_data.len() as f32) * 100.0
             }),
+            achievements: achievements_data,
         })
     }
     Ok(games)
