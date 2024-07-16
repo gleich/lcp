@@ -27,7 +27,7 @@ pub struct SchemaAchievement {
     #[serde(rename = "displayName")]
     display_name: String,
     icon: String,
-    description: String,
+    description: Option<String>,
     name: String,
 }
 
@@ -55,7 +55,7 @@ pub struct Achievement {
     pub achieved: bool,
     pub icon: String,
     pub display_name: String,
-    pub description: String,
+    pub description: Option<String>,
 }
 
 pub async fn fetch_game_achievements(
