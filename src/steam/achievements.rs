@@ -1,6 +1,7 @@
 use std::env;
 
 use anyhow::{Context, Result};
+use chrono::{DateTime, Utc};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
@@ -47,6 +48,8 @@ pub struct PlayerAchievement {
     #[serde(rename = "apiname")]
     pub api_name: String,
     pub achieved: u32,
+    #[serde(rename = "unlock_time")]
+    pub unlock_time: DateTime<Utc>,
 }
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
@@ -56,6 +59,7 @@ pub struct Achievement {
     pub icon: String,
     pub display_name: String,
     pub description: Option<String>,
+    pub unlock_time: DateTime<Utc>,
 }
 
 pub async fn fetch_game_achievements(
@@ -124,10 +128,12 @@ pub async fn fetch_game_achievements(
                     icon: schema_achievement.icon.to_owned(),
                     display_name: schema_achievement.display_name.to_owned(),
                     description: schema_achievement.description.to_owned(),
+                    unlock_time: player_achievement.unlock_time,
                 })
             }
         }
     }
+    achievements.sort_by(|a, b| b.unlock_time.cmp(&a.unlock_time));
 
     Ok(Some(achievements))
 }
