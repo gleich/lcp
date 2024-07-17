@@ -48,8 +48,8 @@ pub struct PlayerAchievement {
     #[serde(rename = "apiname")]
     pub api_name: String,
     pub achieved: u32,
-    #[serde(rename = "unlocktime")]
-    pub unlock_time: DateTime<Utc>,
+    #[serde(rename = "unlock_time")]
+    pub unlock_time: Option<DateTime<Utc>>,
 }
 
 #[derive(Debug, PartialEq, Clone, Deserialize, Serialize)]
@@ -59,7 +59,7 @@ pub struct Achievement {
     pub icon: String,
     pub display_name: String,
     pub description: Option<String>,
-    pub unlock_time: DateTime<Utc>,
+    pub unlock_time: Option<DateTime<Utc>>,
 }
 
 pub async fn fetch_game_achievements(
@@ -133,7 +133,12 @@ pub async fn fetch_game_achievements(
             }
         }
     }
-    achievements.sort_by(|a, b| b.unlock_time.cmp(&a.unlock_time));
+    achievements.sort_by(|a, b| match (&b.unlock_time, &a.unlock_time) {
+        (Some(b_time), Some(a_time)) => b_time.cmp(a_time),
+        (Some(_), None) => std::cmp::Ordering::Less,
+        (None, Some(_)) => std::cmp::Ordering::Greater,
+        (None, None) => std::cmp::Ordering::Equal,
+    });
 
     Ok(Some(achievements))
 }
