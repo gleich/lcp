@@ -133,7 +133,12 @@ pub async fn fetch_game_achievements(
             }
         }
     }
-    achievements.sort_by(|a, b| b.unlock_time.cmp(&a.unlock_time));
+    achievements.sort_by(|a, b| match (&b.unlock_time, &a.unlock_time) {
+        (Some(b_time), Some(a_time)) => b_time.cmp(a_time),
+        (Some(_), None) => std::cmp::Ordering::Less,
+        (None, Some(_)) => std::cmp::Ordering::Greater,
+        (None, None) => std::cmp::Ordering::Equal,
+    });
 
     Ok(Some(achievements))
 }
