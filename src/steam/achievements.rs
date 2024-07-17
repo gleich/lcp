@@ -48,7 +48,7 @@ pub struct PlayerAchievement {
     #[serde(rename = "apiname")]
     pub api_name: String,
     pub achieved: u32,
-    #[serde(rename = "unlock_time")]
+    #[serde(rename = "unlocktime")]
     pub unlock_time: Option<DateTime<Utc>>,
 }
 
