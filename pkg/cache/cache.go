@@ -3,21 +3,32 @@ package cache
 import (
 	"encoding/json"
 	"net/http"
+	"reflect"
 	"sync"
+	"time"
 
 	"github.com/gleich/lcp/pkg/secrets"
 	"github.com/gleich/lumber/v2"
 )
 
 type Cache[T any] struct {
-	mutex sync.RWMutex
-	data  T
+	Name    string
+	mutex   sync.RWMutex
+	data    T
+	updated time.Time
 }
 
-func New[T any](data T) Cache[T] {
+func New[T any](name string, data T) Cache[T] {
 	return Cache[T]{
-		data: data,
+		Name:    name,
+		data:    data,
+		updated: time.Now(),
 	}
+}
+
+type response[T any] struct {
+	Data    T         `json:"data"`
+	Updated time.Time `json:"updated"`
 }
 
 // Handle a GET request to load data from the given cache
@@ -28,18 +39,25 @@ func Route[T any](cache *Cache[T], loadedSecrets secrets.Secrets) http.HandlerFu
 			return
 		}
 		cache.mutex.RLock()
-		defer cache.mutex.RUnlock()
 		w.Header().Set("Content-Type", "application/json")
-		err := json.NewEncoder(w).Encode(cache.data)
+		err := json.NewEncoder(w).Encode(response[T]{Data: cache.data, Updated: cache.updated})
+		cache.mutex.RUnlock()
 		if err != nil {
-			lumber.Error(err, "Failed to write data")
+			lumber.Error(err, "failed to write data")
 		}
 	})
 }
 
 // Update the given cache
 func Update[T any](cache *Cache[T], data T) {
+	var updated bool
 	cache.mutex.Lock()
-	defer cache.mutex.Unlock()
-	cache.data = data
+	if !reflect.DeepEqual(data, cache.data) {
+		cache.data = data
+		cache.updated = time.Now()
+	}
+	cache.mutex.Unlock()
+	if updated {
+		lumber.Success(cache.Name, "updated")
+	}
 }

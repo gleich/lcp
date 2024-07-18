@@ -25,12 +25,12 @@ func main() {
 		lumber.Fatal(err, "parsing required env vars failed")
 	}
 
-	// init strava cache
 	activities, err := strava.FetchActivities(loadedSecrets)
 	if err != nil {
 		lumber.Fatal(err, "failed to do initial fetch on strava activities")
 	}
-	stravaCache := cache.New(activities)
+	stravaCache := cache.New("strava", activities)
+	lumber.Success("init strava cache")
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
