@@ -4,14 +4,19 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gleich/lcp/pkg/cache"
 	"github.com/gleich/lumber/v2"
 )
 
 func main() {
 	lumber.Info("booted")
 
+	// caches
+	stravaCache := cache.New()
+
 	r := gin.Default()
 	r.GET("/", rootRedirect)
+	r.GET("/strava/cache", func(ctx *gin.Context) { cache.CacheRoute(&stravaCache, ctx) })
 
 	err := r.Run()
 	if err != nil {
@@ -19,6 +24,6 @@ func main() {
 	}
 }
 
-func rootRedirect(c *gin.Context) {
-	c.Redirect(http.StatusTemporaryRedirect, "https://mattglei.ch")
+func rootRedirect(ctx *gin.Context) {
+	ctx.Redirect(http.StatusTemporaryRedirect, "https://mattglei.ch")
 }
