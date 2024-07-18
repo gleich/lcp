@@ -32,16 +32,16 @@ type response[T any] struct {
 }
 
 // Handle a GET request to load data from the given cache
-func Route[T any](cache *Cache[T], loadedSecrets secrets.Secrets) http.HandlerFunc {
+func (c *Cache[T]) Route(loadedSecrets secrets.Secrets) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("Authorization") != "Bearer "+loadedSecrets.ValidToken {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
-		cache.mutex.RLock()
+		c.mutex.RLock()
 		w.Header().Set("Content-Type", "application/json")
-		err := json.NewEncoder(w).Encode(response[T]{Data: cache.data, Updated: cache.updated})
-		cache.mutex.RUnlock()
+		err := json.NewEncoder(w).Encode(response[T]{Data: c.data, Updated: c.updated})
+		c.mutex.RUnlock()
 		if err != nil {
 			lumber.Error(err, "failed to write data")
 		}
@@ -49,15 +49,15 @@ func Route[T any](cache *Cache[T], loadedSecrets secrets.Secrets) http.HandlerFu
 }
 
 // Update the given cache
-func Update[T any](cache *Cache[T], data T) {
+func (c *Cache[T]) Update(data T) {
 	var updated bool
-	cache.mutex.Lock()
-	if !reflect.DeepEqual(data, cache.data) {
-		cache.data = data
-		cache.updated = time.Now()
+	c.mutex.Lock()
+	if !reflect.DeepEqual(data, c.data) {
+		c.data = data
+		c.updated = time.Now()
 	}
-	cache.mutex.Unlock()
+	c.mutex.Unlock()
 	if updated {
-		lumber.Success(cache.Name, "updated")
+		lumber.Success(c.Name, "updated")
 	}
 }

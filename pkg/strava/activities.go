@@ -2,12 +2,10 @@ package strava
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"time"
 
-	"github.com/gleich/lcp/pkg/secrets"
 	"github.com/gleich/lumber/v2"
 )
 
@@ -37,40 +35,34 @@ type Activity struct {
 	ID                 uint64  `json:"id"`
 }
 
-func FetchActivities(loadedSecrets secrets.Secrets) ([]Activity, error) {
+func FetchActivities(tokens Tokens) []Activity {
 	req, err := http.NewRequest("GET", "https://www.strava.com/api/v3/athlete/activities", nil)
 	if err != nil {
 		lumber.Error(err, "Failed to create new request")
-		return nil, err
+		return nil
 	}
-	req.Header.Set("Authorization", "Bearer "+loadedSecrets.StravaAccessToken)
+	req.Header.Set("Authorization", "Bearer "+tokens.Access)
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		lumber.Error(err, "Failed to send request for Strava activities")
-		return nil, err
+		return nil
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		err = fmt.Errorf("received non-200 response: %d", resp.StatusCode)
-		lumber.Error(err, "Failed to get a valid response from Strava")
-		return nil, err
-	}
-
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		lumber.Error(err, "Failed to read response body")
-		return nil, err
+		lumber.Error(err, "reading response body failed")
+		return nil
 	}
 
 	var activities []Activity
 	err = json.Unmarshal(body, &activities)
 	if err != nil {
-		lumber.Error(err, "Failed to parse JSON for Strava activities")
-		lumber.Debug("Response body: ", body)
-		return nil, err
+		lumber.Error(err, "failed to parse json")
+		lumber.Debug(string(body))
+		return nil
 	}
 
-	return activities, nil
+	return activities
 }

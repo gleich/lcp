@@ -25,17 +25,16 @@ func main() {
 		lumber.Fatal(err, "parsing required env vars failed")
 	}
 
-	activities, err := strava.FetchActivities(loadedSecrets)
-	if err != nil {
-		lumber.Fatal(err, "failed to do initial fetch on strava activities")
-	}
-	stravaCache := cache.New("strava", activities)
+	stravaTokens := strava.LoadTokens(loadedSecrets)
+	stravaTokens.RefreshIfNeeded(loadedSecrets)
+	stravaActivities := strava.FetchActivities(stravaTokens)
+	stravaCache := cache.New("strava", stravaActivities)
 	lumber.Success("init strava cache")
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.HandleFunc("/", rootRedirect)
-	r.Get("/strava/cache", cache.Route(&stravaCache, loadedSecrets))
+	r.Get("/strava/cache", stravaCache.Route(loadedSecrets))
 	err = http.ListenAndServe(":8000", r)
 	if err != nil {
 		lumber.Fatal(err, "failed to start router")
