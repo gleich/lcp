@@ -1,11 +1,7 @@
-FROM rust:1.79.0
+FROM golang:1.22.5
 
 COPY . .
 
-RUN cargo build --release
+RUN go build && touch .env
 
-ENV RUST_LOG=debug
-
-RUN touch .env
-
-CMD ["target/release/lcp"]
+CMD ["lcp"]

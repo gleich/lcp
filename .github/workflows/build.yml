@@ -5,12 +5,11 @@ on:
   - pull_request
 
 jobs:
-  cargo:
+  go:
     runs-on: ubuntu-latest
-    env:
-      CARGO_TERM_COLOR: always
     steps:
       - uses: actions/checkout@v4
-      - run: rustup toolchain install stable
-      - uses: Swatinem/rust-cache@v2
-      - run: cargo build --release
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.5'
+      - run: 'go build'
