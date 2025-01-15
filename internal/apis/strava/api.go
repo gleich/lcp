@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/gleich/lumber/v3"
 	"pkg.mattglei.ch/lcp-2/internal/apis"
+	"pkg.mattglei.ch/timber"
 )
 
 func sendStravaAPIRequest[T any](path string, tokens tokens) (T, error) {
@@ -19,7 +19,7 @@ func sendStravaAPIRequest[T any](path string, tokens tokens) (T, error) {
 		nil,
 	)
 	if err != nil {
-		lumber.Error(err, "failed to create request")
+		timber.Error(err, "failed to create request")
 		return zeroValue, err
 	}
 	req.Header.Set("Authorization", "Bearer "+tokens.Access)
@@ -27,7 +27,7 @@ func sendStravaAPIRequest[T any](path string, tokens tokens) (T, error) {
 	resp, err := apis.SendRequest[T](req)
 	if err != nil {
 		if !errors.Is(err, apis.WarningError) {
-			lumber.Error(err, "failed to make strava API request")
+			timber.Error(err, "failed to make strava API request")
 		}
 		return zeroValue, err
 	}

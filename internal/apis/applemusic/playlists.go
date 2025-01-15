@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gleich/lumber/v3"
 	"pkg.mattglei.ch/lcp-2/internal/apis"
 	"pkg.mattglei.ch/lcp-2/internal/auth"
 	"pkg.mattglei.ch/lcp-2/internal/cache"
+	"pkg.mattglei.ch/timber"
 )
 
 type playlistSummary struct {
@@ -52,7 +52,7 @@ func fetchPlaylist(id string) (playlist, error) {
 	)
 	if err != nil {
 		if !errors.Is(err, apis.WarningError) {
-			lumber.Error(err, "failed to fetch playlist for", id)
+			timber.Error(err, "failed to fetch playlist for", id)
 		}
 		return playlist{}, err
 	}
@@ -69,7 +69,7 @@ func fetchPlaylist(id string) (playlist, error) {
 		trackData, err = sendAppleMusicAPIRequest[playlistTracksResponse](trackData.Next)
 		if err != nil {
 			if !errors.Is(err, apis.WarningError) {
-				lumber.Error(err, "failed to paginate through tracks for playlist with id of", id)
+				timber.Error(err, "failed to paginate through tracks for playlist with id of", id)
 			}
 			return playlist{}, err
 		}
@@ -119,7 +119,7 @@ func playlistEndpoint(c *cache.Cache[cacheData]) http.HandlerFunc {
 		c.DataMutex.RUnlock()
 		if err != nil {
 			err = fmt.Errorf("%v failed to write json data to request", err)
-			lumber.Error(err)
+			timber.Error(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})

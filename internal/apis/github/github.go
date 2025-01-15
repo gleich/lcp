@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gleich/lumber/v3"
 	"github.com/shurcooL/githubv4"
 	"golang.org/x/oauth2"
 	"pkg.mattglei.ch/lcp-2/internal/cache"
 	"pkg.mattglei.ch/lcp-2/internal/secrets"
+	"pkg.mattglei.ch/timber"
 )
 
 func Setup(mux *http.ServeMux) {
@@ -21,7 +21,7 @@ func Setup(mux *http.ServeMux) {
 
 	pinnedRepos, err := fetchPinnedRepos(githubClient)
 	if err != nil {
-		lumber.Error(err, "fetching initial pinned repos failed")
+		timber.Error(err, "fetching initial pinned repos failed")
 	}
 
 	githubCache := cache.New("github", pinnedRepos, err == nil)
@@ -30,5 +30,5 @@ func Setup(mux *http.ServeMux) {
 		func() ([]repository, error) { return fetchPinnedRepos(githubClient) },
 		1*time.Minute,
 	)
-	lumber.Done("setup github cache")
+	timber.Done("setup github cache")
 }

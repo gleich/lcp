@@ -3,11 +3,11 @@ package strava
 import (
 	"net/http"
 
-	"github.com/gleich/lumber/v3"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"pkg.mattglei.ch/lcp-2/internal/cache"
 	"pkg.mattglei.ch/lcp-2/internal/secrets"
+	"pkg.mattglei.ch/timber"
 )
 
 func Setup(mux *http.ServeMux) {
@@ -22,11 +22,11 @@ func Setup(mux *http.ServeMux) {
 		Secure: true,
 	})
 	if err != nil {
-		lumber.Fatal(err, "failed to create minio client")
+		timber.Fatal(err, "failed to create minio client")
 	}
 	stravaActivities, err := fetchActivities(*minioClient, stravaTokens)
 	if err != nil {
-		lumber.Error(err, "failed to load initial data for strava cache; not updating")
+		timber.Error(err, "failed to load initial data for strava cache; not updating")
 	}
 	stravaCache := cache.New("strava", stravaActivities, err == nil)
 
@@ -34,5 +34,5 @@ func Setup(mux *http.ServeMux) {
 	mux.HandleFunc("POST /strava/event", eventRoute(stravaCache, *minioClient, stravaTokens))
 	mux.HandleFunc("GET /strava/event", challengeRoute)
 
-	lumber.Done("setup strava cache")
+	timber.Done("setup strava cache")
 }

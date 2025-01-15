@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/gleich/lumber/v3"
 	"github.com/minio/minio-go/v7"
 	"pkg.mattglei.ch/lcp-2/internal/secrets"
+	"pkg.mattglei.ch/timber"
 )
 
 const bucketName = "mapbox-maps"
@@ -33,14 +33,14 @@ func fetchMap(polyline string) []byte {
 	)
 	resp, err := http.Get(url)
 	if err != nil {
-		lumber.Error(err, "failed to fetch mapbox image with polyline", url)
+		timber.Error(err, "failed to fetch mapbox image with polyline", url)
 		return nil
 	}
 
 	var b bytes.Buffer
 	_, err = b.ReadFrom(resp.Body)
 	if err != nil {
-		lumber.Error(err, "failed to read data from request")
+		timber.Error(err, "failed to read data from request")
 		return nil
 	}
 
@@ -60,7 +60,7 @@ func uploadMap(minioClient minio.Client, id uint64, data []byte) {
 		minio.PutObjectOptions{ContentType: "image/png"},
 	)
 	if err != nil {
-		lumber.Error(err, "failed to upload to minio")
+		timber.Error(err, "failed to upload to minio")
 	}
 }
 
@@ -73,7 +73,7 @@ func removeOldMaps(minioClient minio.Client, activities []activity) {
 	objects := minioClient.ListObjects(context.Background(), bucketName, minio.ListObjectsOptions{})
 	for object := range objects {
 		if object.Err != nil {
-			lumber.Error(object.Err, "failed to load object")
+			timber.Error(object.Err, "failed to load object")
 			return
 		}
 		var validObject bool
@@ -91,7 +91,7 @@ func removeOldMaps(minioClient minio.Client, activities []activity) {
 				minio.RemoveObjectOptions{},
 			)
 			if err != nil {
-				lumber.Error(err, "failed to remove object")
+				timber.Error(err, "failed to remove object")
 				return
 			}
 		}

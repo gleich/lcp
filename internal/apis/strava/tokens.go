@@ -6,9 +6,9 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/gleich/lumber/v3"
 	"pkg.mattglei.ch/lcp-2/internal/apis"
 	"pkg.mattglei.ch/lcp-2/internal/secrets"
+	"pkg.mattglei.ch/timber"
 )
 
 type tokens struct {
@@ -44,18 +44,18 @@ func (t *tokens) refreshIfNeeded() {
 		nil,
 	)
 	if err != nil {
-		lumber.Error(err, "creating request for new token failed")
+		timber.Error(err, "creating request for new token failed")
 		return
 	}
 
 	tokens, err := apis.SendRequest[tokens](req)
 	if err != nil {
 		if !errors.Is(err, apis.WarningError) {
-			lumber.Error(err, "failed to refresh tokens")
+			timber.Error(err, "failed to refresh tokens")
 		}
 		return
 	}
 
 	*t = tokens
-	lumber.Done("loaded new strava access token:", t.Access)
+	timber.Done("loaded new strava access token:", t.Access)
 }

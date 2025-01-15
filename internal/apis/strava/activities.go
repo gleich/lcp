@@ -6,9 +6,9 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/gleich/lumber/v3"
 	"github.com/minio/minio-go/v7"
 	"pkg.mattglei.ch/lcp-2/internal/images"
+	"pkg.mattglei.ch/timber"
 )
 
 type stravaActivity struct {
@@ -72,7 +72,7 @@ func fetchActivities(minioClient minio.Client, tokens tokens) ([]activity, error
 		tokens,
 	)
 	if err != nil {
-		lumber.Error(err, "failed to send request to Strava API to get activities")
+		timber.Error(err, "failed to send request to Strava API to get activities")
 		return nil, err
 	}
 
@@ -87,7 +87,7 @@ func fetchActivities(minioClient minio.Client, tokens tokens) ([]activity, error
 
 		details, err := fetchActivityDetails(stravaActivity.ID, tokens)
 		if err != nil {
-			lumber.Error(err, "failed to fetch activity details")
+			timber.Error(err, "failed to fetch activity details")
 			continue
 		}
 
@@ -134,7 +134,7 @@ func fetchHeartrate(id uint64, tokens tokens) []int {
 		tokens,
 	)
 	if err != nil {
-		lumber.Error(err, "failed to send request for HR data from activity with ID of", id)
+		timber.Error(err, "failed to send request for HR data from activity with ID of", id)
 	}
 
 	return stream.Heartrate.Data
@@ -146,7 +146,7 @@ func fetchActivityDetails(id uint64, tokens tokens) (detailedStravaActivity, err
 		tokens,
 	)
 	if err != nil {
-		lumber.Error(err, "failed to request detailed activity data for", id)
+		timber.Error(err, "failed to request detailed activity data for", id)
 		return detailedStravaActivity{}, err
 	}
 

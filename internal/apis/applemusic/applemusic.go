@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gleich/lumber/v3"
 	"pkg.mattglei.ch/lcp-2/internal/auth"
 	"pkg.mattglei.ch/lcp-2/internal/cache"
+	"pkg.mattglei.ch/timber"
 )
 
 const API_ENDPOINT = "https://api.music.apple.com/"
@@ -61,14 +61,14 @@ func cacheUpdate() (cacheData, error) {
 func Setup(mux *http.ServeMux) {
 	data, err := cacheUpdate()
 	if err != nil {
-		lumber.Error(err, "initial fetch of cache data failed")
+		timber.Error(err, "initial fetch of cache data failed")
 	}
 
 	applemusicCache := cache.New("applemusic", data, err == nil)
 	mux.HandleFunc("GET /applemusic", serveHTTP(applemusicCache))
 	mux.HandleFunc("GET /applemusic/playlists/{id}", playlistEndpoint(applemusicCache))
 	go applemusicCache.UpdatePeriodically(cacheUpdate, 30*time.Second)
-	lumber.Done("setup apple music cache")
+	timber.Done("setup apple music cache")
 }
 
 type cacheDataResponse struct {
@@ -110,7 +110,7 @@ func serveHTTP(c *cache.Cache[cacheData]) http.HandlerFunc {
 		c.DataMutex.RUnlock()
 		if err != nil {
 			err = fmt.Errorf("%v failed to write json data to request", err)
-			lumber.Error(err)
+			timber.Error(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})

@@ -9,14 +9,14 @@ import (
 	"io"
 
 	"github.com/buckket/go-blurhash"
-	"github.com/gleich/lumber/v3"
+	"pkg.mattglei.ch/timber"
 )
 
 func BlurImage(data []byte, decoder func(r io.Reader) (image.Image, error)) []byte {
 	reader := bytes.NewReader(data)
 	parsedImage, err := decoder(reader)
 	if err != nil {
-		lumber.Error(err, "decoding image failed")
+		timber.Error(err, "decoding image failed")
 		return nil
 	}
 
@@ -24,20 +24,20 @@ func BlurImage(data []byte, decoder func(r io.Reader) (image.Image, error)) []by
 	height := parsedImage.Bounds().Dy()
 	blurData, err := blurhash.Encode(4, 3, parsedImage)
 	if err != nil {
-		lumber.Error(err, "encoding image into blurhash failed")
+		timber.Error(err, "encoding image into blurhash failed")
 		return nil
 	}
 
 	scaleDownFactor := 25
 	blurImage, err := blurhash.Decode(blurData, width/scaleDownFactor, height/scaleDownFactor, 1)
 	if err != nil {
-		lumber.Error(err, "decoding blurhash data into img failed")
+		timber.Error(err, "decoding blurhash data into img failed")
 		return nil
 	}
 	blurImageBuffer := new(bytes.Buffer)
 	err = png.Encode(blurImageBuffer, blurImage)
 	if err != nil {
-		lumber.Error(err, "creating png based off blurred image failed")
+		timber.Error(err, "creating png based off blurred image failed")
 		return nil
 	}
 	return blurImageBuffer.Bytes()

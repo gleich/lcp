@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gleich/lumber/v3"
+	"pkg.mattglei.ch/timber"
 )
 
 type song struct {
@@ -57,7 +57,7 @@ func songFromSongResponse(s songResponse) song {
 			fmt.Sprint(s.Attributes.PlayParams.CatalogID),
 		)
 		if err != nil {
-			lumber.Error(err, "failed to create URL for song", s.Attributes.Name)
+			timber.Error(err, "failed to create URL for song", s.Attributes.Name)
 		}
 		s.Attributes.URL = u
 	}

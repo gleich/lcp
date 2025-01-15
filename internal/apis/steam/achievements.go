@@ -10,9 +10,9 @@ import (
 	"sort"
 	"time"
 
-	"github.com/gleich/lumber/v3"
 	"pkg.mattglei.ch/lcp-2/internal/apis"
 	"pkg.mattglei.ch/lcp-2/internal/secrets"
+	"pkg.mattglei.ch/timber"
 )
 
 type playerAchievementsResponse struct {
@@ -58,21 +58,21 @@ func fetchGameAchievements(appID int32) (*float32, *[]achievement, error) {
 		"https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v0001?" + params.Encode(),
 	)
 	if err != nil {
-		lumber.Error(err, "sending request for player achievements from", appID, "failed")
+		timber.Error(err, "sending request for player achievements from", appID, "failed")
 		return nil, nil, err
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		lumber.Error(err, "reading response body for player achievements from", appID, "failed")
+		timber.Error(err, "reading response body for player achievements from", appID, "failed")
 		return nil, nil, err
 	}
 	if string(body) == `{"playerstats":{"error":"Requested app has no stats","success":false}}` {
 		return nil, nil, err
 	}
 	if resp.StatusCode != http.StatusOK {
-		lumber.Warning(
+		timber.Warning(
 			"status code of",
 			resp.StatusCode,
 			"returned from API. Code of 200 expected from",
@@ -84,8 +84,8 @@ func fetchGameAchievements(appID int32) (*float32, *[]achievement, error) {
 	var playerAchievements playerAchievementsResponse
 	err = json.Unmarshal(body, &playerAchievements)
 	if err != nil {
-		lumber.Error(err, "failed to parse json for player achievements for", appID)
-		lumber.Debug("body:", string(body))
+		timber.Error(err, "failed to parse json for player achievements for", appID)
+		timber.Debug("body:", string(body))
 		return nil, nil, err
 	}
 
@@ -104,13 +104,13 @@ func fetchGameAchievements(appID int32) (*float32, *[]achievement, error) {
 		nil,
 	)
 	if err != nil {
-		lumber.Error(err, "creating request for owned games failed for app id:", appID)
+		timber.Error(err, "creating request for owned games failed for app id:", appID)
 		return nil, nil, err
 	}
 	gameSchema, err := apis.SendRequest[schemaGameResponse](req)
 	if err != nil {
 		if !errors.Is(err, apis.WarningError) {
-			lumber.Error(err, "failed to get game schema for app id:", appID)
+			timber.Error(err, "failed to get game schema for app id:", appID)
 		}
 		return nil, nil, err
 	}

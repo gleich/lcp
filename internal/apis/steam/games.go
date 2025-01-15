@@ -8,9 +8,9 @@ import (
 	"sort"
 	"time"
 
-	"github.com/gleich/lumber/v3"
 	"pkg.mattglei.ch/lcp-2/internal/apis"
 	"pkg.mattglei.ch/lcp-2/internal/secrets"
+	"pkg.mattglei.ch/timber"
 )
 
 type ownedGamesResponse struct {
@@ -51,13 +51,13 @@ func fetchRecentlyPlayedGames() ([]game, error) {
 		"https://api.steampowered.com/IPlayerService/GetOwnedGames/v1?"+params.Encode(), nil,
 	)
 	if err != nil {
-		lumber.Error(err, "failed to create request for steam API owned games")
+		timber.Error(err, "failed to create request for steam API owned games")
 		return nil, err
 	}
 	ownedGames, err := apis.SendRequest[ownedGamesResponse](req)
 	if err != nil {
 		if !errors.Is(err, apis.WarningError) {
-			lumber.Error(err, "sending request for owned games failed")
+			timber.Error(err, "sending request for owned games failed")
 		}
 		return nil, err
 	}
@@ -80,7 +80,7 @@ func fetchRecentlyPlayedGames() ([]game, error) {
 		)
 		libraryImageResponse, err := http.Get(libraryURL)
 		if err != nil {
-			lumber.Error(err, "getting library image for", g.Name, "failed")
+			timber.Error(err, "getting library image for", g.Name, "failed")
 			return nil, err
 		}
 		defer libraryImageResponse.Body.Close()

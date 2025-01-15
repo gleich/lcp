@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/gleich/lumber/v3"
 	"pkg.mattglei.ch/lcp-2/internal/apis"
 	"pkg.mattglei.ch/lcp-2/internal/secrets"
+	"pkg.mattglei.ch/timber"
 )
 
 func sendAppleMusicAPIRequest[T any](path string) (T, error) {
@@ -19,7 +19,7 @@ func sendAppleMusicAPIRequest[T any](path string) (T, error) {
 		nil,
 	)
 	if err != nil {
-		lumber.Error(err, "failed to create request")
+		timber.Error(err, "failed to create request")
 		return zeroValue, err
 	}
 	req.Header.Set("Authorization", "Bearer "+secrets.SECRETS.AppleMusicAppToken)
@@ -28,7 +28,7 @@ func sendAppleMusicAPIRequest[T any](path string) (T, error) {
 	resp, err := apis.SendRequest[T](req)
 	if err != nil {
 		if !errors.Is(err, apis.WarningError) {
-			lumber.Error(err, "failed to make apple music API request")
+			timber.Error(err, "failed to make apple music API request")
 		}
 		return zeroValue, err
 	}

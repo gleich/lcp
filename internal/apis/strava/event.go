@@ -5,10 +5,10 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/gleich/lumber/v3"
 	"github.com/minio/minio-go/v7"
 	"pkg.mattglei.ch/lcp-2/internal/cache"
 	"pkg.mattglei.ch/lcp-2/internal/secrets"
+	"pkg.mattglei.ch/timber"
 )
 
 type event struct {
@@ -29,7 +29,7 @@ func eventRoute(
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
-			lumber.Error(err, "reading response body failed")
+			timber.Error(err, "reading response body failed")
 			return
 		}
 		defer r.Body.Close()
@@ -37,8 +37,8 @@ func eventRoute(
 		var eventData event
 		err = json.Unmarshal(body, &eventData)
 		if err != nil {
-			lumber.Error(err, "failed to parse json")
-			lumber.Debug(string(body))
+			timber.Error(err, "failed to parse json")
+			timber.Debug(string(body))
 			return
 		}
 
@@ -50,7 +50,7 @@ func eventRoute(
 		tokens.refreshIfNeeded()
 		activities, err := fetchActivities(minioClient, tokens)
 		if err != nil {
-			lumber.ErrorMsg("failed to update strava cache")
+			timber.ErrorMsg("failed to update strava cache")
 			return
 		}
 		stravaCache.Update(activities)
@@ -70,6 +70,6 @@ func challengeRoute(w http.ResponseWriter, r *http.Request) {
 		Challenge string `json:"hub.challenge"`
 	}{Challenge: challenge})
 	if err != nil {
-		lumber.Error(err, "failed to write json")
+		timber.Error(err, "failed to write json")
 	}
 }

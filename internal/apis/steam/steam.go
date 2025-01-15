@@ -4,18 +4,18 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gleich/lumber/v3"
 	"pkg.mattglei.ch/lcp-2/internal/cache"
+	"pkg.mattglei.ch/timber"
 )
 
 func Setup(mux *http.ServeMux) {
 	games, err := fetchRecentlyPlayedGames()
 	if err != nil {
-		lumber.Error(err, "initial fetch of games failed")
+		timber.Error(err, "initial fetch of games failed")
 	}
 
 	steamCache := cache.New("steam", games, err == nil)
 	mux.HandleFunc("GET /steam", steamCache.ServeHTTP)
 	go steamCache.UpdatePeriodically(fetchRecentlyPlayedGames, 5*time.Minute)
-	lumber.Done("setup steam cache")
+	timber.Done("setup steam cache")
 }
