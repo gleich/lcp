@@ -14,7 +14,7 @@ import (
 
 func Setup(mux *http.ServeMux) {
 	githubTokenSource := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: secrets.SECRETS.GitHubAccessToken},
+		&oauth2.Token{AccessToken: secrets.ENV.GitHubAccessToken},
 	)
 	githubHttpClient := oauth2.NewClient(context.Background(), githubTokenSource)
 	githubClient := githubv4.NewClient(githubHttpClient)

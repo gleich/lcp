@@ -49,8 +49,8 @@ type achievement struct {
 
 func fetchGameAchievements(appID int32) (*float32, *[]achievement, error) {
 	params := url.Values{
-		"key":     {secrets.SECRETS.SteamKey},
-		"steamid": {secrets.SECRETS.SteamID},
+		"key":     {secrets.ENV.SteamKey},
+		"steamid": {secrets.ENV.SteamID},
 		"appid":   {fmt.Sprint(appID)},
 		"format":  {"json"},
 	}
@@ -94,7 +94,7 @@ func fetchGameAchievements(appID int32) (*float32, *[]achievement, error) {
 	}
 
 	params = url.Values{
-		"key":    {secrets.SECRETS.SteamKey},
+		"key":    {secrets.ENV.SteamKey},
 		"appid":  {fmt.Sprint(appID)},
 		"format": {"json"},
 	}

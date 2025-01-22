@@ -6,7 +6,7 @@ import (
 	"pkg.mattglei.ch/timber"
 )
 
-var SECRETS Secrets
+var ENV Secrets
 
 type Secrets struct {
 	ValidToken  string `env:"VALID_TOKEN"`
@@ -42,6 +42,6 @@ func Load() {
 	if err != nil {
 		timber.Fatal(err, "parsing required env vars failed")
 	}
-	SECRETS = loadedSecrets
+	ENV = loadedSecrets
 	timber.Done("loaded secrets")
 }

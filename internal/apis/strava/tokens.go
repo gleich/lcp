@@ -19,8 +19,8 @@ type tokens struct {
 
 func loadTokens() tokens {
 	return tokens{
-		Access:    secrets.SECRETS.StravaAccessToken,
-		Refresh:   secrets.SECRETS.StravaRefreshToken,
+		Access:    secrets.ENV.StravaAccessToken,
+		Refresh:   secrets.ENV.StravaRefreshToken,
 		ExpiresAt: 0, // starts at zero to force a refresh on boot
 	}
 }
@@ -32,11 +32,11 @@ func (t *tokens) refreshIfNeeded() {
 	}
 
 	params := url.Values{
-		"client_id":     {secrets.SECRETS.StravaClientID},
-		"client_secret": {secrets.SECRETS.StravaClientSecret},
+		"client_id":     {secrets.ENV.StravaClientID},
+		"client_secret": {secrets.ENV.StravaClientSecret},
 		"grant_type":    {"refresh_token"},
 		"refresh_token": {t.Refresh},
-		"code":          {secrets.SECRETS.StravaOAuthCode},
+		"code":          {secrets.ENV.StravaOAuthCode},
 	}
 	req, err := http.NewRequest(
 		http.MethodPost,

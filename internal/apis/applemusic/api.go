@@ -22,8 +22,8 @@ func sendAppleMusicAPIRequest[T any](path string) (T, error) {
 		timber.Error(err, "failed to create request")
 		return zeroValue, err
 	}
-	req.Header.Set("Authorization", "Bearer "+secrets.SECRETS.AppleMusicAppToken)
-	req.Header.Set("Music-User-Token", secrets.SECRETS.AppleMusicUserToken)
+	req.Header.Set("Authorization", "Bearer "+secrets.ENV.AppleMusicAppToken)
+	req.Header.Set("Music-User-Token", secrets.ENV.AppleMusicUserToken)
 
 	resp, err := apis.SendRequest[T](req)
 	if err != nil {

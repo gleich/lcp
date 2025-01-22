@@ -8,7 +8,7 @@ import (
 )
 
 func IsAuthorized(w http.ResponseWriter, r *http.Request) bool {
-	if r.Header.Get("Authorization") != fmt.Sprintf("Bearer %s", secrets.SECRETS.ValidToken) {
+	if r.Header.Get("Authorization") != fmt.Sprintf("Bearer %s", secrets.ENV.ValidToken) {
 		http.Error(w, "Invalid bearer auth token", http.StatusUnauthorized)
 		return false
 	}

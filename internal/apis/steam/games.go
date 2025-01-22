@@ -42,8 +42,8 @@ type game struct {
 
 func fetchRecentlyPlayedGames() ([]game, error) {
 	params := url.Values{
-		"key":             {secrets.SECRETS.SteamKey},
-		"steamid":         {secrets.SECRETS.SteamID},
+		"key":             {secrets.ENV.SteamKey},
+		"steamid":         {secrets.ENV.SteamID},
 		"include_appinfo": {"true"},
 		"format":          {"json"},
 	}

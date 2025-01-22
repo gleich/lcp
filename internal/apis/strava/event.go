@@ -42,7 +42,7 @@ func eventRoute(
 			return
 		}
 
-		if eventData.SubscriptionID != secrets.SECRETS.StravaSubscriptionID {
+		if eventData.SubscriptionID != secrets.ENV.StravaSubscriptionID {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
@@ -59,7 +59,7 @@ func eventRoute(
 
 func challengeRoute(w http.ResponseWriter, r *http.Request) {
 	verifyToken := r.URL.Query().Get("hub.verify_token")
-	if verifyToken != secrets.SECRETS.StravaVerifyToken {
+	if verifyToken != secrets.ENV.StravaVerifyToken {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}

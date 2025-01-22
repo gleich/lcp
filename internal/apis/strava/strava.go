@@ -13,10 +13,10 @@ import (
 func Setup(mux *http.ServeMux) {
 	stravaTokens := loadTokens()
 	stravaTokens.refreshIfNeeded()
-	minioClient, err := minio.New(secrets.SECRETS.MinioEndpoint, &minio.Options{
+	minioClient, err := minio.New(secrets.ENV.MinioEndpoint, &minio.Options{
 		Creds: credentials.NewStaticV4(
-			secrets.SECRETS.MinioAccessKeyID,
-			secrets.SECRETS.MinioSecretKey,
+			secrets.ENV.MinioAccessKeyID,
+			secrets.ENV.MinioSecretKey,
 			"",
 		),
 		Secure: true,

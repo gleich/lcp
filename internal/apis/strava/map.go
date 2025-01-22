@@ -20,7 +20,7 @@ func fetchMap(polyline string) []byte {
 		lineColor = "000"
 		width     = 440
 		height    = 240
-		params    = url.Values{"access_token": {secrets.SECRETS.MapboxAccessToken}}
+		params    = url.Values{"access_token": {secrets.ENV.MapboxAccessToken}}
 	)
 	url := fmt.Sprintf(
 		"https://api.mapbox.com/styles/v1/mattgleich/clxxsfdfm002401qj7jcxh47e/static/path-%f+%s(%s)/auto/%dx%d@2x?%s",

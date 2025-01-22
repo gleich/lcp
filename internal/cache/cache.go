@@ -28,7 +28,7 @@ func New[T any](name string, data T, update bool) *Cache[T] {
 	cache := Cache[T]{
 		name:     name,
 		Updated:  time.Now(),
-		filePath: filepath.Join(secrets.SECRETS.CacheFolder, fmt.Sprintf("%s.json", name)),
+		filePath: filepath.Join(secrets.ENV.CacheFolder, fmt.Sprintf("%s.json", name)),
 	}
 	cache.loadFromFile()
 	if update {
