@@ -2,6 +2,7 @@ package strava
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
 	"time"
@@ -25,10 +26,10 @@ func loadTokens() tokens {
 	}
 }
 
-func (t *tokens) refreshIfNeeded(client *http.Client) {
+func (t *tokens) refreshIfNeeded(client *http.Client) error {
 	// subtract 60 to ensure that token doesn't expire in the next 60 seconds
 	if t.ExpiresAt-60 >= time.Now().Unix() {
-		return
+		return nil
 	}
 
 	params := url.Values{
@@ -44,18 +45,18 @@ func (t *tokens) refreshIfNeeded(client *http.Client) {
 		nil,
 	)
 	if err != nil {
-		timber.Error(err, "creating request for new token failed")
-		return
+		return fmt.Errorf("%v creating request for new token failed", err)
 	}
 
 	tokens, err := apis.SendRequest[tokens](client, req)
 	if err != nil {
 		if !errors.Is(err, apis.IgnoreError) {
-			timber.Error(err, "failed to refresh tokens")
+			return fmt.Errorf("%v failed to fetch refresh tokens", err)
 		}
-		return
+		return err
 	}
 
 	*t = tokens
 	timber.Done("loaded new strava access token:", t.Access)
+	return nil
 }

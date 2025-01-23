@@ -13,7 +13,10 @@ import (
 func Setup(mux *http.ServeMux) {
 	client := http.Client{}
 	stravaTokens := loadTokens()
-	stravaTokens.refreshIfNeeded(&client)
+	err := stravaTokens.refreshIfNeeded(&client)
+	if err != nil {
+		timber.Error(err, "failed to refresh token data on boot")
+	}
 	minioClient, err := minio.New(secrets.ENV.MinioEndpoint, &minio.Options{
 		Creds: credentials.NewStaticV4(
 			secrets.ENV.MinioAccessKeyID,

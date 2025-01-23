@@ -48,7 +48,12 @@ func eventRoute(
 			return
 		}
 
-		tokens.refreshIfNeeded(client)
+		err = tokens.refreshIfNeeded(client)
+		if err != nil {
+			timber.Error(err)
+			return
+		}
+
 		activities, err := fetchActivities(client, minioClient, tokens)
 		if err != nil {
 			timber.ErrorMsg("failed to update strava cache")
