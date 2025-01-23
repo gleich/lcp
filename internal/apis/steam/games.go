@@ -10,7 +10,6 @@ import (
 
 	"pkg.mattglei.ch/lcp-2/internal/apis"
 	"pkg.mattglei.ch/lcp-2/internal/secrets"
-	"pkg.mattglei.ch/timber"
 )
 
 type ownedGamesResponse struct {
@@ -51,13 +50,12 @@ func fetchRecentlyPlayedGames(client *http.Client) ([]game, error) {
 		"https://api.steampowered.com/IPlayerService/GetOwnedGames/v1?"+params.Encode(), nil,
 	)
 	if err != nil {
-		timber.Error(err, "failed to create request for steam API owned games")
-		return nil, err
+		return nil, fmt.Errorf("%v failed to create request for steam API owned games", err)
 	}
 	ownedGames, err := apis.SendRequest[ownedGamesResponse](client, req)
 	if err != nil {
-		if !errors.Is(err, apis.WarningError) {
-			timber.Error(err, "sending request for owned games failed")
+		if !errors.Is(err, apis.IgnoreError) {
+			return nil, fmt.Errorf("%v sending request for owned games failed", err)
 		}
 		return nil, err
 	}
@@ -80,8 +78,7 @@ func fetchRecentlyPlayedGames(client *http.Client) ([]game, error) {
 		)
 		libraryImageResponse, err := http.Get(libraryURL)
 		if err != nil {
-			timber.Error(err, "getting library image for", g.Name, "failed")
-			return nil, err
+			return nil, fmt.Errorf("%v getting library image for %s failed", err, g.Name)
 		}
 		defer libraryImageResponse.Body.Close()
 

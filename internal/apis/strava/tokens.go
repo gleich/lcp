@@ -50,7 +50,7 @@ func (t *tokens) refreshIfNeeded(client *http.Client) {
 
 	tokens, err := apis.SendRequest[tokens](client, req)
 	if err != nil {
-		if !errors.Is(err, apis.WarningError) {
+		if !errors.Is(err, apis.IgnoreError) {
 			timber.Error(err, "failed to refresh tokens")
 		}
 		return

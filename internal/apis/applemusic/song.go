@@ -7,8 +7,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-
-	"pkg.mattglei.ch/timber"
 )
 
 type song struct {
@@ -44,7 +42,7 @@ type songResponse struct {
 	} `json:"attributes"`
 }
 
-func songFromSongResponse(s songResponse) song {
+func songFromSongResponse(s songResponse) (song, error) {
 	if s.Attributes.URL == "" {
 		// remove special characters
 		slugURL := regexp.MustCompile(`[^\w\s-]`).ReplaceAllString(s.Attributes.Name, "")
@@ -57,7 +55,7 @@ func songFromSongResponse(s songResponse) song {
 			fmt.Sprint(s.Attributes.PlayParams.CatalogID),
 		)
 		if err != nil {
-			timber.Error(err, "failed to create URL for song", s.Attributes.Name)
+			return song{}, fmt.Errorf("%v failed to create URL for song %s", err, s.Attributes.Name)
 		}
 		s.Attributes.URL = u
 	}
@@ -74,5 +72,5 @@ func songFromSongResponse(s songResponse) song {
 		), "{h}", strconv.Itoa(int(math.Min(float64(s.Attributes.Artwork.Height), maxAlbumArtSize)))),
 		URL: s.Attributes.URL,
 		ID:  s.ID,
-	}
+	}, nil
 }

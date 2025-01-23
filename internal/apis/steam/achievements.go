@@ -58,15 +58,21 @@ func fetchGameAchievements(client *http.Client, appID int32) (*float32, *[]achie
 		"https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v0001?" + params.Encode(),
 	)
 	if err != nil {
-		timber.Error(err, "sending request for player achievements from", appID, "failed")
-		return nil, nil, err
+		return nil, nil, fmt.Errorf(
+			"%v sending request for player achievements from %d failed",
+			err,
+			appID,
+		)
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		timber.Error(err, "reading response body for player achievements from", appID, "failed")
-		return nil, nil, err
+		return nil, nil, fmt.Errorf(
+			"%v reading response body for player achievements from %d failed",
+			err,
+			appID,
+		)
 	}
 	if string(body) == `{"playerstats":{"error":"Requested app has no stats","success":false}}` {
 		return nil, nil, err
@@ -78,13 +84,13 @@ func fetchGameAchievements(client *http.Client, appID int32) (*float32, *[]achie
 			"returned from API. Code of 200 expected from",
 			resp.Request.URL.String(),
 		)
-		return nil, nil, apis.WarningError
+		return nil, nil, apis.IgnoreError
 	}
 
 	var playerAchievements playerAchievementsResponse
 	err = json.Unmarshal(body, &playerAchievements)
 	if err != nil {
-		timber.Error(err, "failed to parse json for player achievements for", appID)
+		err = fmt.Errorf("%v failed to parse json for player achievements for %d", err, appID)
 		timber.Debug("body:", string(body))
 		return nil, nil, err
 	}
@@ -104,13 +110,16 @@ func fetchGameAchievements(client *http.Client, appID int32) (*float32, *[]achie
 		nil,
 	)
 	if err != nil {
-		timber.Error(err, "creating request for owned games failed for app id:", appID)
-		return nil, nil, err
+		return nil, nil, fmt.Errorf(
+			"%v creating request for owned games failed for app id: %d",
+			err,
+			appID,
+		)
 	}
 	gameSchema, err := apis.SendRequest[schemaGameResponse](client, req)
 	if err != nil {
-		if !errors.Is(err, apis.WarningError) {
-			timber.Error(err, "failed to get game schema for app id:", appID)
+		if !errors.Is(err, apis.IgnoreError) {
+			return nil, nil, fmt.Errorf("%v failed to get game schema for app id: %d", err, appID)
 		}
 		return nil, nil, err
 	}

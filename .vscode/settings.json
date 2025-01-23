@@ -1,4 +1,4 @@
 {
   "github-actions.workflows.pinned.workflows": [".github/workflows/deploy.yml"],
-  "cSpell.words": ["applemusic"]
+  "cSpell.words": ["applemusic", "blurhash"]
 }

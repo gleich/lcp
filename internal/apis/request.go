@@ -3,6 +3,7 @@ package apis
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -10,15 +11,14 @@ import (
 	"pkg.mattglei.ch/timber"
 )
 
-var WarningError = errors.New("Warning error when trying to make request. Ignore error.")
+var IgnoreError = errors.New("Warning error when trying to make request. Ignore error.")
 
 // sends a given http.Request and will unmarshal the JSON from the response body and return that as the given type.
 func SendRequest[T any](client *http.Client, req *http.Request) (T, error) {
 	var zeroValue T // to be used as "nil" when returning errors
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		timber.Error(err, "sending request failed")
-		return zeroValue, err
+		return zeroValue, fmt.Errorf("%v sending request failed", err)
 	}
 	defer resp.Body.Close()
 
@@ -26,29 +26,27 @@ func SendRequest[T any](client *http.Client, req *http.Request) (T, error) {
 	if err != nil {
 		if errors.Is(err, io.ErrUnexpectedEOF) {
 			timber.Warning("Unexpected EOF from", req.URL.String())
-			return zeroValue, WarningError
+			return zeroValue, IgnoreError
 		}
 		var netErr *net.OpError
 		if errors.As(err, &netErr) && netErr.Err != nil &&
 			netErr.Err.Error() == "connection reset by peer" {
 			timber.Warning("TCP connection reset by peer from", req.URL.String())
-			return zeroValue, WarningError
+			return zeroValue, IgnoreError
 		}
 
-		timber.Error(err, "reading response body failed")
-		return zeroValue, err
+		return zeroValue, fmt.Errorf("%v reading response body failed", err)
 	}
 	if resp.StatusCode != http.StatusOK {
 		timber.Warning(resp.StatusCode, "returned from", req.URL.String())
-		return zeroValue, WarningError
+		return zeroValue, IgnoreError
 	}
 
 	var data T
 	err = json.Unmarshal(body, &data)
 	if err != nil {
-		timber.Error(err, "failed to parse json")
 		timber.Debug(string(body))
-		return zeroValue, err
+		return zeroValue, fmt.Errorf("%v failed to parse json", err)
 	}
 
 	return data, nil

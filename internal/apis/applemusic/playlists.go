@@ -52,8 +52,8 @@ func fetchPlaylist(client *http.Client, id string) (playlist, error) {
 		fmt.Sprintf("/v1/me/library/playlists/%s", id),
 	)
 	if err != nil {
-		if !errors.Is(err, apis.WarningError) {
-			timber.Error(err, "failed to fetch playlist for", id)
+		if !errors.Is(err, apis.IgnoreError) {
+			return playlist{}, fmt.Errorf("%v failed to fetch playlist for %s", err, id)
 		}
 		return playlist{}, err
 	}
@@ -70,8 +70,12 @@ func fetchPlaylist(client *http.Client, id string) (playlist, error) {
 	for trackData.Next != "" {
 		trackData, err = sendAppleMusicAPIRequest[playlistTracksResponse](client, trackData.Next)
 		if err != nil {
-			if !errors.Is(err, apis.WarningError) {
-				timber.Error(err, "failed to paginate through tracks for playlist with id of", id)
+			if !errors.Is(err, apis.IgnoreError) {
+				return playlist{}, fmt.Errorf(
+					"%v failed to paginate through tracks for playlist with id of %s",
+					err,
+					id,
+				)
 			}
 			return playlist{}, err
 		}
@@ -80,7 +84,11 @@ func fetchPlaylist(client *http.Client, id string) (playlist, error) {
 
 	var tracks []song
 	for _, t := range totalResponseData {
-		tracks = append(tracks, songFromSongResponse(t))
+		song, err := songFromSongResponse(t)
+		if err != nil {
+			return playlist{}, err
+		}
+		tracks = append(tracks, song)
 	}
 
 	return playlist{

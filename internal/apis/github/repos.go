@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/shurcooL/githubv4"
-	"pkg.mattglei.ch/timber"
 )
 
 type pinnedItemsQuery struct {
@@ -48,8 +47,7 @@ func fetchPinnedRepos(client *githubv4.Client) ([]repository, error) {
 	var query pinnedItemsQuery
 	err := client.Query(context.Background(), &query, nil)
 	if err != nil {
-		timber.Error(err, "querying github's graphql API failed")
-		return nil, err
+		return nil, fmt.Errorf("%v querying github's graphql API failed", err)
 	}
 
 	var repositories []repository

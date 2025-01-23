@@ -9,38 +9,33 @@ import (
 	"io"
 
 	"github.com/buckket/go-blurhash"
-	"pkg.mattglei.ch/timber"
 )
 
-func BlurImage(data []byte, decoder func(r io.Reader) (image.Image, error)) []byte {
+func BlurImage(data []byte, decoder func(r io.Reader) (image.Image, error)) ([]byte, error) {
 	reader := bytes.NewReader(data)
 	parsedImage, err := decoder(reader)
 	if err != nil {
-		timber.Error(err, "decoding image failed")
-		return nil
+		return nil, fmt.Errorf("%v decoding image failed", err)
 	}
 
 	width := parsedImage.Bounds().Dx()
 	height := parsedImage.Bounds().Dy()
 	blurData, err := blurhash.Encode(4, 3, parsedImage)
 	if err != nil {
-		timber.Error(err, "encoding image into blurhash failed")
-		return nil
+		return nil, fmt.Errorf("%v encoding image into blurhash failed", err)
 	}
 
 	scaleDownFactor := 25
 	blurImage, err := blurhash.Decode(blurData, width/scaleDownFactor, height/scaleDownFactor, 1)
 	if err != nil {
-		timber.Error(err, "decoding blurhash data into img failed")
-		return nil
+		return nil, fmt.Errorf("%v decoding blurhash data into img failed", err)
 	}
 	blurImageBuffer := new(bytes.Buffer)
 	err = png.Encode(blurImageBuffer, blurImage)
 	if err != nil {
-		timber.Error(err, "creating png based off blurred image failed")
-		return nil
+		return nil, fmt.Errorf("%v creating png based off blurred image failed", err)
 	}
-	return blurImageBuffer.Bytes()
+	return blurImageBuffer.Bytes(), nil
 }
 
 func BlurDataURI(data []byte) string {

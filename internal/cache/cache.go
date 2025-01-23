@@ -92,7 +92,7 @@ func UpdatePeriodically[T any, C any](
 		time.Sleep(interval)
 		data, err := update(client)
 		if err != nil {
-			if !errors.Is(err, apis.WarningError) {
+			if !errors.Is(err, apis.IgnoreError) {
 				timber.Error(err, "updating", cache.name, "cache failed")
 			}
 		} else {

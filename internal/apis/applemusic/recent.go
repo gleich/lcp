@@ -1,6 +1,9 @@
 package applemusic
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+)
 
 type recentlyPlayedResponse struct {
 	Data []songResponse `json:"data"`
@@ -17,7 +20,11 @@ func fetchRecentlyPlayed(client *http.Client) ([]song, error) {
 
 	var songs []song
 	for _, s := range response.Data {
-		songs = append(songs, songFromSongResponse(s))
+		so, err := songFromSongResponse(s)
+		if err != nil {
+			return []song{}, fmt.Errorf("%v failed to parse song from song response", err)
+		}
+		songs = append(songs, so)
 	}
 
 	// filter out duplicate songs
