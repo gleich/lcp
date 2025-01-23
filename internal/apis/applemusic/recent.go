@@ -1,11 +1,16 @@
 package applemusic
 
+import "net/http"
+
 type recentlyPlayedResponse struct {
 	Data []songResponse `json:"data"`
 }
 
-func fetchRecentlyPlayed() ([]song, error) {
-	response, err := sendAppleMusicAPIRequest[recentlyPlayedResponse]("/v1/me/recent/played/tracks")
+func fetchRecentlyPlayed(client *http.Client) ([]song, error) {
+	response, err := sendAppleMusicAPIRequest[recentlyPlayedResponse](
+		client,
+		"/v1/me/recent/played/tracks",
+	)
 	if err != nil {
 		return []song{}, err
 	}

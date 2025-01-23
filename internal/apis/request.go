@@ -13,7 +13,7 @@ import (
 var WarningError = errors.New("Warning error when trying to make request. Ignore error.")
 
 // sends a given http.Request and will unmarshal the JSON from the response body and return that as the given type.
-func SendRequest[T any](req *http.Request) (T, error) {
+func SendRequest[T any](client *http.Client, req *http.Request) (T, error) {
 	var zeroValue T // to be used as "nil" when returning errors
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {

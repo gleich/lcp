@@ -11,8 +11,9 @@ import (
 )
 
 func Setup(mux *http.ServeMux) {
+	client := http.Client{}
 	stravaTokens := loadTokens()
-	stravaTokens.refreshIfNeeded()
+	stravaTokens.refreshIfNeeded(&client)
 	minioClient, err := minio.New(secrets.ENV.MinioEndpoint, &minio.Options{
 		Creds: credentials.NewStaticV4(
 			secrets.ENV.MinioAccessKeyID,
@@ -24,14 +25,17 @@ func Setup(mux *http.ServeMux) {
 	if err != nil {
 		timber.Fatal(err, "failed to create minio client")
 	}
-	stravaActivities, err := fetchActivities(*minioClient, stravaTokens)
+	stravaActivities, err := fetchActivities(&client, *minioClient, stravaTokens)
 	if err != nil {
 		timber.Error(err, "failed to load initial data for strava cache; not updating")
 	}
 	stravaCache := cache.New("strava", stravaActivities, err == nil)
 
 	mux.HandleFunc("GET /strava", stravaCache.ServeHTTP)
-	mux.HandleFunc("POST /strava/event", eventRoute(stravaCache, *minioClient, stravaTokens))
+	mux.HandleFunc(
+		"POST /strava/event",
+		eventRoute(&client, stravaCache, *minioClient, stravaTokens),
+	)
 	mux.HandleFunc("GET /strava/event", challengeRoute)
 
 	timber.Done("setup strava cache")

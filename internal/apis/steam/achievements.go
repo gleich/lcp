@@ -47,7 +47,7 @@ type achievement struct {
 	UnlockTime  *time.Time `json:"unlock_time"`
 }
 
-func fetchGameAchievements(appID int32) (*float32, *[]achievement, error) {
+func fetchGameAchievements(client *http.Client, appID int32) (*float32, *[]achievement, error) {
 	params := url.Values{
 		"key":     {secrets.ENV.SteamKey},
 		"steamid": {secrets.ENV.SteamID},
@@ -107,7 +107,7 @@ func fetchGameAchievements(appID int32) (*float32, *[]achievement, error) {
 		timber.Error(err, "creating request for owned games failed for app id:", appID)
 		return nil, nil, err
 	}
-	gameSchema, err := apis.SendRequest[schemaGameResponse](req)
+	gameSchema, err := apis.SendRequest[schemaGameResponse](client, req)
 	if err != nil {
 		if !errors.Is(err, apis.WarningError) {
 			timber.Error(err, "failed to get game schema for app id:", appID)

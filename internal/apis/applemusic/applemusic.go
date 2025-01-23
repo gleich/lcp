@@ -18,8 +18,8 @@ type cacheData struct {
 	Playlists      []playlist `json:"playlists"`
 }
 
-func cacheUpdate() (cacheData, error) {
-	recentlyPlayed, err := fetchRecentlyPlayed()
+func cacheUpdate(client *http.Client) (cacheData, error) {
+	recentlyPlayed, err := fetchRecentlyPlayed(client)
 	if err != nil {
 		return cacheData{}, err
 	}
@@ -45,7 +45,7 @@ func cacheUpdate() (cacheData, error) {
 	}
 	playlists := []playlist{}
 	for _, id := range playlistsIDs {
-		playlistData, err := fetchPlaylist(id)
+		playlistData, err := fetchPlaylist(client, id)
 		if err != nil {
 			return cacheData{}, err
 		}
@@ -59,7 +59,8 @@ func cacheUpdate() (cacheData, error) {
 }
 
 func Setup(mux *http.ServeMux) {
-	data, err := cacheUpdate()
+	client := http.Client{}
+	data, err := cacheUpdate(&client)
 	if err != nil {
 		timber.Error(err, "initial fetch of cache data failed")
 	}
@@ -67,7 +68,7 @@ func Setup(mux *http.ServeMux) {
 	applemusicCache := cache.New("applemusic", data, err == nil)
 	mux.HandleFunc("GET /applemusic", serveHTTP(applemusicCache))
 	mux.HandleFunc("GET /applemusic/playlists/{id}", playlistEndpoint(applemusicCache))
-	go applemusicCache.UpdatePeriodically(cacheUpdate, 30*time.Second)
+	go cache.UpdatePeriodically(applemusicCache, &client, cacheUpdate, 30*time.Second)
 	timber.Done("setup apple music cache")
 }
 

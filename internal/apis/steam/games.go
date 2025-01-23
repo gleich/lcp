@@ -40,7 +40,7 @@ type game struct {
 	Achievements        *[]achievement `json:"achievements"`
 }
 
-func fetchRecentlyPlayedGames() ([]game, error) {
+func fetchRecentlyPlayedGames(client *http.Client) ([]game, error) {
 	params := url.Values{
 		"key":             {secrets.ENV.SteamKey},
 		"steamid":         {secrets.ENV.SteamID},
@@ -54,7 +54,7 @@ func fetchRecentlyPlayedGames() ([]game, error) {
 		timber.Error(err, "failed to create request for steam API owned games")
 		return nil, err
 	}
-	ownedGames, err := apis.SendRequest[ownedGamesResponse](req)
+	ownedGames, err := apis.SendRequest[ownedGamesResponse](client, req)
 	if err != nil {
 		if !errors.Is(err, apis.WarningError) {
 			timber.Error(err, "sending request for owned games failed")
@@ -90,7 +90,7 @@ func fetchRecentlyPlayedGames() ([]game, error) {
 			libraryURLPtr = &libraryURL
 		}
 
-		achievementPercentage, achievements, err := fetchGameAchievements(g.AppID)
+		achievementPercentage, achievements, err := fetchGameAchievements(client, g.AppID)
 		if err != nil {
 			return nil, err
 		}

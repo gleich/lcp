@@ -46,8 +46,9 @@ type playlistResponse struct {
 	} `json:"data"`
 }
 
-func fetchPlaylist(id string) (playlist, error) {
+func fetchPlaylist(client *http.Client, id string) (playlist, error) {
 	playlistData, err := sendAppleMusicAPIRequest[playlistResponse](
+		client,
 		fmt.Sprintf("/v1/me/library/playlists/%s", id),
 	)
 	if err != nil {
@@ -59,6 +60,7 @@ func fetchPlaylist(id string) (playlist, error) {
 
 	var totalResponseData []songResponse
 	trackData, err := sendAppleMusicAPIRequest[playlistTracksResponse](
+		client,
 		fmt.Sprintf("/v1/me/library/playlists/%s/tracks", id),
 	)
 	if err != nil {
@@ -66,7 +68,7 @@ func fetchPlaylist(id string) (playlist, error) {
 	}
 	totalResponseData = append(totalResponseData, trackData.Data...)
 	for trackData.Next != "" {
-		trackData, err = sendAppleMusicAPIRequest[playlistTracksResponse](trackData.Next)
+		trackData, err = sendAppleMusicAPIRequest[playlistTracksResponse](client, trackData.Next)
 		if err != nil {
 			if !errors.Is(err, apis.WarningError) {
 				timber.Error(err, "failed to paginate through tracks for playlist with id of", id)

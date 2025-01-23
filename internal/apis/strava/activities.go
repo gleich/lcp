@@ -3,6 +3,7 @@ package strava
 import (
 	"fmt"
 	"image/png"
+	"net/http"
 	"net/url"
 	"time"
 
@@ -66,8 +67,13 @@ type activity struct {
 	Calories           float32   `json:"calories"`
 }
 
-func fetchActivities(minioClient minio.Client, tokens tokens) ([]activity, error) {
+func fetchActivities(
+	client *http.Client,
+	minioClient minio.Client,
+	tokens tokens,
+) ([]activity, error) {
 	stravaActivities, err := sendStravaAPIRequest[[]stravaActivity](
+		client,
 		"api/v3/athlete/activities",
 		tokens,
 	)
@@ -85,7 +91,7 @@ func fetchActivities(minioClient minio.Client, tokens tokens) ([]activity, error
 			continue
 		}
 
-		details, err := fetchActivityDetails(stravaActivity.ID, tokens)
+		details, err := fetchActivityDetails(client, stravaActivity.ID, tokens)
 		if err != nil {
 			timber.Error(err, "failed to fetch activity details")
 			continue
@@ -102,7 +108,7 @@ func fetchActivities(minioClient minio.Client, tokens tokens) ([]activity, error
 			ID:                 stravaActivity.ID,
 			AverageHeartrate:   stravaActivity.AverageHeartrate,
 			HasMap:             stravaActivity.Map.SummaryPolyline != "",
-			HeartrateData:      fetchHeartrate(stravaActivity.ID, tokens),
+			HeartrateData:      fetchHeartrate(client, stravaActivity.ID, tokens),
 			Calories:           details.Calories,
 		}
 		if a.HasMap {
@@ -123,13 +129,14 @@ func fetchActivities(minioClient minio.Client, tokens tokens) ([]activity, error
 	return activities, nil
 }
 
-func fetchHeartrate(id uint64, tokens tokens) []int {
+func fetchHeartrate(client *http.Client, id uint64, tokens tokens) []int {
 	params := url.Values{
 		"key_by_type": {"true"},
 		"keys":        {"heartrate"},
 		"resolution":  {"low"},
 	}
 	stream, err := sendStravaAPIRequest[struct{ Heartrate activityStream }](
+		client,
 		fmt.Sprintf("api/v3/activities/%d/streams?%s", id, params.Encode()),
 		tokens,
 	)
@@ -140,8 +147,13 @@ func fetchHeartrate(id uint64, tokens tokens) []int {
 	return stream.Heartrate.Data
 }
 
-func fetchActivityDetails(id uint64, tokens tokens) (detailedStravaActivity, error) {
+func fetchActivityDetails(
+	client *http.Client,
+	id uint64,
+	tokens tokens,
+) (detailedStravaActivity, error) {
 	details, err := sendStravaAPIRequest[detailedStravaActivity](
+		client,
 		fmt.Sprintf("api/v3/activities/%d", id),
 		tokens,
 	)

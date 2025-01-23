@@ -11,7 +11,7 @@ import (
 	"pkg.mattglei.ch/timber"
 )
 
-func sendAppleMusicAPIRequest[T any](path string) (T, error) {
+func sendAppleMusicAPIRequest[T any](client *http.Client, path string) (T, error) {
 	var zeroValue T
 	req, err := http.NewRequest(
 		http.MethodGet,
@@ -25,7 +25,7 @@ func sendAppleMusicAPIRequest[T any](path string) (T, error) {
 	req.Header.Set("Authorization", "Bearer "+secrets.ENV.AppleMusicAppToken)
 	req.Header.Set("Music-User-Token", secrets.ENV.AppleMusicUserToken)
 
-	resp, err := apis.SendRequest[T](req)
+	resp, err := apis.SendRequest[T](client, req)
 	if err != nil {
 		if !errors.Is(err, apis.WarningError) {
 			timber.Error(err, "failed to make apple music API request")

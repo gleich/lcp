@@ -82,16 +82,21 @@ func (c *Cache[T]) Update(data T) {
 	}
 }
 
-func (c *Cache[T]) UpdatePeriodically(update func() (T, error), interval time.Duration) {
+func UpdatePeriodically[T any, C any](
+	cache *Cache[T],
+	client C,
+	update func(C) (T, error),
+	interval time.Duration,
+) {
 	for {
 		time.Sleep(interval)
-		data, err := update()
+		data, err := update(client)
 		if err != nil {
 			if !errors.Is(err, apis.WarningError) {
-				timber.Error(err, "updating", c.name, "cache failed")
+				timber.Error(err, "updating", cache.name, "cache failed")
 			}
 		} else {
-			c.Update(data)
+			cache.Update(data)
 		}
 	}
 }

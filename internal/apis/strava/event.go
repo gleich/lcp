@@ -22,6 +22,7 @@ type event struct {
 }
 
 func eventRoute(
+	client *http.Client,
 	stravaCache *cache.Cache[[]activity],
 	minioClient minio.Client,
 	tokens tokens,
@@ -47,8 +48,8 @@ func eventRoute(
 			return
 		}
 
-		tokens.refreshIfNeeded()
-		activities, err := fetchActivities(minioClient, tokens)
+		tokens.refreshIfNeeded(client)
+		activities, err := fetchActivities(client, minioClient, tokens)
 		if err != nil {
 			timber.ErrorMsg("failed to update strava cache")
 			return

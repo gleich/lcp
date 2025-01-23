@@ -25,7 +25,7 @@ func loadTokens() tokens {
 	}
 }
 
-func (t *tokens) refreshIfNeeded() {
+func (t *tokens) refreshIfNeeded(client *http.Client) {
 	// subtract 60 to ensure that token doesn't expire in the next 60 seconds
 	if t.ExpiresAt-60 >= time.Now().Unix() {
 		return
@@ -48,7 +48,7 @@ func (t *tokens) refreshIfNeeded() {
 		return
 	}
 
-	tokens, err := apis.SendRequest[tokens](req)
+	tokens, err := apis.SendRequest[tokens](client, req)
 	if err != nil {
 		if !errors.Is(err, apis.WarningError) {
 			timber.Error(err, "failed to refresh tokens")
