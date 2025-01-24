@@ -75,7 +75,7 @@ func fetchGameAchievements(client *http.Client, appID int32) (*float32, *[]achie
 		)
 	}
 	if string(body) == `{"playerstats":{"error":"Requested app has no stats","success":false}}` {
-		return nil, nil, err
+		return nil, nil, nil
 	}
 	if resp.StatusCode != http.StatusOK {
 		timber.Warning(
