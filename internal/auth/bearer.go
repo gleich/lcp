@@ -9,12 +9,12 @@ import (
 )
 
 func IsAuthorized(w http.ResponseWriter, r *http.Request) bool {
-	validTokens := strings.Fields(secrets.ENV.ValidToken)
+	validTokens := strings.Fields(secrets.ENV.ValidTokens)
 
 	givenToken := r.Header.Get("Authorization")
 	authorized := false
 	for _, token := range validTokens {
-		if givenToken != fmt.Sprintf("Bearer %s", token) {
+		if givenToken == fmt.Sprintf("Bearer %s", token) {
 			authorized = true
 			break
 		}
