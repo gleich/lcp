@@ -7,16 +7,9 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-)
 
-type song struct {
-	Track            string `json:"track"`
-	Artist           string `json:"artist"`
-	DurationInMillis int    `json:"duration_in_millis"`
-	AlbumArtURL      string `json:"album_art_url"`
-	URL              string `json:"url"`
-	ID               string `json:"id"`
-}
+	"pkg.mattglei.ch/lcp-2/pkg/models"
+)
 
 type songResponse struct {
 	ID         string `json:"id"`
@@ -42,7 +35,7 @@ type songResponse struct {
 	} `json:"attributes"`
 }
 
-func songFromSongResponse(s songResponse) (song, error) {
+func songFromSongResponse(s songResponse) (models.AppleMusicSong, error) {
 	if s.Attributes.URL == "" {
 		// remove special characters
 		slugURL := regexp.MustCompile(`[^\w\s-]`).ReplaceAllString(s.Attributes.Name, "")
@@ -55,13 +48,17 @@ func songFromSongResponse(s songResponse) (song, error) {
 			fmt.Sprint(s.Attributes.PlayParams.CatalogID),
 		)
 		if err != nil {
-			return song{}, fmt.Errorf("%v failed to create URL for song %s", err, s.Attributes.Name)
+			return models.AppleMusicSong{}, fmt.Errorf(
+				"%v failed to create URL for song %s",
+				err,
+				s.Attributes.Name,
+			)
 		}
 		s.Attributes.URL = u
 	}
 
 	maxAlbumArtSize := 600.0
-	return song{
+	return models.AppleMusicSong{
 		Track:            s.Attributes.Name,
 		Artist:           s.Attributes.ArtistName,
 		DurationInMillis: s.Attributes.DurationInMillis,

@@ -9,6 +9,7 @@ import (
 
 	"github.com/minio/minio-go/v7"
 	"pkg.mattglei.ch/lcp-2/internal/images"
+	"pkg.mattglei.ch/lcp-2/pkg/models"
 	"pkg.mattglei.ch/timber"
 )
 
@@ -50,28 +51,11 @@ type detailedStravaActivity struct {
 	Calories float32 `json:"calories"`
 }
 
-type activity struct {
-	Name               string    `json:"name"`
-	SportType          string    `json:"sport_type"`
-	StartDate          time.Time `json:"start_date"`
-	Timezone           string    `json:"timezone"`
-	MapBlurImage       *string   `json:"map_blur_image"`
-	MapImageURL        *string   `json:"map_image_url"`
-	HasMap             bool      `json:"has_map"`
-	TotalElevationGain float32   `json:"total_elevation_gain"`
-	MovingTime         uint32    `json:"moving_time"`
-	Distance           float32   `json:"distance"`
-	ID                 uint64    `json:"id"`
-	AverageHeartrate   float32   `json:"average_heartrate"`
-	HeartrateData      []int     `json:"heartrate_data"`
-	Calories           float32   `json:"calories"`
-}
-
 func fetchActivities(
 	client *http.Client,
 	minioClient minio.Client,
 	tokens tokens,
-) ([]activity, error) {
+) ([]models.StravaActivity, error) {
 	stravaActivities, err := sendStravaAPIRequest[[]stravaActivity](
 		client,
 		"api/v3/athlete/activities",
@@ -81,7 +65,7 @@ func fetchActivities(
 		return nil, fmt.Errorf("%v failed to send request to Strava API to get activities", err)
 	}
 
-	var activities []activity
+	var activities []models.StravaActivity
 	for _, stravaActivity := range stravaActivities {
 		if len(activities) >= 5 {
 			break
@@ -101,7 +85,7 @@ func fetchActivities(
 			return nil, fmt.Errorf("%v failed to fetch HR data", err)
 		}
 
-		a := activity{
+		a := models.StravaActivity{
 			Name:               stravaActivity.Name,
 			SportType:          stravaActivity.SportType,
 			StartDate:          stravaActivity.StartDate,

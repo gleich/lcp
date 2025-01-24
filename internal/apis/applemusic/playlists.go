@@ -10,23 +10,9 @@ import (
 	"pkg.mattglei.ch/lcp-2/internal/apis"
 	"pkg.mattglei.ch/lcp-2/internal/auth"
 	"pkg.mattglei.ch/lcp-2/internal/cache"
+	"pkg.mattglei.ch/lcp-2/pkg/models"
 	"pkg.mattglei.ch/timber"
 )
-
-type playlistSummary struct {
-	Name            string `json:"name"`
-	TrackCount      int    `json:"track_count"`
-	FirstFourTracks []song `json:"first_four_tracks"`
-	ID              string `json:"id"`
-}
-
-type playlist struct {
-	Name         string    `json:"name"`
-	Tracks       []song    `json:"tracks"`
-	LastModified time.Time `json:"last_modified"`
-	URL          string    `json:"url"`
-	ID           string    `json:"id"`
-}
 
 type playlistTracksResponse struct {
 	Next string         `json:"next"`
@@ -46,16 +32,20 @@ type playlistResponse struct {
 	} `json:"data"`
 }
 
-func fetchPlaylist(client *http.Client, id string) (playlist, error) {
+func fetchPlaylist(client *http.Client, id string) (models.AppleMusicPlaylist, error) {
 	playlistData, err := sendAppleMusicAPIRequest[playlistResponse](
 		client,
 		fmt.Sprintf("/v1/me/library/playlists/%s", id),
 	)
 	if err != nil {
 		if !errors.Is(err, apis.IgnoreError) {
-			return playlist{}, fmt.Errorf("%v failed to fetch playlist for %s", err, id)
+			return models.AppleMusicPlaylist{}, fmt.Errorf(
+				"%v failed to fetch playlist for %s",
+				err,
+				id,
+			)
 		}
-		return playlist{}, err
+		return models.AppleMusicPlaylist{}, err
 	}
 
 	var totalResponseData []songResponse
@@ -64,34 +54,34 @@ func fetchPlaylist(client *http.Client, id string) (playlist, error) {
 		fmt.Sprintf("/v1/me/library/playlists/%s/tracks", id),
 	)
 	if err != nil {
-		return playlist{}, err
+		return models.AppleMusicPlaylist{}, err
 	}
 	totalResponseData = append(totalResponseData, trackData.Data...)
 	for trackData.Next != "" {
 		trackData, err = sendAppleMusicAPIRequest[playlistTracksResponse](client, trackData.Next)
 		if err != nil {
 			if !errors.Is(err, apis.IgnoreError) {
-				return playlist{}, fmt.Errorf(
+				return models.AppleMusicPlaylist{}, fmt.Errorf(
 					"%v failed to paginate through tracks for playlist with id of %s",
 					err,
 					id,
 				)
 			}
-			return playlist{}, err
+			return models.AppleMusicPlaylist{}, err
 		}
 		totalResponseData = append(totalResponseData, trackData.Data...)
 	}
 
-	var tracks []song
+	var tracks []models.AppleMusicSong
 	for _, t := range totalResponseData {
 		song, err := songFromSongResponse(t)
 		if err != nil {
-			return playlist{}, err
+			return models.AppleMusicPlaylist{}, err
 		}
 		tracks = append(tracks, song)
 	}
 
-	return playlist{
+	return models.AppleMusicPlaylist{
 		Name:         playlistData.Data[0].Attributes.Name,
 		LastModified: playlistData.Data[0].Attributes.LastModifiedDate,
 		Tracks:       tracks,
@@ -103,7 +93,7 @@ func fetchPlaylist(client *http.Client, id string) (playlist, error) {
 	}, nil
 }
 
-func playlistEndpoint(c *cache.Cache[cacheData]) http.HandlerFunc {
+func playlistEndpoint(c *cache.Cache[models.AppleMusicCache]) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !auth.IsAuthorized(w, r) {
 			return
@@ -111,7 +101,7 @@ func playlistEndpoint(c *cache.Cache[cacheData]) http.HandlerFunc {
 		id := r.PathValue("id")
 
 		c.DataMutex.RLock()
-		var p *playlist
+		var p *models.AppleMusicPlaylist
 		for _, plist := range c.Data.Playlists {
 			if plist.ID == id {
 				p = &plist

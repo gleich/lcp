@@ -10,6 +10,7 @@ import (
 
 	"pkg.mattglei.ch/lcp-2/internal/apis"
 	"pkg.mattglei.ch/lcp-2/internal/secrets"
+	"pkg.mattglei.ch/lcp-2/pkg/models"
 )
 
 type ownedGamesResponse struct {
@@ -24,22 +25,7 @@ type ownedGamesResponse struct {
 	} `json:"response"`
 }
 
-type game struct {
-	Name                string         `json:"name"`
-	AppID               int32          `json:"app_id"`
-	IconURL             string         `json:"icon_url"`
-	RTimeLastPlayed     time.Time      `json:"rtime_last_played"`
-	PlaytimeForever     int32          `json:"playtime_forever"`
-	URL                 string         `json:"url"`
-	HeaderURL           string         `json:"header_url"`
-	LibraryURL          *string        `json:"library_url"`
-	LibraryHeroURL      string         `json:"library_hero_url"`
-	LibraryHeroLogoURL  string         `json:"library_hero_logo_url"`
-	AchievementProgress *float32       `json:"achievement_progress"`
-	Achievements        *[]achievement `json:"achievements"`
-}
-
-func fetchRecentlyPlayedGames(client *http.Client) ([]game, error) {
+func fetchRecentlyPlayedGames(client *http.Client) ([]models.SteamGame, error) {
 	params := url.Values{
 		"key":             {secrets.ENV.SteamKey},
 		"steamid":         {secrets.ENV.SteamID},
@@ -64,7 +50,7 @@ func fetchRecentlyPlayedGames(client *http.Client) ([]game, error) {
 		return ownedGames.Response.Games[i].RTimeLastPlayed > ownedGames.Response.Games[j].RTimeLastPlayed
 	})
 
-	var games []game
+	var games []models.SteamGame
 	i := 0
 	for len(games) < 10 {
 		if i > len(games) {
@@ -92,7 +78,7 @@ func fetchRecentlyPlayedGames(client *http.Client) ([]game, error) {
 			return nil, err
 		}
 
-		games = append(games, game{
+		games = append(games, models.SteamGame{
 			Name:  g.Name,
 			AppID: g.AppID,
 			IconURL: fmt.Sprintf(

@@ -3,9 +3,9 @@ package github
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/shurcooL/githubv4"
+	"pkg.mattglei.ch/lcp-2/pkg/models"
 )
 
 type pinnedItemsQuery struct {
@@ -32,27 +32,16 @@ type pinnedItemsQuery struct {
 	}
 }
 
-type repository struct {
-	Name          string    `json:"name"`
-	Owner         string    `json:"owner"`
-	Language      string    `json:"language"`
-	LanguageColor string    `json:"language_color"`
-	Description   string    `json:"description"`
-	UpdatedAt     time.Time `json:"updated_at"`
-	ID            string    `json:"id"`
-	URL           string    `json:"url"`
-}
-
-func fetchPinnedRepos(client *githubv4.Client) ([]repository, error) {
+func fetchPinnedRepos(client *githubv4.Client) ([]models.GitHubRepository, error) {
 	var query pinnedItemsQuery
 	err := client.Query(context.Background(), &query, nil)
 	if err != nil {
 		return nil, fmt.Errorf("%v querying github's graphql API failed", err)
 	}
 
-	var repositories []repository
+	var repositories []models.GitHubRepository
 	for _, node := range query.Viewer.PinnedItems.Nodes {
-		repositories = append(repositories, repository{
+		repositories = append(repositories, models.GitHubRepository{
 			Name:          string(node.Repository.Name),
 			Owner:         string(node.Repository.Owner.Login),
 			Language:      string(node.Repository.PrimaryLanguage.Name),

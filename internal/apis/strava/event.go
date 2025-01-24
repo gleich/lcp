@@ -8,6 +8,7 @@ import (
 	"github.com/minio/minio-go/v7"
 	"pkg.mattglei.ch/lcp-2/internal/cache"
 	"pkg.mattglei.ch/lcp-2/internal/secrets"
+	"pkg.mattglei.ch/lcp-2/pkg/models"
 	"pkg.mattglei.ch/timber"
 )
 
@@ -23,7 +24,7 @@ type event struct {
 
 func eventRoute(
 	client *http.Client,
-	stravaCache *cache.Cache[[]activity],
+	stravaCache *cache.Cache[[]models.StravaActivity],
 	minioClient minio.Client,
 	tokens tokens,
 ) http.HandlerFunc {

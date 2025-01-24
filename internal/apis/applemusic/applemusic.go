@@ -8,20 +8,16 @@ import (
 
 	"pkg.mattglei.ch/lcp-2/internal/auth"
 	"pkg.mattglei.ch/lcp-2/internal/cache"
+	"pkg.mattglei.ch/lcp-2/pkg/models"
 	"pkg.mattglei.ch/timber"
 )
 
 const API_ENDPOINT = "https://api.music.apple.com/"
 
-type cacheData struct {
-	RecentlyPlayed []song     `json:"recently_played"`
-	Playlists      []playlist `json:"playlists"`
-}
-
-func cacheUpdate(client *http.Client) (cacheData, error) {
+func cacheUpdate(client *http.Client) (models.AppleMusicCache, error) {
 	recentlyPlayed, err := fetchRecentlyPlayed(client)
 	if err != nil {
-		return cacheData{}, err
+		return models.AppleMusicCache{}, err
 	}
 
 	playlistsIDs := []string{
@@ -43,16 +39,16 @@ func cacheUpdate(client *http.Client) (cacheData, error) {
 		// "p.ZOAXAMZF4KMD6ob", // sad girl music
 		// "p.QvDQEebsVbAeokL", // christmas
 	}
-	playlists := []playlist{}
+	playlists := []models.AppleMusicPlaylist{}
 	for _, id := range playlistsIDs {
 		playlistData, err := fetchPlaylist(client, id)
 		if err != nil {
-			return cacheData{}, err
+			return models.AppleMusicCache{}, err
 		}
 		playlists = append(playlists, playlistData)
 	}
 
-	return cacheData{
+	return models.AppleMusicCache{
 		RecentlyPlayed: recentlyPlayed,
 		Playlists:      playlists,
 	}, nil
@@ -73,11 +69,11 @@ func Setup(mux *http.ServeMux) {
 }
 
 type cacheDataResponse struct {
-	PlaylistSummaries []playlistSummary `json:"playlist_summaries"`
-	RecentlyPlayed    []song            `json:"recently_played"`
+	PlaylistSummaries []models.AppleMusicPlaylistSummary `json:"playlist_summaries"`
+	RecentlyPlayed    []models.AppleMusicSong            `json:"recently_played"`
 }
 
-func serveHTTP(c *cache.Cache[cacheData]) http.HandlerFunc {
+func serveHTTP(c *cache.Cache[models.AppleMusicCache]) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !auth.IsAuthorized(w, r) {
 			return
@@ -88,7 +84,7 @@ func serveHTTP(c *cache.Cache[cacheData]) http.HandlerFunc {
 
 		data := cacheDataResponse{}
 		for _, p := range c.Data.Playlists {
-			firstFourTracks := []song{}
+			firstFourTracks := []models.AppleMusicSong{}
 			for _, track := range p.Tracks {
 				if len(firstFourTracks) < 4 {
 					firstFourTracks = append(firstFourTracks, track)
@@ -96,7 +92,7 @@ func serveHTTP(c *cache.Cache[cacheData]) http.HandlerFunc {
 			}
 			data.PlaylistSummaries = append(
 				data.PlaylistSummaries,
-				playlistSummary{
+				models.AppleMusicPlaylistSummary{
 					Name:            p.Name,
 					ID:              p.ID,
 					TrackCount:      len(p.Tracks),
