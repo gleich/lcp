@@ -49,7 +49,7 @@ func fetchGameAchievements(
 		"appid":   {fmt.Sprint(appID)},
 		"format":  {"json"},
 	}
-	resp, err := http.Get(
+	resp, err := client.Get(
 		"https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v0001?" + params.Encode(),
 	)
 	if err != nil {
