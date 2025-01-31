@@ -1,12 +1,14 @@
 package apis
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net"
 	"net/http"
+	"time"
 
 	"pkg.mattglei.ch/timber"
 )
@@ -15,8 +17,12 @@ var IgnoreError = errors.New("Warning error when trying to make request. Ignore 
 
 // sends a given http.Request and will unmarshal the JSON from the response body and return that as the given type.
 func SendRequest[T any](client *http.Client, req *http.Request) (T, error) {
+	ctx, cancel := context.WithTimeout(req.Context(), 1*time.Minute)
+	defer cancel()
+	req = req.WithContext(ctx)
+
 	var zeroValue T // to be used as "nil" when returning errors
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return zeroValue, fmt.Errorf("%v sending request failed", err)
 	}
