@@ -9,7 +9,7 @@ require (
 	github.com/minio/minio-go/v7 v7.0.84
 	github.com/shurcooL/githubv4 v0.0.0-20240727222349-48295856cce7
 	golang.org/x/oauth2 v0.25.0
-	pkg.mattglei.ch/timber v1.0.1
+	pkg.mattglei.ch/timber v1.1.0
 )
 
 require (
@@ -28,7 +28,6 @@ require (
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/minio/md5-simd v1.1.2 // indirect
 	github.com/muesli/termenv v0.15.2 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rs/xid v1.6.0 // indirect
 	github.com/shurcooL/graphql v0.0.0-20230722043721-ed46e5a46466 // indirect
