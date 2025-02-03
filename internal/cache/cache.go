@@ -13,10 +13,11 @@ import (
 	"pkg.mattglei.ch/lcp-2/internal/apis"
 	"pkg.mattglei.ch/lcp-2/internal/auth"
 	"pkg.mattglei.ch/lcp-2/internal/secrets"
+	"pkg.mattglei.ch/lcp-2/pkg/lcp"
 	"pkg.mattglei.ch/timber"
 )
 
-type Cache[T any] struct {
+type Cache[T lcp.CacheData] struct {
 	name      string
 	DataMutex sync.RWMutex
 	Data      T
@@ -24,7 +25,7 @@ type Cache[T any] struct {
 	filePath  string
 }
 
-func New[T any](name string, data T, update bool) *Cache[T] {
+func New[T lcp.CacheData](name string, data T, update bool) *Cache[T] {
 	cache := Cache[T]{
 		name:     name,
 		Updated:  time.Now(),
@@ -82,7 +83,7 @@ func (c *Cache[T]) Update(data T) {
 	}
 }
 
-func UpdatePeriodically[T any, C any](
+func UpdatePeriodically[T lcp.CacheData, C any](
 	cache *Cache[T],
 	client C,
 	update func(C) (T, error),

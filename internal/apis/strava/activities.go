@@ -9,7 +9,7 @@ import (
 
 	"github.com/minio/minio-go/v7"
 	"pkg.mattglei.ch/lcp-2/internal/images"
-	"pkg.mattglei.ch/lcp-2/pkg/models"
+	"pkg.mattglei.ch/lcp-2/pkg/lcp"
 	"pkg.mattglei.ch/timber"
 )
 
@@ -55,7 +55,7 @@ func fetchActivities(
 	client *http.Client,
 	minioClient minio.Client,
 	tokens tokens,
-) ([]models.StravaActivity, error) {
+) ([]lcp.StravaActivity, error) {
 	stravaActivities, err := sendStravaAPIRequest[[]stravaActivity](
 		client,
 		"api/v3/athlete/activities",
@@ -65,7 +65,7 @@ func fetchActivities(
 		return nil, fmt.Errorf("%v failed to send request to Strava API to get activities", err)
 	}
 
-	var activities []models.StravaActivity
+	var activities []lcp.StravaActivity
 	for _, stravaActivity := range stravaActivities {
 		if len(activities) >= 5 {
 			break
@@ -85,7 +85,7 @@ func fetchActivities(
 			return nil, fmt.Errorf("%v failed to fetch HR data", err)
 		}
 
-		a := models.StravaActivity{
+		a := lcp.StravaActivity{
 			Name:               stravaActivity.Name,
 			SportType:          stravaActivity.SportType,
 			StartDate:          stravaActivity.StartDate,

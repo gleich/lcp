@@ -9,7 +9,7 @@ import (
 
 	"github.com/minio/minio-go/v7"
 	"pkg.mattglei.ch/lcp-2/internal/secrets"
-	"pkg.mattglei.ch/lcp-2/pkg/models"
+	"pkg.mattglei.ch/lcp-2/pkg/lcp"
 	"pkg.mattglei.ch/timber"
 )
 
@@ -65,7 +65,7 @@ func uploadMap(minioClient minio.Client, id uint64, data []byte) {
 	}
 }
 
-func removeOldMaps(minioClient minio.Client, activities []models.StravaActivity) {
+func removeOldMaps(minioClient minio.Client, activities []lcp.StravaActivity) {
 	var validKeys []string
 	for _, activity := range activities {
 		validKeys = append(validKeys, fmt.Sprintf("%d.png", activity.ID))

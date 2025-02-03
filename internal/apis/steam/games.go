@@ -10,7 +10,7 @@ import (
 
 	"pkg.mattglei.ch/lcp-2/internal/apis"
 	"pkg.mattglei.ch/lcp-2/internal/secrets"
-	"pkg.mattglei.ch/lcp-2/pkg/models"
+	"pkg.mattglei.ch/lcp-2/pkg/lcp"
 )
 
 type ownedGamesResponse struct {
@@ -25,7 +25,7 @@ type ownedGamesResponse struct {
 	} `json:"response"`
 }
 
-func fetchRecentlyPlayedGames(client *http.Client) ([]models.SteamGame, error) {
+func fetchRecentlyPlayedGames(client *http.Client) ([]lcp.SteamGame, error) {
 	params := url.Values{
 		"key":             {secrets.ENV.SteamKey},
 		"steamid":         {secrets.ENV.SteamID},
@@ -50,7 +50,7 @@ func fetchRecentlyPlayedGames(client *http.Client) ([]models.SteamGame, error) {
 		return ownedGames.Response.Games[i].RTimeLastPlayed > ownedGames.Response.Games[j].RTimeLastPlayed
 	})
 
-	var games []models.SteamGame
+	var games []lcp.SteamGame
 	i := 0
 	for len(games) < 10 {
 		if i > len(games) {
@@ -78,7 +78,7 @@ func fetchRecentlyPlayedGames(client *http.Client) ([]models.SteamGame, error) {
 			return nil, err
 		}
 
-		games = append(games, models.SteamGame{
+		games = append(games, lcp.SteamGame{
 			Name:  g.Name,
 			AppID: g.AppID,
 			IconURL: fmt.Sprintf(

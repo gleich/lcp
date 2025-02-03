@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/shurcooL/githubv4"
-	"pkg.mattglei.ch/lcp-2/pkg/models"
+	"pkg.mattglei.ch/lcp-2/pkg/lcp"
 )
 
 type pinnedItemsQuery struct {
@@ -32,16 +32,16 @@ type pinnedItemsQuery struct {
 	}
 }
 
-func fetchPinnedRepos(client *githubv4.Client) ([]models.GitHubRepository, error) {
+func fetchPinnedRepos(client *githubv4.Client) ([]lcp.GitHubRepository, error) {
 	var query pinnedItemsQuery
 	err := client.Query(context.Background(), &query, nil)
 	if err != nil {
 		return nil, fmt.Errorf("%v querying github's graphql API failed", err)
 	}
 
-	var repositories []models.GitHubRepository
+	var repositories []lcp.GitHubRepository
 	for _, node := range query.Viewer.PinnedItems.Nodes {
-		repositories = append(repositories, models.GitHubRepository{
+		repositories = append(repositories, lcp.GitHubRepository{
 			Name:          string(node.Repository.Name),
 			Owner:         string(node.Repository.Owner.Login),
 			Language:      string(node.Repository.PrimaryLanguage.Name),

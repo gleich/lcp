@@ -12,7 +12,7 @@ import (
 
 	"pkg.mattglei.ch/lcp-2/internal/apis"
 	"pkg.mattglei.ch/lcp-2/internal/secrets"
-	"pkg.mattglei.ch/lcp-2/pkg/models"
+	"pkg.mattglei.ch/lcp-2/pkg/lcp"
 	"pkg.mattglei.ch/timber"
 )
 
@@ -42,7 +42,7 @@ type schemaGameResponse struct {
 func fetchGameAchievements(
 	client *http.Client,
 	appID int32,
-) (*float32, *[]models.SteamAchievement, error) {
+) (*float32, *[]lcp.SteamAchievement, error) {
 	params := url.Values{
 		"key":     {secrets.ENV.SteamKey},
 		"steamid": {secrets.ENV.SteamID},
@@ -119,7 +119,7 @@ func fetchGameAchievements(
 		return nil, nil, err
 	}
 
-	var achievements []models.SteamAchievement
+	var achievements []lcp.SteamAchievement
 	for _, playerAchievement := range *playerAchievements.PlayerStats.Achievements {
 		for _, schemaAchievement := range gameSchema.Game.GameStats.Achievements {
 			if playerAchievement.ApiName == schemaAchievement.Name {
@@ -127,7 +127,7 @@ func fetchGameAchievements(
 				if playerAchievement.UnlockTime != nil && *playerAchievement.UnlockTime != 0 {
 					unlockTime = time.Unix(*playerAchievement.UnlockTime, 0)
 				}
-				achievements = append(achievements, models.SteamAchievement{
+				achievements = append(achievements, lcp.SteamAchievement{
 					ApiName:     playerAchievement.ApiName,
 					Achieved:    playerAchievement.Achieved == 1,
 					Icon:        schemaAchievement.Icon,

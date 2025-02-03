@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"pkg.mattglei.ch/lcp-2/pkg/models"
+	"pkg.mattglei.ch/lcp-2/pkg/lcp"
 )
 
 type songResponse struct {
@@ -35,7 +35,7 @@ type songResponse struct {
 	} `json:"attributes"`
 }
 
-func songFromSongResponse(s songResponse) (models.AppleMusicSong, error) {
+func songFromSongResponse(s songResponse) (lcp.AppleMusicSong, error) {
 	if s.Attributes.URL == "" {
 		// remove special characters
 		slugURL := regexp.MustCompile(`[^\w\s-]`).ReplaceAllString(s.Attributes.Name, "")
@@ -48,7 +48,7 @@ func songFromSongResponse(s songResponse) (models.AppleMusicSong, error) {
 			fmt.Sprint(s.Attributes.PlayParams.CatalogID),
 		)
 		if err != nil {
-			return models.AppleMusicSong{}, fmt.Errorf(
+			return lcp.AppleMusicSong{}, fmt.Errorf(
 				"%v failed to create URL for song %s",
 				err,
 				s.Attributes.Name,
@@ -58,7 +58,7 @@ func songFromSongResponse(s songResponse) (models.AppleMusicSong, error) {
 	}
 
 	maxAlbumArtSize := 600.0
-	return models.AppleMusicSong{
+	return lcp.AppleMusicSong{
 		Track:            s.Attributes.Name,
 		Artist:           s.Attributes.ArtistName,
 		DurationInMillis: s.Attributes.DurationInMillis,
