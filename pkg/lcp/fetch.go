@@ -10,15 +10,6 @@ import (
 	"time"
 )
 
-type Cache string
-
-const (
-	AppleMusic Cache = "applemusic"
-	GitHub     Cache = "github"
-	Steam      Cache = "steam"
-	Strava     Cache = "strava"
-)
-
 type Client struct {
 	Token      string
 	httpClient http.Client
@@ -29,13 +20,25 @@ type Response[T CacheData] struct {
 	Updated time.Time
 }
 
-func FetchCache[T CacheData](client *Client, cache Cache) (Response[T], error) {
+func FetchCache[T CacheData](client *Client) (Response[T], error) {
 	var zeroValue Response[T] // acts as "nil" value to be used when returning an error
 	if client.Token == "" {
 		return zeroValue, errors.New("no token provided in client")
 	}
 
-	url, err := url.JoinPath("https://lcp.dev.mattglei.ch", string(cache))
+	var cacheName string
+	switch any(zeroValue.Data).(type) {
+	case AppleMusicCache:
+		cacheName = "applemusic"
+	case []GitHubRepository:
+		cacheName = "github"
+	case []SteamGame:
+		cacheName = "steam"
+	case []StravaActivity:
+		cacheName = "strava"
+	}
+
+	url, err := url.JoinPath("https://lcp.dev.mattglei.ch", cacheName)
 	if err != nil {
 		return zeroValue, fmt.Errorf("%v failed to join path for URL", err)
 	}
