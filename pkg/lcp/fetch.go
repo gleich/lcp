@@ -29,7 +29,7 @@ type Response[T CacheData] struct {
 	Updated time.Time
 }
 
-func FetchCache[T CacheData](client Client, cache Cache) (Response[T], error) {
+func FetchCache[T CacheData](client *Client, cache Cache) (Response[T], error) {
 	var zeroValue Response[T] // acts as "nil" value to be used when returning an error
 	if client.Token == "" {
 		return zeroValue, errors.New("no token provided in client")
