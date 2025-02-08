@@ -13,10 +13,8 @@ import (
 var ENV Secrets
 
 type Secrets struct {
-	ValidTokens   string `env:"VALID_TOKENS"`
-	CacheFolder   string `env:"CACHE_FOLDER"`
-	RedisAddress  string `env:"REDIS_ADDRESS"`
-	RedisPassword string `env:"REDIS_PASSWORD"`
+	ValidTokens string `env:"VALID_TOKENS"`
+	CacheFolder string `env:"CACHE_FOLDER"`
 
 	StravaClientID       string `env:"STRAVA_CLIENT_ID"`
 	StravaClientSecret   string `env:"STRAVA_CLIENT_SECRET"`
@@ -26,9 +24,13 @@ type Secrets struct {
 	StravaSubscriptionID int64  `env:"STRAVA_SUBSCRIPTION_ID"`
 	StravaVerifyToken    string `env:"STRAVA_VERIFY_TOKEN"`
 	MapboxAccessToken    string `env:"MAPBOX_ACCESS_TOKEN"`
-	MinioEndpoint        string `env:"MINIO_ENDPOINT"`
-	MinioAccessKeyID     string `env:"MINIO_ACCESS_KEY_ID"`
-	MinioSecretKey       string `env:"MINIO_SECRET_KEY"`
+
+	MinioEndpoint    string `env:"MINIO_ENDPOINT"`
+	MinioAccessKeyID string `env:"MINIO_ACCESS_KEY_ID"`
+	MinioSecretKey   string `env:"MINIO_SECRET_KEY"`
+
+	RedisAddress  string `env:"REDIS_ADDRESS"`
+	RedisPassword string `env:"REDIS_PASSWORD"`
 
 	SteamKey string `env:"STEAM_KEY"`
 	SteamID  string `env:"STEAM_ID"`
