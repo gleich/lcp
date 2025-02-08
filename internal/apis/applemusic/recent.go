@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/redis/go-redis/v9"
 	"pkg.mattglei.ch/lcp-2/pkg/lcp"
 )
 
@@ -12,7 +11,10 @@ type recentlyPlayedResponse struct {
 	Data []songResponse `json:"data"`
 }
 
-func fetchRecentlyPlayed(client *http.Client, rdb *redis.Client) ([]lcp.AppleMusicSong, error) {
+func fetchRecentlyPlayed(
+	client *http.Client,
+	bhCache *blurhashCache,
+) ([]lcp.AppleMusicSong, error) {
 	response, err := sendAppleMusicAPIRequest[recentlyPlayedResponse](
 		client,
 		"/v1/me/recent/played/tracks",
@@ -23,7 +25,7 @@ func fetchRecentlyPlayed(client *http.Client, rdb *redis.Client) ([]lcp.AppleMus
 
 	var songs []lcp.AppleMusicSong
 	for _, s := range response.Data {
-		so, err := songFromSongResponse(client, rdb, s)
+		so, err := songFromSongResponse(client, bhCache, s)
 		if err != nil {
 			return []lcp.AppleMusicSong{}, fmt.Errorf(
 				"%v failed to parse song from song response",

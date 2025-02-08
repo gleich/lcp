@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/redis/go-redis/v9"
 	"pkg.mattglei.ch/lcp-2/internal/apis"
 	"pkg.mattglei.ch/lcp-2/internal/auth"
 	"pkg.mattglei.ch/lcp-2/internal/cache"
@@ -35,7 +34,7 @@ type playlistResponse struct {
 
 func fetchPlaylist(
 	client *http.Client,
-	rdb *redis.Client,
+	bhCache *blurhashCache,
 	id string,
 ) (lcp.AppleMusicPlaylist, error) {
 	playlistData, err := sendAppleMusicAPIRequest[playlistResponse](
@@ -79,7 +78,7 @@ func fetchPlaylist(
 
 	var tracks []lcp.AppleMusicSong
 	for _, t := range totalResponseData {
-		song, err := songFromSongResponse(client, rdb, t)
+		song, err := songFromSongResponse(client, bhCache, t)
 		if err != nil {
 			return lcp.AppleMusicPlaylist{}, err
 		}

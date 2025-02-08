@@ -29,9 +29,6 @@ type Secrets struct {
 	MinioAccessKeyID string `env:"MINIO_ACCESS_KEY_ID"`
 	MinioSecretKey   string `env:"MINIO_SECRET_KEY"`
 
-	RedisAddress  string `env:"REDIS_ADDRESS"`
-	RedisPassword string `env:"REDIS_PASSWORD"`
-
 	SteamKey string `env:"STEAM_KEY"`
 	SteamID  string `env:"STEAM_ID"`
 

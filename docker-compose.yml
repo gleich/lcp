@@ -1,7 +1,0 @@
-services:
-  redis:
-    image: redis:latest
-    container_name: redis
-    command: ['redis-server', '--requirepass', 'password']
-    ports:
-      - '6379:6379'

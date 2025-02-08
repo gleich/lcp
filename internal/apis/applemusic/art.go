@@ -1,24 +1,27 @@
 package applemusic
 
 import (
-	"context"
-	"encoding/json"
 	"fmt"
 	"image/jpeg"
 	"io"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
-	"github.com/redis/go-redis/v9"
 	"pkg.mattglei.ch/lcp-2/internal/images"
 	"pkg.mattglei.ch/timber"
 )
 
+type blurhashCache struct {
+	Entires map[string]blurhashCacheEntry
+	mutex   sync.RWMutex
+}
+
 type blurhashCacheEntry struct {
-	Blurhash string    `json:"blurhash"`
-	Created  time.Time `json:"created"`
-	Url      string    `json:"url"`
+	Blurhash string
+	Created  time.Time
+	Url      string
 }
 
 // Load an album's album art blurhash either for the first time or from the redis cache.
@@ -29,35 +32,16 @@ type blurhashCacheEntry struct {
 //   - error that might of been encountered
 func loadAlbumArtBlurhash(
 	client *http.Client,
-	rdb *redis.Client,
+	cache *blurhashCache,
 	url string,
 	id string,
 ) (*string, error) {
-	ctx := context.Background()
-	blurhashIsCached, err := rdb.Exists(ctx, id).Result()
-	if err != nil {
-		return nil, fmt.Errorf(
-			"%v failed to check to see if id of %s from redis exists",
-			err,
-			id,
-		)
-	}
+	cache.mutex.RLock()
+	cachedBlurhash, exists := cache.Entires[id]
+	cache.mutex.RUnlock()
 
-	if blurhashIsCached == 1 {
-		var cachedBlurHash blurhashCacheEntry
-		result, err := rdb.Get(ctx, id).Result()
-		if err != nil {
-			return nil, fmt.Errorf(
-				"%v failed to get blurhash for song with id of %s from redis",
-				err,
-				id,
-			)
-		}
-		err = json.Unmarshal([]byte(result), &cachedBlurHash)
-		if err != nil {
-			return nil, fmt.Errorf("%v failed to decode json into blurhash cache entry", err)
-		}
-		return &cachedBlurHash.Blurhash, nil
+	if exists {
+		return &cachedBlurhash.Blurhash, nil
 	}
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
@@ -65,7 +49,7 @@ func loadAlbumArtBlurhash(
 		return nil, fmt.Errorf("%v failed to create request for %s", err, url)
 	}
 
-	blurhashURL, err := createAlbumArtBlurhash(client, rdb, id, url, req)
+	blurhashURL, err := createAlbumArtBlurhash(client, cache, id, url, req)
 	if err != nil {
 		return nil, fmt.Errorf("%v failed to create blurhash", err)
 	}
@@ -74,64 +58,37 @@ func loadAlbumArtBlurhash(
 }
 
 // Update the album art in the redis cache every hour
-func updateAlbumArtPeriodically(client *http.Client, rdb *redis.Client, interval time.Duration) {
+func updateAlbumArtPeriodically(client *http.Client, cache *blurhashCache, interval time.Duration) {
 	for {
 		time.Sleep(interval)
-		var (
-			cursor  uint64
-			allKeys []string
-			ctx     = context.Background()
-		)
-		for {
-			keys, newCursor, err := rdb.Scan(context.Background(), cursor, "*", 100).Result()
-			if err != nil {
-				timber.Error(err, "failed to scan for keys from redis")
-				return
-			}
-			allKeys = append(allKeys, keys...)
-			if newCursor == 0 {
-				break
-			}
-			cursor = newCursor
-		}
 
-		timber.Info(LOG_PREFIX, "checking album art blurhash for", len(allKeys), "albums")
+		timber.Info(LOG_PREFIX, "checking album art blurhash for", len(cache.Entires), "albums")
 		updated := 0
-		for _, key := range allKeys {
-			result, err := rdb.Get(ctx, key).Result()
-			if err != nil {
-				timber.Error(err, "failed to get key from redis", key)
-				return
-			}
-			var cachedBlurHash blurhashCacheEntry
-			err = json.Unmarshal([]byte(result), &cachedBlurHash)
-			if err != nil {
-				timber.Error(err, "failed to decode json for key", key)
-				return
-			}
-
-			req, err := http.NewRequest(http.MethodGet, cachedBlurHash.Url, nil)
+		cache.mutex.Lock()
+		for id, entry := range cache.Entires {
+			req, err := http.NewRequest(http.MethodGet, entry.Url, nil)
 			if err != nil {
 				timber.Error(err, "failed to decode json")
 			}
-			req.Header.Set("If-Modified-Since", cachedBlurHash.Created.Format(time.RFC1123))
+			req.Header.Set("If-Modified-Since", entry.Created.Format(time.RFC1123))
 
 			updatedBlurhash, err := createAlbumArtBlurhash(
 				client,
-				rdb,
-				key,
-				cachedBlurHash.Url,
+				cache,
+				id,
+				entry.Url,
 				req,
 			)
 			if err != nil && strings.Contains(err.Error(), "unexpected EOF") {
-				timber.Warning("failed to create blur hash for", cachedBlurHash.Url)
+				timber.Warning("failed to create blur hash for", entry.Url)
 			}
-			if updatedBlurhash != nil && updatedBlurhash != &cachedBlurHash.Blurhash {
-				cachedBlurHash.Blurhash = *updatedBlurhash
+			if updatedBlurhash != nil && updatedBlurhash != &entry.Blurhash {
+				entry.Blurhash = *updatedBlurhash
 				updated++
 			}
 		}
-		timber.Done("updated", fmt.Sprintf("%d/%d", updated, len(allKeys)), "album arts")
+		timber.Done("updated", fmt.Sprintf("%d/%d", updated, len(cache.Entires)), "album arts")
+		cache.mutex.Unlock()
 	}
 }
 
@@ -142,7 +99,7 @@ func updateAlbumArtPeriodically(client *http.Client, rdb *redis.Client, interval
 //   - error that might of been encountered
 func createAlbumArtBlurhash(
 	client *http.Client,
-	rdb *redis.Client,
+	cache *blurhashCache,
 	id string,
 	url string,
 	req *http.Request,
@@ -167,21 +124,13 @@ func createAlbumArtBlurhash(
 		return nil, fmt.Errorf("%v failed to blur image", err)
 	}
 
-	cacheData, err := json.Marshal(blurhashCacheEntry{
+	cache.mutex.Lock()
+	cache.Entires[id] = blurhashCacheEntry{
 		Blurhash: blurhashURL,
 		Created:  time.Now(),
 		Url:      url,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("%v failed to marshal cache data", err)
 	}
-
-	// approximately a 1 week long cache lifetime
-	err = rdb.Set(context.Background(), id, string(cacheData), 168*time.Hour).
-		Err()
-	if err != nil {
-		return nil, fmt.Errorf("%v failed to set %s to %s", err, id, string(cacheData))
-	}
+	cache.mutex.Unlock()
 	timber.Done(LOG_PREFIX, "created blurhash for", id)
 	return &blurhashURL, nil
 }

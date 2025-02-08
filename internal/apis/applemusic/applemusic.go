@@ -6,10 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/redis/go-redis/v9"
 	"pkg.mattglei.ch/lcp-2/internal/auth"
 	"pkg.mattglei.ch/lcp-2/internal/cache"
-	"pkg.mattglei.ch/lcp-2/internal/secrets"
 	"pkg.mattglei.ch/lcp-2/pkg/lcp"
 	"pkg.mattglei.ch/timber"
 )
@@ -17,8 +15,8 @@ import (
 const API_ENDPOINT = "https://api.music.apple.com/"
 const LOG_PREFIX = "[applemusic]"
 
-func cacheUpdate(client *http.Client, rdb *redis.Client) (lcp.AppleMusicCache, error) {
-	recentlyPlayed, err := fetchRecentlyPlayed(client, rdb)
+func cacheUpdate(client *http.Client, bhCache *blurhashCache) (lcp.AppleMusicCache, error) {
+	recentlyPlayed, err := fetchRecentlyPlayed(client, bhCache)
 	if err != nil {
 		return lcp.AppleMusicCache{}, err
 	}
@@ -44,7 +42,7 @@ func cacheUpdate(client *http.Client, rdb *redis.Client) (lcp.AppleMusicCache, e
 	}
 	playlists := []lcp.AppleMusicPlaylist{}
 	for _, id := range playlistsIDs {
-		playlistData, err := fetchPlaylist(client, rdb, id)
+		playlistData, err := fetchPlaylist(client, bhCache, id)
 		if err != nil {
 			return lcp.AppleMusicCache{}, err
 		}
@@ -59,13 +57,11 @@ func cacheUpdate(client *http.Client, rdb *redis.Client) (lcp.AppleMusicCache, e
 
 func Setup(mux *http.ServeMux) {
 	client := http.Client{}
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     secrets.ENV.RedisAddress,
-		Password: secrets.ENV.RedisPassword,
-		DB:       0,
-	})
+	bhCache := blurhashCache{
+		Entires: map[string]blurhashCacheEntry{},
+	}
 
-	data, err := cacheUpdate(&client, rdb)
+	data, err := cacheUpdate(&client, &bhCache)
 	if err != nil {
 		timber.Error(err, "initial fetch of cache data failed")
 	}
@@ -77,11 +73,11 @@ func Setup(mux *http.ServeMux) {
 		applemusicCache,
 		&client,
 		func(client *http.Client) (lcp.AppleMusicCache, error) {
-			return cacheUpdate(client, rdb)
+			return cacheUpdate(client, &bhCache)
 		},
 		30*time.Second,
 	)
-	go updateAlbumArtPeriodically(&client, rdb, 60*time.Minute)
+	go updateAlbumArtPeriodically(&client, &bhCache, 60*time.Minute)
 	timber.Done(LOG_PREFIX, "setup cache and endpoints")
 }
 
