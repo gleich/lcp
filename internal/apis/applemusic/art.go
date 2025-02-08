@@ -64,8 +64,15 @@ func updateAlbumArtPeriodically(client *http.Client, cache *blurhashCache, inter
 
 		timber.Info(LOG_PREFIX, "checking album art blurhash for", len(cache.Entires), "albums")
 		updated := 0
-		cache.mutex.Lock()
+
+		cache.mutex.RLock()
+		entriesCopy := make(map[string]blurhashCacheEntry, len(cache.Entires))
 		for id, entry := range cache.Entires {
+			entriesCopy[id] = entry
+		}
+		cache.mutex.RUnlock()
+
+		for id, entry := range entriesCopy {
 			req, err := http.NewRequest(http.MethodGet, entry.Url, nil)
 			if err != nil {
 				timber.Error(err, "failed to decode json")
@@ -82,13 +89,18 @@ func updateAlbumArtPeriodically(client *http.Client, cache *blurhashCache, inter
 			if err != nil && strings.Contains(err.Error(), "unexpected EOF") {
 				timber.Warning("failed to create blur hash for", entry.Url)
 			}
-			if updatedBlurhash != nil && updatedBlurhash != &entry.Blurhash {
-				entry.Blurhash = *updatedBlurhash
-				updated++
+			if updatedBlurhash != nil {
+				cache.mutex.Lock()
+				currentEntry := cache.Entires[id]
+				cache.mutex.Unlock()
+				if *updatedBlurhash != currentEntry.Blurhash {
+					// The cache update already happens inside createAlbumArtBlurhash,
+					// so this may be just for counting purposes.
+					updated++
+				}
 			}
 		}
 		timber.Done("updated", fmt.Sprintf("%d/%d", updated, len(cache.Entires)), "album arts")
-		cache.mutex.Unlock()
 	}
 }
 
