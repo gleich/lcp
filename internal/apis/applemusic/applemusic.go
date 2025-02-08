@@ -82,7 +82,7 @@ func Setup(mux *http.ServeMux) {
 		30*time.Second,
 	)
 	go updateAlbumArtPeriodically(&client, rdb)
-	timber.Done("setup apple music cache")
+	timber.Done(LOG_PREFIX, "setup cache and endpoints")
 }
 
 type cacheDataResponse struct {

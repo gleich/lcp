@@ -12,6 +12,8 @@ import (
 	"pkg.mattglei.ch/timber"
 )
 
+const LOG_PREFIX = "[github]"
+
 func Setup(mux *http.ServeMux) {
 	githubTokenSource := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: secrets.ENV.GitHubAccessToken},
@@ -27,5 +29,6 @@ func Setup(mux *http.ServeMux) {
 	githubCache := cache.New("github", pinnedRepos, err == nil)
 	mux.HandleFunc("GET /github", githubCache.ServeHTTP)
 	go cache.UpdatePeriodically(githubCache, githubClient, fetchPinnedRepos, 1*time.Minute)
-	timber.Done("setup github cache")
+
+	timber.Done(LOG_PREFIX, "setup cache and endpoint")
 }

@@ -57,6 +57,6 @@ func (t *tokens) refreshIfNeeded(client *http.Client) error {
 	}
 
 	*t = tokens
-	timber.Done("loaded new strava access token:", t.Access)
+	timber.Done(LOG_PREFIX, "new access token", t.Access)
 	return nil
 }

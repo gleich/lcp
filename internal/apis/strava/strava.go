@@ -10,6 +10,8 @@ import (
 	"pkg.mattglei.ch/timber"
 )
 
+const LOG_PREFIX = "[strava]"
+
 func Setup(mux *http.ServeMux) {
 	client := http.Client{}
 	stravaTokens := loadTokens()
@@ -41,5 +43,5 @@ func Setup(mux *http.ServeMux) {
 	)
 	mux.HandleFunc("GET /strava/event", challengeRoute)
 
-	timber.Done("setup strava cache")
+	timber.Done(LOG_PREFIX, "setup cache and endpoints")
 }

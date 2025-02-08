@@ -8,6 +8,8 @@ import (
 	"pkg.mattglei.ch/timber"
 )
 
+const LOG_PREFIX = "[steam]"
+
 func Setup(mux *http.ServeMux) {
 	client := http.Client{}
 	games, err := fetchRecentlyPlayedGames(&client)
@@ -18,5 +20,5 @@ func Setup(mux *http.ServeMux) {
 	steamCache := cache.New("steam", games, err == nil)
 	mux.HandleFunc("GET /steam", steamCache.ServeHTTP)
 	go cache.UpdatePeriodically(steamCache, &client, fetchRecentlyPlayedGames, 5*time.Minute)
-	timber.Done("setup steam cache")
+	timber.Done(LOG_PREFIX, "setup cache and endpoint")
 }
