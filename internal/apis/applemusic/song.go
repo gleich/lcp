@@ -149,7 +149,7 @@ func loadAlbumArtBlurhash(
 
 func updateAlbumArtPeriodically(client *http.Client, rdb *redis.Client) {
 	for {
-		time.Sleep(1 * time.Minute)
+		time.Sleep(60 * time.Minute)
 		var (
 			cursor  uint64
 			allKeys []string
