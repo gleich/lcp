@@ -8,6 +8,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"strings"
 	"time"
 
 	"pkg.mattglei.ch/timber"
@@ -30,7 +31,7 @@ func SendRequest[T any](client *http.Client, req *http.Request) (T, error) {
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		if errors.Is(err, io.ErrUnexpectedEOF) {
+		if errors.Is(err, io.ErrUnexpectedEOF) || strings.Contains(err.Error(), "unexpected EOF") {
 			timber.Warning("Unexpected EOF from", req.URL.String())
 			return zeroValue, IgnoreError
 		}
