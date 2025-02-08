@@ -12,12 +12,13 @@ type AppleMusicCache struct {
 }
 
 type AppleMusicSong struct {
-	Track            string `json:"track"`
-	Artist           string `json:"artist"`
-	DurationInMillis int    `json:"duration_in_millis"`
-	AlbumArtURL      string `json:"album_art_url"`
-	URL              string `json:"url"`
-	ID               string `json:"id"`
+	Track            string  `json:"track"`
+	Artist           string  `json:"artist"`
+	DurationInMillis int     `json:"duration_in_millis"`
+	AlbumArtURL      string  `json:"album_art_url"`
+	AlbumArtBlurhash *string `json:"album_art_blurhash"`
+	URL              string  `json:"url"`
+	ID               string  `json:"id"`
 }
 
 type AppleMusicPlaylist struct {

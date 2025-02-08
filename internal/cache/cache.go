@@ -79,7 +79,7 @@ func (c *Cache[T]) Update(data T) {
 		c.DataMutex.Unlock()
 
 		c.persistToFile()
-		timber.Done(strings.ToUpper(c.name), "cache updated")
+		timber.Done(fmt.Sprintf("[%s]", c.name), "cache updated")
 	}
 }
 

@@ -6,16 +6,19 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/redis/go-redis/v9"
 	"pkg.mattglei.ch/lcp-2/internal/auth"
 	"pkg.mattglei.ch/lcp-2/internal/cache"
+	"pkg.mattglei.ch/lcp-2/internal/secrets"
 	"pkg.mattglei.ch/lcp-2/pkg/lcp"
 	"pkg.mattglei.ch/timber"
 )
 
 const API_ENDPOINT = "https://api.music.apple.com/"
+const LOG_PREFIX = "[applemusic]"
 
-func cacheUpdate(client *http.Client) (lcp.AppleMusicCache, error) {
-	recentlyPlayed, err := fetchRecentlyPlayed(client)
+func cacheUpdate(client *http.Client, rdb *redis.Client) (lcp.AppleMusicCache, error) {
+	recentlyPlayed, err := fetchRecentlyPlayed(client, rdb)
 	if err != nil {
 		return lcp.AppleMusicCache{}, err
 	}
@@ -41,7 +44,7 @@ func cacheUpdate(client *http.Client) (lcp.AppleMusicCache, error) {
 	}
 	playlists := []lcp.AppleMusicPlaylist{}
 	for _, id := range playlistsIDs {
-		playlistData, err := fetchPlaylist(client, id)
+		playlistData, err := fetchPlaylist(client, rdb, id)
 		if err != nil {
 			return lcp.AppleMusicCache{}, err
 		}
@@ -56,7 +59,13 @@ func cacheUpdate(client *http.Client) (lcp.AppleMusicCache, error) {
 
 func Setup(mux *http.ServeMux) {
 	client := http.Client{}
-	data, err := cacheUpdate(&client)
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     secrets.ENV.RedisAddress,
+		Password: secrets.ENV.RedisPassword,
+		DB:       0,
+	})
+
+	data, err := cacheUpdate(&client, rdb)
 	if err != nil {
 		timber.Error(err, "initial fetch of cache data failed")
 	}
@@ -64,7 +73,15 @@ func Setup(mux *http.ServeMux) {
 	applemusicCache := cache.New("applemusic", data, err == nil)
 	mux.HandleFunc("GET /applemusic", serveHTTP(applemusicCache))
 	mux.HandleFunc("GET /applemusic/playlists/{id}", playlistEndpoint(applemusicCache))
-	go cache.UpdatePeriodically(applemusicCache, &client, cacheUpdate, 30*time.Second)
+	go cache.UpdatePeriodically(
+		applemusicCache,
+		&client,
+		func(client *http.Client) (lcp.AppleMusicCache, error) {
+			return cacheUpdate(client, rdb)
+		},
+		30*time.Second,
+	)
+	go updateAlbumArtPeriodically(&client, rdb)
 	timber.Done("setup apple music cache")
 }
 

@@ -103,13 +103,12 @@ func fetchActivities(
 		if a.HasMap {
 			mapData := fetchMap(stravaActivity.Map.SummaryPolyline)
 			uploadMap(minioClient, stravaActivity.ID, mapData)
-			mapBlurData, err := images.BlurImage(mapData, png.Decode)
+			mapBlurURL, err := images.BlurImage(mapData, png.Decode)
 			if err != nil {
 				timber.Error(err, "failed to create blur image")
 				continue
 			}
-			mapBlurURI := images.BlurDataURI(mapBlurData)
-			a.MapBlurImage = &mapBlurURI
+			a.MapBlurImage = &mapBlurURL
 			imgurl := fmt.Sprintf(
 				"https://minio-api.dev.mattglei.ch/mapbox-maps/%d.png",
 				a.ID,
