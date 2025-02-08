@@ -71,11 +71,15 @@ func songFromSongResponse(
 		strconv.Itoa(int(math.Min(float64(s.Attributes.Artwork.Width), maxAlbumArtSize))),
 	), "{h}", strconv.Itoa(int(math.Min(float64(s.Attributes.Artwork.Height), maxAlbumArtSize))))
 
-	blurhash, err := loadAlbumArtBlurhash(client, rdb, albumArtURL, s.ID)
+	id := s.ID
+	if s.Attributes.PlayParams.CatalogID != "" {
+		id = s.Attributes.PlayParams.CatalogID
+	}
+	blurhash, err := loadAlbumArtBlurhash(client, rdb, albumArtURL, id)
 	if err != nil && strings.Contains(err.Error(), "unexpected EOF") {
 		timber.Warning("failed to create blur hash for", albumArtURL)
 	} else if err != nil {
-		return lcp.AppleMusicSong{}, fmt.Errorf("%v failed to get blur hash for %s", err, s.ID)
+		return lcp.AppleMusicSong{}, fmt.Errorf("%v failed to get blur hash for %s", err, id)
 	}
 
 	return lcp.AppleMusicSong{
@@ -85,6 +89,6 @@ func songFromSongResponse(
 		AlbumArtURL:      albumArtURL,
 		AlbumArtBlurhash: blurhash,
 		URL:              s.Attributes.URL,
-		ID:               s.ID,
+		ID:               id,
 	}, nil
 }
