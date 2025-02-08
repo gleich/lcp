@@ -74,9 +74,9 @@ func loadAlbumArtBlurhash(
 }
 
 // Update the album art in the redis cache every hour
-func updateAlbumArtPeriodically(client *http.Client, rdb *redis.Client) {
+func updateAlbumArtPeriodically(client *http.Client, rdb *redis.Client, interval time.Duration) {
 	for {
-		time.Sleep(60 * time.Minute)
+		time.Sleep(interval)
 		var (
 			cursor  uint64
 			allKeys []string
