@@ -77,7 +77,7 @@ func Setup(mux *http.ServeMux) {
 		},
 		30*time.Second,
 	)
-	go updateAlbumArtPeriodically(&client, &bhCache, 60*time.Minute)
+	go updateAlbumArtPeriodically(&client, &bhCache, 24*time.Hour)
 	timber.Done(LOG_PREFIX, "setup cache and endpoints")
 }
 
