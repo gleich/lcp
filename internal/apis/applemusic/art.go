@@ -144,6 +144,5 @@ func createAlbumArtBlurhash(
 		Url:      url,
 	}
 	cache.mutex.Unlock()
-	timber.Done(LOG_PREFIX, "created blurhash for", id)
 	return &blurhashURL, nil
 }
