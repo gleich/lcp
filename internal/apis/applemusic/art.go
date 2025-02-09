@@ -41,7 +41,8 @@ func loadAlbumArtBlurhash(
 	cache.mutex.RUnlock()
 
 	if exists {
-		return &cachedBlurhash.Blurhash, nil
+		blurHashCopy := cachedBlurhash.Blurhash
+		return &blurHashCopy, nil
 	}
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
