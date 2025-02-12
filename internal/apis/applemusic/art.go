@@ -24,8 +24,8 @@ type blurhashCacheEntry struct {
 	Url      string
 }
 
-// Load an album's album art blurhash either for the first time or from the redis cache.
-// Instead of just fetching the image and creating the blurhash it checks the redis cache first.
+// Load an album's album art blurhash either for the first time or from the cache.
+// Instead of just fetching the image and creating the blurhash it checks the cache first.
 //
 // Returns:
 //   - the URI encoded data for the blurhash or nil if there is no blurhash output
@@ -58,7 +58,7 @@ func loadAlbumArtBlurhash(
 	return blurhashURL, nil
 }
 
-// Update the album art in the redis cache every hour
+// Update the album art in the cache every hour
 func updateAlbumArtPeriodically(client *http.Client, cache *blurhashCache, interval time.Duration) {
 	for {
 		time.Sleep(interval)
@@ -105,7 +105,7 @@ func updateAlbumArtPeriodically(client *http.Client, cache *blurhashCache, inter
 	}
 }
 
-// Create an album art in the redis cache
+// Create an album art in the cache
 //
 // Returns:
 //   - the URI encoded data for the blurhash or nil if there is no blurhash output
