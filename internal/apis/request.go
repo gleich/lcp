@@ -25,23 +25,22 @@ func SendRequest[T any](client *http.Client, req *http.Request) (T, error) {
 	var zeroValue T // to be used as "nil" when returning errors
 	resp, err := client.Do(req)
 	if err != nil {
+		if errors.Is(err, io.ErrUnexpectedEOF) || strings.Contains(err.Error(), "unexpected EOF") {
+			timber.Warning("unexpected EOF from", req.URL.String())
+			return zeroValue, IgnoreError
+		}
+		var netErr *net.OpError
+		if errors.As(err, &netErr) && netErr.Err != nil &&
+			netErr.Err.Error() == "connection reset by peer" {
+			timber.Warning("tcp connection reset by peer from", req.URL.String())
+			return zeroValue, IgnoreError
+		}
 		return zeroValue, fmt.Errorf("%v sending request failed", err)
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		if errors.Is(err, io.ErrUnexpectedEOF) || strings.Contains(err.Error(), "unexpected EOF") {
-			timber.Warning("Unexpected EOF from", req.URL.String())
-			return zeroValue, IgnoreError
-		}
-		var netErr *net.OpError
-		if errors.As(err, &netErr) && netErr.Err != nil &&
-			netErr.Err.Error() == "connection reset by peer" {
-			timber.Warning("TCP connection reset by peer from", req.URL.String())
-			return zeroValue, IgnoreError
-		}
-
 		return zeroValue, fmt.Errorf("%v reading response body failed", err)
 	}
 	if resp.StatusCode != http.StatusOK {
