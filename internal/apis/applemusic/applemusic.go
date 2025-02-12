@@ -24,9 +24,9 @@ func cacheUpdate(client *http.Client, bhCache *blurhashCache) (lcp.AppleMusicCac
 	playlistsIDs := []string{
 		"p.AWXoXPYSLrvpJlY", // alt
 		"p.LV0PX3EIl0EpDLW", // jazz
+		"p.V7VYVB0hZo53MQv", // old man
 		"p.AWXoZoxHLrvpJlY", // chill
 		"p.gek1E8efLa68Adp", // classics
-		"p.V7VYVB0hZo53MQv", // old man
 		"p.qQXLxPLtA75zg8e", // 80s
 		"p.LV0PXNoCl0EpDLW", // divorced dad
 		"p.QvDQE5RIVbAeokL", // PARTY
