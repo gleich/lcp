@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	"pkg.mattglei.ch/lcp-2/pkg/lcp"
-	"pkg.mattglei.ch/timber"
+	"go.mattglei.ch/lcp-2/pkg/lcp"
+	"go.mattglei.ch/timber"
 )
 
 type songResponse struct {

@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/shurcooL/githubv4"
-	"pkg.mattglei.ch/lcp-2/pkg/lcp"
+	"go.mattglei.ch/lcp-2/pkg/lcp"
 )
 
 type pinnedItemsQuery struct {

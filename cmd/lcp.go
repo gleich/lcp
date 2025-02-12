@@ -4,12 +4,12 @@ import (
 	"net/http"
 	"time"
 
-	"pkg.mattglei.ch/lcp-2/internal/apis/applemusic"
-	"pkg.mattglei.ch/lcp-2/internal/apis/github"
-	"pkg.mattglei.ch/lcp-2/internal/apis/steam"
-	"pkg.mattglei.ch/lcp-2/internal/apis/strava"
-	"pkg.mattglei.ch/lcp-2/internal/secrets"
-	"pkg.mattglei.ch/timber"
+	"go.mattglei.ch/lcp-2/internal/apis/applemusic"
+	"go.mattglei.ch/lcp-2/internal/apis/github"
+	"go.mattglei.ch/lcp-2/internal/apis/steam"
+	"go.mattglei.ch/lcp-2/internal/apis/strava"
+	"go.mattglei.ch/lcp-2/internal/secrets"
+	"go.mattglei.ch/timber"
 )
 
 func main() {

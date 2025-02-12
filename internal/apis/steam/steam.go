@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	"pkg.mattglei.ch/lcp-2/internal/cache"
-	"pkg.mattglei.ch/timber"
+	"go.mattglei.ch/lcp-2/internal/cache"
+	"go.mattglei.ch/timber"
 )
 
 const LOG_PREFIX = "[steam]"

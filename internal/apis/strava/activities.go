@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/minio/minio-go/v7"
-	"pkg.mattglei.ch/lcp-2/internal/images"
-	"pkg.mattglei.ch/lcp-2/pkg/lcp"
-	"pkg.mattglei.ch/timber"
+	"go.mattglei.ch/lcp-2/internal/images"
+	"go.mattglei.ch/lcp-2/pkg/lcp"
+	"go.mattglei.ch/timber"
 )
 
 type stravaActivity struct {

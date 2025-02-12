@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"pkg.mattglei.ch/lcp-2/pkg/lcp"
+	"go.mattglei.ch/lcp-2/pkg/lcp"
 )
 
 type recentlyPlayedResponse struct {

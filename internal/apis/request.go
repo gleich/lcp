@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"time"
 
-	"pkg.mattglei.ch/timber"
+	"go.mattglei.ch/timber"
 )
 
 var IgnoreError = errors.New("Warning error when trying to make request. Ignore error.")

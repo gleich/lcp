@@ -9,8 +9,8 @@ import (
 	"sync"
 	"time"
 
-	"pkg.mattglei.ch/lcp-2/internal/images"
-	"pkg.mattglei.ch/timber"
+	"go.mattglei.ch/lcp-2/internal/images"
+	"go.mattglei.ch/timber"
 )
 
 type blurhashCache struct {

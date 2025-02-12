@@ -7,9 +7,9 @@ import (
 	"net/url"
 	"time"
 
-	"pkg.mattglei.ch/lcp-2/internal/apis"
-	"pkg.mattglei.ch/lcp-2/internal/secrets"
-	"pkg.mattglei.ch/timber"
+	"go.mattglei.ch/lcp-2/internal/apis"
+	"go.mattglei.ch/lcp-2/internal/secrets"
+	"go.mattglei.ch/timber"
 )
 
 type tokens struct {

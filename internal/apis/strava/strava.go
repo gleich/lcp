@@ -5,9 +5,9 @@ import (
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
-	"pkg.mattglei.ch/lcp-2/internal/cache"
-	"pkg.mattglei.ch/lcp-2/internal/secrets"
-	"pkg.mattglei.ch/timber"
+	"go.mattglei.ch/lcp-2/internal/cache"
+	"go.mattglei.ch/lcp-2/internal/secrets"
+	"go.mattglei.ch/timber"
 )
 
 const LOG_PREFIX = "[strava]"

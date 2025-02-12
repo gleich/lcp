@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strings"
 
-	"pkg.mattglei.ch/lcp-2/internal/apis"
-	"pkg.mattglei.ch/lcp-2/internal/secrets"
+	"go.mattglei.ch/lcp-2/internal/apis"
+	"go.mattglei.ch/lcp-2/internal/secrets"
 )
 
 func sendAppleMusicAPIRequest[T any](client *http.Client, path string) (T, error) {

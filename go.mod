@@ -1,4 +1,4 @@
-module pkg.mattglei.ch/lcp-2
+module go.mattglei.ch/lcp-2
 
 go 1.23.6
 
@@ -8,8 +8,8 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/minio/minio-go/v7 v7.0.84
 	github.com/shurcooL/githubv4 v0.0.0-20240727222349-48295856cce7
+	go.mattglei.ch/timber v1.1.1
 	golang.org/x/oauth2 v0.26.0
-	pkg.mattglei.ch/timber v1.1.0
 )
 
 require (

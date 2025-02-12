@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"pkg.mattglei.ch/timber"
+	"go.mattglei.ch/timber"
 )
 
 func (c *Cache[T]) persistToFile() {

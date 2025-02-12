@@ -6,10 +6,10 @@ import (
 	"time"
 
 	"github.com/shurcooL/githubv4"
+	"go.mattglei.ch/lcp-2/internal/cache"
+	"go.mattglei.ch/lcp-2/internal/secrets"
+	"go.mattglei.ch/timber"
 	"golang.org/x/oauth2"
-	"pkg.mattglei.ch/lcp-2/internal/cache"
-	"pkg.mattglei.ch/lcp-2/internal/secrets"
-	"pkg.mattglei.ch/timber"
 )
 
 const LOG_PREFIX = "[github]"

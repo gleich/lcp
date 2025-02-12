@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strings"
 
-	"pkg.mattglei.ch/lcp-2/internal/apis"
-	"pkg.mattglei.ch/timber"
+	"go.mattglei.ch/lcp-2/internal/apis"
+	"go.mattglei.ch/timber"
 )
 
 func sendStravaAPIRequest[T any](client *http.Client, path string, tokens tokens) (T, error) {

@@ -6,10 +6,10 @@ import (
 	"net/http"
 
 	"github.com/minio/minio-go/v7"
-	"pkg.mattglei.ch/lcp-2/internal/cache"
-	"pkg.mattglei.ch/lcp-2/internal/secrets"
-	"pkg.mattglei.ch/lcp-2/pkg/lcp"
-	"pkg.mattglei.ch/timber"
+	"go.mattglei.ch/lcp-2/internal/cache"
+	"go.mattglei.ch/lcp-2/internal/secrets"
+	"go.mattglei.ch/lcp-2/pkg/lcp"
+	"go.mattglei.ch/timber"
 )
 
 type event struct {

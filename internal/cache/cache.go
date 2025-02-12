@@ -10,11 +10,11 @@ import (
 	"sync"
 	"time"
 
-	"pkg.mattglei.ch/lcp-2/internal/apis"
-	"pkg.mattglei.ch/lcp-2/internal/auth"
-	"pkg.mattglei.ch/lcp-2/internal/secrets"
-	"pkg.mattglei.ch/lcp-2/pkg/lcp"
-	"pkg.mattglei.ch/timber"
+	"go.mattglei.ch/lcp-2/internal/apis"
+	"go.mattglei.ch/lcp-2/internal/auth"
+	"go.mattglei.ch/lcp-2/internal/secrets"
+	"go.mattglei.ch/lcp-2/pkg/lcp"
+	"go.mattglei.ch/timber"
 )
 
 type Cache[T lcp.CacheData] struct {
