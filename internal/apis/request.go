@@ -6,8 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net"
 	"net/http"
+	"strings"
 	"time"
 
 	"go.mattglei.ch/timber"
@@ -28,9 +28,7 @@ func SendRequest[T any](client *http.Client, req *http.Request) (T, error) {
 			timber.Warning("unexpected EOF from", req.URL.String())
 			return zeroValue, IgnoreError
 		}
-		var netErr *net.OpError
-		if errors.As(err, &netErr) && netErr.Err != nil &&
-			netErr.Err.Error() == "connection reset by peer" {
+		if strings.Contains(err.Error(), "read: connection reset by peer") {
 			timber.Warning("tcp connection reset by peer from", req.URL.String())
 			return zeroValue, IgnoreError
 		}
