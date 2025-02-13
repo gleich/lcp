@@ -6,9 +6,9 @@ require (
 	github.com/buckket/go-blurhash v1.1.0
 	github.com/caarlos0/env/v11 v11.3.1
 	github.com/joho/godotenv v1.5.1
-	github.com/minio/minio-go/v7 v7.0.84
+	github.com/minio/minio-go/v7 v7.0.85
 	github.com/shurcooL/githubv4 v0.0.0-20240727222349-48295856cce7
-	go.mattglei.ch/timber v1.1.1
+	go.mattglei.ch/timber v1.1.2
 	golang.org/x/oauth2 v0.26.0
 )
 
@@ -32,8 +32,8 @@ require (
 	github.com/rs/xid v1.6.0 // indirect
 	github.com/shurcooL/graphql v0.0.0-20230722043721-ed46e5a46466 // indirect
 	github.com/stretchr/testify v1.10.0 // indirect
-	golang.org/x/crypto v0.32.0 // indirect
-	golang.org/x/net v0.34.0 // indirect
+	golang.org/x/crypto v0.33.0 // indirect
+	golang.org/x/net v0.35.0 // indirect
 	golang.org/x/sys v0.30.0 // indirect
 	golang.org/x/text v0.22.0 // indirect
 )
