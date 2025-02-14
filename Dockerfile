@@ -8,7 +8,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/lcp ./cmd/lcp.go
 
 FROM alpine:3.20.2
 
-RUN apk update && apk add --no-cache ca-certificates=20241121-r1 tzdata=2024b-r0
+RUN apk update && apk add --no-cache ca-certificates=20241121-r1 tzdata=2025a-r0
 
 WORKDIR /src
 COPY --from=build /bin/lcp /bin/lcp
