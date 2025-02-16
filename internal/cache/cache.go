@@ -10,7 +10,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/aymanbagabas/go-udiff"
 	"go.mattglei.ch/lcp-2/internal/apis"
 	"go.mattglei.ch/lcp-2/internal/auth"
 	"go.mattglei.ch/lcp-2/internal/secrets"
@@ -77,8 +76,6 @@ func (c *Cache[T]) Update(data T) {
 	old := string(oldBin)
 	new := string(newBin)
 	if old != new && new != "null" && strings.Trim(string(newBin), " ") != "" {
-		unified := udiff.Unified("old cache", "new cache", old, new)
-		timber.Info(fmt.Sprintf("\n%s", unified))
 		c.DataMutex.Lock()
 		c.Data = data
 		c.Updated = time.Now()

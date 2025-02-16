@@ -3,7 +3,6 @@ module go.mattglei.ch/lcp-2
 go 1.24
 
 require (
-	github.com/aymanbagabas/go-udiff v0.2.0
 	github.com/buckket/go-blurhash v1.1.0
 	github.com/caarlos0/env/v11 v11.3.1
 	github.com/joho/godotenv v1.5.1
