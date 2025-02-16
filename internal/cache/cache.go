@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/aymanbagabas/go-udiff"
 	"go.mattglei.ch/lcp-2/internal/apis"
 	"go.mattglei.ch/lcp-2/internal/auth"
 	"go.mattglei.ch/lcp-2/internal/secrets"
@@ -59,20 +60,25 @@ func (c *Cache[T]) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *Cache[T]) Update(data T) {
+	const jsonIndent = "  "
 	c.DataMutex.RLock()
-	old, err := json.Marshal(c.Data)
+	oldBin, err := json.MarshalIndent(c.Data, "", jsonIndent)
 	if err != nil {
 		timber.Error(err, "failed to json marshal old data")
 		return
 	}
 	c.DataMutex.RUnlock()
-	new, err := json.Marshal(data)
+	newBin, err := json.MarshalIndent(data, "", jsonIndent)
 	if err != nil {
 		timber.Error(err, "failed to json marshal new data")
 		return
 	}
 
-	if string(old) != string(new) && string(new) != "null" && strings.Trim(string(new), " ") != "" {
+	old := string(oldBin)
+	new := string(newBin)
+	if old != new && new != "null" && strings.Trim(string(newBin), " ") != "" {
+		unified := udiff.Unified("old cache", "new cache", old, new)
+		timber.Info(fmt.Sprintf("\n%s", unified))
 		c.DataMutex.Lock()
 		c.Data = data
 		c.Updated = time.Now()
