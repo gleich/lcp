@@ -62,7 +62,7 @@ func fetchActivities(
 		tokens,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("%v failed to send request to Strava API to get activities", err)
+		return nil, fmt.Errorf("%w failed to send request to Strava API to get activities", err)
 	}
 
 	var activities []lcp.StravaActivity
@@ -82,7 +82,7 @@ func fetchActivities(
 
 		hrStream, err := fetchHeartrate(client, stravaActivity.ID, tokens)
 		if err != nil {
-			return nil, fmt.Errorf("%v failed to fetch HR data", err)
+			return nil, fmt.Errorf("%w failed to fetch HR data", err)
 		}
 
 		a := lcp.StravaActivity{

@@ -45,13 +45,13 @@ func (t *tokens) refreshIfNeeded(client *http.Client) error {
 		nil,
 	)
 	if err != nil {
-		return fmt.Errorf("%v creating request for new token failed", err)
+		return fmt.Errorf("%w creating request for new token failed", err)
 	}
 
 	tokens, err := apis.SendRequest[tokens](client, req)
 	if err != nil {
 		if !errors.Is(err, apis.IgnoreError) {
-			return fmt.Errorf("%v failed to fetch refresh tokens", err)
+			return fmt.Errorf("%w failed to fetch refresh tokens", err)
 		}
 		return err
 	}

@@ -40,30 +40,30 @@ func FetchCache[T CacheData](client *Client) (Response[T], error) {
 
 	url, err := url.JoinPath("https://lcp.dev.mattglei.ch", cacheName)
 	if err != nil {
-		return zeroValue, fmt.Errorf("%v failed to join path for URL", err)
+		return zeroValue, fmt.Errorf("%w failed to join path for URL", err)
 	}
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		return zeroValue, fmt.Errorf("%v failed to create request", err)
+		return zeroValue, fmt.Errorf("%w failed to create request", err)
 	}
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", client.Token))
 
 	resp, err := client.httpClient.Do(req)
 	if err != nil {
-		return zeroValue, fmt.Errorf("%v failed to execute request", err)
+		return zeroValue, fmt.Errorf("%w failed to execute request", err)
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return zeroValue, fmt.Errorf("%v reading request body failed", err)
+		return zeroValue, fmt.Errorf("%w reading request body failed", err)
 	}
 
 	var response Response[T]
 	err = json.Unmarshal(body, &response)
 	if err != nil {
-		return zeroValue, fmt.Errorf("%v failed to parse json", err)
+		return zeroValue, fmt.Errorf("%w failed to parse json", err)
 	}
 	return response, nil
 }

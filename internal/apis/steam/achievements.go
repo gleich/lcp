@@ -85,7 +85,7 @@ func fetchGameAchievements(
 	var playerAchievements playerAchievementsResponse
 	err = json.Unmarshal(body, &playerAchievements)
 	if err != nil {
-		err = fmt.Errorf("%v failed to parse json for player achievements for %d", err, appID)
+		err = fmt.Errorf("%w failed to parse json for player achievements for %d", err, appID)
 		timber.Debug("body:", string(body))
 		return nil, nil, err
 	}
@@ -114,7 +114,7 @@ func fetchGameAchievements(
 	gameSchema, err := apis.SendRequest[schemaGameResponse](client, req)
 	if err != nil {
 		if !errors.Is(err, apis.IgnoreError) {
-			return nil, nil, fmt.Errorf("%v failed to get game schema for app id: %d", err, appID)
+			return nil, nil, fmt.Errorf("%w failed to get game schema for app id: %d", err, appID)
 		}
 		return nil, nil, err
 	}

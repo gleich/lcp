@@ -47,12 +47,12 @@ func loadAlbumArtBlurhash(
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		return nil, fmt.Errorf("%v failed to create request for %s", err, url)
+		return nil, fmt.Errorf("%w failed to create request for %s", err, url)
 	}
 
 	blurhashURL, err := createAlbumArtBlurhash(client, cache, id, url, req)
 	if err != nil {
-		return nil, fmt.Errorf("%v failed to create blurhash", err)
+		return nil, fmt.Errorf("%w failed to create blurhash", err)
 	}
 
 	return blurhashURL, nil
@@ -119,7 +119,7 @@ func createAlbumArtBlurhash(
 ) (*string, error) {
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("%v failed to execute request", err)
+		return nil, fmt.Errorf("%w failed to execute request", err)
 	}
 	defer resp.Body.Close()
 
@@ -129,12 +129,12 @@ func createAlbumArtBlurhash(
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("%v failed to read response body from request", err)
+		return nil, fmt.Errorf("%w failed to read response body from request", err)
 	}
 
 	blurhashURL, err := images.BlurImage(body, jpeg.Decode)
 	if err != nil {
-		return nil, fmt.Errorf("%v failed to blur image", err)
+		return nil, fmt.Errorf("%w failed to blur image", err)
 	}
 
 	cache.mutex.Lock()

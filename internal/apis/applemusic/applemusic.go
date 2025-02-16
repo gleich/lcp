@@ -119,7 +119,7 @@ func serveHTTP(c *cache.Cache[lcp.AppleMusicCache]) http.HandlerFunc {
 			Encode(cache.CacheResponse[cacheDataResponse]{Data: data, Updated: c.Updated})
 		c.DataMutex.RUnlock()
 		if err != nil {
-			err = fmt.Errorf("%v failed to write json data to request", err)
+			err = fmt.Errorf("%w failed to write json data to request", err)
 			timber.Error(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}

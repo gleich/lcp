@@ -32,13 +32,13 @@ func SendRequest[T any](client *http.Client, req *http.Request) (T, error) {
 			timber.Warning("tcp connection reset by peer from", req.URL.String())
 			return zeroValue, IgnoreError
 		}
-		return zeroValue, fmt.Errorf("%v sending request failed", err)
+		return zeroValue, fmt.Errorf("%w sending request failed", err)
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return zeroValue, fmt.Errorf("%v reading response body failed", err)
+		return zeroValue, fmt.Errorf("%w reading response body failed", err)
 	}
 	if resp.StatusCode != http.StatusOK {
 		timber.Warning(resp.StatusCode, "returned from", req.URL.String())
@@ -49,7 +49,7 @@ func SendRequest[T any](client *http.Client, req *http.Request) (T, error) {
 	err = json.Unmarshal(body, &data)
 	if err != nil {
 		timber.Debug(string(body))
-		return zeroValue, fmt.Errorf("%v failed to parse json", err)
+		return zeroValue, fmt.Errorf("%w failed to parse json", err)
 	}
 
 	return data, nil

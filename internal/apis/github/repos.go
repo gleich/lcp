@@ -36,7 +36,7 @@ func fetchPinnedRepos(client *githubv4.Client) ([]lcp.GitHubRepository, error) {
 	var query pinnedItemsQuery
 	err := client.Query(context.Background(), &query, nil)
 	if err != nil {
-		return nil, fmt.Errorf("%v querying github's graphql API failed", err)
+		return nil, fmt.Errorf("%w querying github's graphql API failed", err)
 	}
 
 	var repositories []lcp.GitHubRepository

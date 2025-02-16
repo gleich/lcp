@@ -36,12 +36,12 @@ func fetchRecentlyPlayedGames(client *http.Client) ([]lcp.SteamGame, error) {
 		"https://api.steampowered.com/IPlayerService/GetOwnedGames/v1?"+params.Encode(), nil,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("%v failed to create request for steam API owned games", err)
+		return nil, fmt.Errorf("%w failed to create request for steam API owned games", err)
 	}
 	ownedGames, err := apis.SendRequest[ownedGamesResponse](client, req)
 	if err != nil {
 		if !errors.Is(err, apis.IgnoreError) {
-			return nil, fmt.Errorf("%v sending request for owned games failed", err)
+			return nil, fmt.Errorf("%w sending request for owned games failed", err)
 		}
 		return nil, err
 	}
@@ -64,7 +64,7 @@ func fetchRecentlyPlayedGames(client *http.Client) ([]lcp.SteamGame, error) {
 		)
 		libraryImageResponse, err := http.Get(libraryURL)
 		if err != nil {
-			return nil, fmt.Errorf("%v getting library image for %s failed", err, g.Name)
+			return nil, fmt.Errorf("%w getting library image for %s failed", err, g.Name)
 		}
 		defer libraryImageResponse.Body.Close()
 
