@@ -24,6 +24,10 @@ func SendRequest[T any](client *http.Client, req *http.Request) (T, error) {
 	var zeroValue T // to be used as "nil" when returning errors
 	resp, err := client.Do(req)
 	if err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			timber.Warning("request timed out for", req.URL.String())
+			return zeroValue, IgnoreError
+		}
 		if errors.Is(err, io.ErrUnexpectedEOF) {
 			timber.Warning("unexpected EOF from", req.URL.String())
 			return zeroValue, IgnoreError
