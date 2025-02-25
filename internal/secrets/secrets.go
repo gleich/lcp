@@ -25,6 +25,8 @@ type Secrets struct {
 	StravaVerifyToken    string `env:"STRAVA_VERIFY_TOKEN"`
 	MapboxAccessToken    string `env:"MAPBOX_ACCESS_TOKEN"`
 
+	HevyAccessToken string `env:"HEVY_ACCESS_TOKEN"`
+
 	MinioEndpoint    string `env:"MINIO_ENDPOINT"`
 	MinioAccessKeyID string `env:"MINIO_ACCESS_KEY_ID"`
 	MinioSecretKey   string `env:"MINIO_SECRET_KEY"`

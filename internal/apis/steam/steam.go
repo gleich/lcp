@@ -14,7 +14,7 @@ func Setup(mux *http.ServeMux) {
 	client := http.Client{}
 	games, err := fetchRecentlyPlayedGames(&client)
 	if err != nil {
-		timber.Error(err, "initial fetch of games failed")
+		timber.Error(err, "initial fetch of steam games failed")
 	}
 
 	steamCache := cache.New("steam", games, err == nil)
