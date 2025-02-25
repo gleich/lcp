@@ -3,7 +3,7 @@ package lcp
 import "time"
 
 type CacheData interface {
-	AppleMusicCache | []GitHubRepository | []SteamGame | []StravaActivity
+	AppleMusicCache | []GitHubRepository | []SteamGame | []StravaActivity | []HevyWorkout
 }
 
 type AppleMusicCache struct {
@@ -86,4 +86,27 @@ type StravaActivity struct {
 	AverageHeartrate   float32   `json:"average_heartrate"`
 	HeartrateData      []int     `json:"heartrate_data"`
 	Calories           float32   `json:"calories"`
+}
+
+type HevyWorkout struct {
+	ID          string         `json:"id"`
+	Title       string         `json:"title"`
+	Description string         `json:"description"`
+	StartTime   time.Time      `json:"start_time"`
+	EndTime     time.Time      `json:"end_time"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+	CreatedAt   time.Time      `json:"created_at"`
+	Exercises   []HevyExercise `json:"exercises"`
+}
+
+type HevyExercise struct {
+	Title string    `json:"title"`
+	Sets  []HevySet `json:"sets"`
+}
+
+type HevySet struct {
+	Index    int     `json:"index"`
+	Type     string  `json:"type"`
+	WeightKg float64 `json:"weight_kg"`
+	Reps     int     `json:"reps"`
 }
