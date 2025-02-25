@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/redis/go-redis/v9"
 	"go.mattglei.ch/lcp-2/pkg/lcp"
 	"go.mattglei.ch/timber"
 )
@@ -39,7 +40,7 @@ type songResponse struct {
 
 func songFromSongResponse(
 	client *http.Client,
-	bhCache *blurhashCache,
+	rdb *redis.Client,
 	s songResponse,
 ) (lcp.AppleMusicSong, error) {
 	if s.Attributes.URL == "" {
@@ -74,7 +75,7 @@ func songFromSongResponse(
 	if s.Attributes.PlayParams.CatalogID != "" {
 		id = s.Attributes.PlayParams.CatalogID
 	}
-	blurhash, err := loadAlbumArtBlurhash(client, bhCache, albumArtURL, id)
+	blurhash, err := loadAlbumArtBlurhash(client, rdb, albumArtURL, id)
 	if err != nil && strings.Contains(err.Error(), "unexpected EOF") {
 		timber.Warning("failed to create blur hash for", albumArtURL)
 	} else if err != nil {

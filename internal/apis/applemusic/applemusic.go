@@ -6,8 +6,10 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/redis/go-redis/v9"
 	"go.mattglei.ch/lcp-2/internal/auth"
 	"go.mattglei.ch/lcp-2/internal/cache"
+	"go.mattglei.ch/lcp-2/internal/secrets"
 	"go.mattglei.ch/lcp-2/pkg/lcp"
 	"go.mattglei.ch/timber"
 )
@@ -15,8 +17,8 @@ import (
 const API_ENDPOINT = "https://api.music.apple.com/"
 const LOG_PREFIX = "[applemusic]"
 
-func cacheUpdate(client *http.Client, bhCache *blurhashCache) (lcp.AppleMusicCache, error) {
-	recentlyPlayed, err := fetchRecentlyPlayed(client, bhCache)
+func cacheUpdate(client *http.Client, rdb *redis.Client) (lcp.AppleMusicCache, error) {
+	recentlyPlayed, err := fetchRecentlyPlayed(client, rdb)
 	if err != nil {
 		return lcp.AppleMusicCache{}, err
 	}
@@ -42,7 +44,7 @@ func cacheUpdate(client *http.Client, bhCache *blurhashCache) (lcp.AppleMusicCac
 	}
 	playlists := []lcp.AppleMusicPlaylist{}
 	for _, id := range playlistsIDs {
-		playlistData, err := fetchPlaylist(client, bhCache, id)
+		playlistData, err := fetchPlaylist(client, rdb, id)
 		if err != nil {
 			return lcp.AppleMusicCache{}, err
 		}
@@ -57,11 +59,14 @@ func cacheUpdate(client *http.Client, bhCache *blurhashCache) (lcp.AppleMusicCac
 
 func Setup(mux *http.ServeMux) {
 	client := http.Client{}
-	bhCache := blurhashCache{
-		Entires: map[string]blurhashCacheEntry{},
-	}
 
-	data, err := cacheUpdate(&client, &bhCache)
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     secrets.ENV.RedisAddress,
+		Password: secrets.ENV.RedisPassword,
+		DB:       0,
+	})
+
+	data, err := cacheUpdate(&client, rdb)
 	if err != nil {
 		timber.Error(err, "initial fetch of cache data failed")
 	}
@@ -73,11 +78,11 @@ func Setup(mux *http.ServeMux) {
 		applemusicCache,
 		&client,
 		func(client *http.Client) (lcp.AppleMusicCache, error) {
-			return cacheUpdate(client, &bhCache)
+			return cacheUpdate(client, rdb)
 		},
 		30*time.Second,
 	)
-	go updateAlbumArtPeriodically(&client, &bhCache, 24*time.Hour)
+	go updateAlbumArtPeriodically(&client, rdb, 24*time.Hour)
 	timber.Done(LOG_PREFIX, "setup cache and endpoints")
 }
 
