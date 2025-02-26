@@ -7,7 +7,6 @@ import (
 	"go.mattglei.ch/lcp-2/internal/apis/workouts/hevy"
 	"go.mattglei.ch/lcp-2/internal/apis/workouts/strava"
 	"go.mattglei.ch/lcp-2/pkg/lcp"
-	"go.mattglei.ch/timber"
 )
 
 func fetch(
@@ -23,10 +22,6 @@ func fetch(
 	hevyWorkouts, err := hevy.FetchWorkouts(client)
 	if err != nil {
 		return []lcp.Activity{}, err
-	}
-
-	for _, h := range hevyWorkouts {
-		timber.Debug(h.Name)
 	}
 
 	activities := []lcp.Activity{}
