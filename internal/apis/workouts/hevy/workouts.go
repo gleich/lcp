@@ -36,7 +36,7 @@ func FetchWorkouts(client *http.Client) ([]lcp.Activity, error) {
 		volume := 0.0
 		for _, exercise := range workout.Exercises {
 			for _, set := range exercise.Sets {
-				volume += set.WeightKg
+				volume += set.WeightKg * float64(set.Reps)
 			}
 		}
 		activities = append(activities, lcp.Activity{

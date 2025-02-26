@@ -2,8 +2,11 @@ package workouts
 
 import (
 	"net/http"
+	"sort"
+	"time"
 
 	"github.com/minio/minio-go/v7"
+	"go.mattglei.ch/lcp-2/internal/apis/workouts/hevy"
 	"go.mattglei.ch/lcp-2/internal/apis/workouts/strava"
 	"go.mattglei.ch/lcp-2/pkg/lcp"
 )
@@ -18,36 +21,34 @@ func fetch(
 		return []lcp.Activity{}, err
 	}
 
-	return stravaActivities, nil
+	hevyWorkouts, err := hevy.FetchWorkouts(client)
+	if err != nil {
+		return []lcp.Activity{}, err
+	}
 
-	// hevyWorkouts, err := hevy.FetchWorkouts(client)
-	// if err != nil {
-	// 	return []lcp.Activity{}, err
-	// }
+	activities := []lcp.Activity{}
+	activities = append(activities, hevyWorkouts...)
 
-	// activities := []lcp.Activity{}
-	// activities = append(activities, hevyWorkouts...)
+	for _, s := range stravaActivities {
+		conflict := false
+		for _, h := range hevyWorkouts {
+			diff := s.StartDate.Sub(h.StartDate)
+			if diff < 0 {
+				diff = -diff
+			}
+			if diff < time.Minute {
+				conflict = true
+				break
+			}
+		}
+		if !conflict {
+			activities = append(activities, s)
+		}
+	}
 
-	// for _, s := range stravaActivities {
-	// 	conflict := false
-	// 	for _, h := range hevyWorkouts {
-	// 		diff := s.StartDate.Sub(h.StartDate)
-	// 		if diff < 0 {
-	// 			diff = -diff
-	// 		}
-	// 		if diff < time.Minute {
-	// 			conflict = true
-	// 			break
-	// 		}
-	// 	}
-	// 	if !conflict {
-	// 		activities = append(activities, s)
-	// 	}
-	// }
+	sort.Slice(activities, func(i, j int) bool {
+		return activities[i].StartDate.After(activities[j].StartDate)
+	})
 
-	// sort.Slice(activities, func(i, j int) bool {
-	// 	return activities[i].StartDate.After(activities[j].StartDate)
-	// })
-
-	// return activities, nil
+	return activities, nil
 }
