@@ -1,17 +1,17 @@
-package activities
+package workouts
 
 import (
 	"net/http"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
-	"go.mattglei.ch/lcp-2/internal/apis/activities/strava"
+	"go.mattglei.ch/lcp-2/internal/apis/workouts/strava"
 	"go.mattglei.ch/lcp-2/internal/cache"
 	"go.mattglei.ch/lcp-2/internal/secrets"
 	"go.mattglei.ch/timber"
 )
 
-const LOG_PREFIX = "[activities]"
+const LOG_PREFIX = "[workouts]"
 
 func Setup(mux *http.ServeMux) {
 	client := http.Client{}
@@ -35,12 +35,12 @@ func Setup(mux *http.ServeMux) {
 	if err != nil {
 		timber.Error(err, "failed to load initial data for workouts cache; not updating")
 	}
-	activityCache := cache.New("workouts", activities, err == nil)
+	workoutsCache := cache.New("workouts", activities, err == nil)
 
-	mux.HandleFunc("GET /activities", activityCache.ServeHTTP)
+	mux.HandleFunc("GET /workouts", workoutsCache.ServeHTTP)
 	mux.HandleFunc(
 		"POST /strava/event",
-		strava.EventRoute(&client, activityCache, *minioClient, fetch, stravaTokens),
+		strava.EventRoute(&client, workoutsCache, *minioClient, fetch, stravaTokens),
 	)
 	mux.HandleFunc("GET /strava/event", strava.ChallengeRoute)
 

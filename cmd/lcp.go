@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"time"
 
-	"go.mattglei.ch/lcp-2/internal/apis/activities"
 	"go.mattglei.ch/lcp-2/internal/apis/applemusic"
 	"go.mattglei.ch/lcp-2/internal/apis/github"
 	"go.mattglei.ch/lcp-2/internal/apis/steam"
+	"go.mattglei.ch/lcp-2/internal/apis/workouts"
 	"go.mattglei.ch/lcp-2/internal/secrets"
 	"go.mattglei.ch/timber"
 )
@@ -22,7 +22,7 @@ func main() {
 	mux.HandleFunc("/", rootRedirect)
 
 	github.Setup(mux)
-	activities.Setup(mux)
+	workouts.Setup(mux)
 	steam.Setup(mux)
 	applemusic.Setup(mux)
 

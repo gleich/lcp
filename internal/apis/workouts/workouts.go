@@ -1,11 +1,11 @@
-package activities
+package workouts
 
 import (
 	"net/http"
 
 	"github.com/minio/minio-go/v7"
-	"go.mattglei.ch/lcp-2/internal/apis/activities/hevy"
-	"go.mattglei.ch/lcp-2/internal/apis/activities/strava"
+	"go.mattglei.ch/lcp-2/internal/apis/workouts/hevy"
+	"go.mattglei.ch/lcp-2/internal/apis/workouts/strava"
 	"go.mattglei.ch/lcp-2/pkg/lcp"
 	"go.mattglei.ch/timber"
 )
