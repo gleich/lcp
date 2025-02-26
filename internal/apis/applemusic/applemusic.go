@@ -68,7 +68,7 @@ func Setup(mux *http.ServeMux) {
 
 	data, err := cacheUpdate(&client, rdb)
 	if err != nil {
-		timber.Error(err, "initial fetch of cache data failed")
+		timber.Error(err, "initial fetch of applemusic cache data failed")
 	}
 
 	applemusicCache := cache.New("applemusic", data, err == nil)
