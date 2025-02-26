@@ -12,21 +12,21 @@ import (
 	"go.mattglei.ch/timber"
 )
 
-type tokens struct {
+type Tokens struct {
 	Access    string `json:"access_token"`
 	Refresh   string `json:"refresh_token"`
 	ExpiresAt int64  `json:"expires_at"`
 }
 
-func loadTokens() tokens {
-	return tokens{
+func LoadTokens() Tokens {
+	return Tokens{
 		Access:    secrets.ENV.StravaAccessToken,
 		Refresh:   secrets.ENV.StravaRefreshToken,
 		ExpiresAt: 0, // starts at zero to force a refresh on boot
 	}
 }
 
-func (t *tokens) refreshIfNeeded(client *http.Client) error {
+func (t *Tokens) RefreshIfNeeded(client *http.Client) error {
 	// subtract 60 to ensure that token doesn't expire in the next 60 seconds
 	if t.ExpiresAt-60 >= time.Now().Unix() {
 		return nil
@@ -48,7 +48,7 @@ func (t *tokens) refreshIfNeeded(client *http.Client) error {
 		return fmt.Errorf("%w creating request for new token failed", err)
 	}
 
-	tokens, err := apis.SendRequest[tokens](client, req)
+	tokens, err := apis.SendRequest[Tokens](client, req)
 	if err != nil {
 		if !errors.Is(err, apis.IgnoreError) {
 			return fmt.Errorf("%w failed to fetch refresh tokens", err)

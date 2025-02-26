@@ -65,10 +65,10 @@ func uploadMap(minioClient minio.Client, id uint64, data []byte) {
 	}
 }
 
-func removeOldMaps(minioClient minio.Client, activities []lcp.StravaActivity) {
+func removeOldMaps(minioClient minio.Client, activities []lcp.Activity) {
 	var validKeys []string
 	for _, activity := range activities {
-		validKeys = append(validKeys, fmt.Sprintf("%d.png", activity.ID))
+		validKeys = append(validKeys, fmt.Sprintf("%s.png", activity.ID))
 	}
 
 	objects := minioClient.ListObjects(context.Background(), bucketName, minio.ListObjectsOptions{})

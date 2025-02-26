@@ -13,7 +13,7 @@ import (
 	"go.mattglei.ch/timber"
 )
 
-type stravaActivity struct {
+type StravaActivity struct {
 	Name      string    `json:"name"`
 	SportType string    `json:"sport_type"`
 	StartDate time.Time `json:"start_date"`
@@ -51,12 +51,12 @@ type detailedStravaActivity struct {
 	Calories float32 `json:"calories"`
 }
 
-func fetchActivities(
+func FetchActivities(
 	client *http.Client,
 	minioClient minio.Client,
-	tokens tokens,
-) ([]lcp.StravaActivity, error) {
-	stravaActivities, err := sendStravaAPIRequest[[]stravaActivity](
+	tokens Tokens,
+) ([]lcp.Activity, error) {
+	stravaActivities, err := sendStravaAPIRequest[[]StravaActivity](
 		client,
 		"api/v3/athlete/activities",
 		tokens,
@@ -65,7 +65,7 @@ func fetchActivities(
 		return nil, fmt.Errorf("%w failed to send request to Strava API to get activities", err)
 	}
 
-	var activities []lcp.StravaActivity
+	var activities []lcp.Activity
 	for _, stravaActivity := range stravaActivities {
 		if len(activities) >= 5 {
 			break
@@ -85,7 +85,8 @@ func fetchActivities(
 			return nil, fmt.Errorf("%w failed to fetch HR data", err)
 		}
 
-		a := lcp.StravaActivity{
+		a := lcp.Activity{
+			Platform:           "strava",
 			Name:               stravaActivity.Name,
 			SportType:          stravaActivity.SportType,
 			StartDate:          stravaActivity.StartDate,
@@ -93,10 +94,11 @@ func fetchActivities(
 			TotalElevationGain: stravaActivity.TotalElevationGain,
 			MovingTime:         stravaActivity.MovingTime,
 			Distance:           stravaActivity.Distance,
-			ID:                 stravaActivity.ID,
+			ID:                 fmt.Sprint(stravaActivity.ID),
 			AverageHeartrate:   stravaActivity.AverageHeartrate,
 			HasMap:             stravaActivity.Map.SummaryPolyline != "",
 			HeartrateData:      hrStream,
+			HasHeartrate:       true,
 			Calories:           details.Calories,
 		}
 
@@ -110,7 +112,7 @@ func fetchActivities(
 			}
 			a.MapBlurImage = &mapBlurURL
 			imgurl := fmt.Sprintf(
-				"https://minio-api.dev.mattglei.ch/mapbox-maps/%d.png",
+				"https://minio-api.dev.mattglei.ch/mapbox-maps/%s.png",
 				a.ID,
 			)
 			a.MapImageURL = &imgurl
@@ -122,7 +124,7 @@ func fetchActivities(
 	return activities, nil
 }
 
-func fetchHeartrate(client *http.Client, id uint64, tokens tokens) ([]int, error) {
+func fetchHeartrate(client *http.Client, id uint64, tokens Tokens) ([]int, error) {
 	params := url.Values{
 		"key_by_type": {"true"},
 		"keys":        {"heartrate"},
@@ -147,7 +149,7 @@ func fetchHeartrate(client *http.Client, id uint64, tokens tokens) ([]int, error
 func fetchActivityDetails(
 	client *http.Client,
 	id uint64,
-	tokens tokens,
+	tokens Tokens,
 ) (detailedStravaActivity, error) {
 	details, err := sendStravaAPIRequest[detailedStravaActivity](
 		client,

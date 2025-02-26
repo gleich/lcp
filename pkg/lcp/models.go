@@ -3,7 +3,7 @@ package lcp
 import "time"
 
 type CacheData interface {
-	AppleMusicCache | []GitHubRepository | []SteamGame | []StravaActivity | []HevyWorkout
+	AppleMusicCache | []GitHubRepository | []SteamGame | []Activity
 }
 
 type AppleMusicCache struct {
@@ -71,32 +71,25 @@ type SteamAchievement struct {
 	UnlockTime  *time.Time `json:"unlock_time"`
 }
 
-type StravaActivity struct {
-	Name               string    `json:"name"`
-	SportType          string    `json:"sport_type"`
-	StartDate          time.Time `json:"start_date"`
-	Timezone           string    `json:"timezone"`
-	MapBlurImage       *string   `json:"map_blur_image"`
-	MapImageURL        *string   `json:"map_image_url"`
-	HasMap             bool      `json:"has_map"`
-	TotalElevationGain float32   `json:"total_elevation_gain"`
-	MovingTime         uint32    `json:"moving_time"`
-	Distance           float32   `json:"distance"`
-	ID                 uint64    `json:"id"`
-	AverageHeartrate   float32   `json:"average_heartrate"`
-	HeartrateData      []int     `json:"heartrate_data"`
-	Calories           float32   `json:"calories"`
-}
-
-type HevyWorkout struct {
-	ID          string         `json:"id"`
-	Title       string         `json:"title"`
-	Description string         `json:"description"`
-	StartTime   time.Time      `json:"start_time"`
-	EndTime     time.Time      `json:"end_time"`
-	UpdatedAt   time.Time      `json:"updated_at"`
-	CreatedAt   time.Time      `json:"created_at"`
-	Exercises   []HevyExercise `json:"exercises"`
+type Activity struct {
+	Platform           string         `json:"platform"`
+	Name               string         `json:"name"`
+	SportType          string         `json:"sport_type"`
+	StartDate          time.Time      `json:"start_date"`
+	Timezone           string         `json:"timezone"`
+	MapBlurImage       *string        `json:"map_blur_image,omitempty"`
+	MapImageURL        *string        `json:"map_image_url,omitempty"`
+	HasMap             bool           `json:"has_map"`
+	TotalElevationGain float32        `json:"total_elevation_gain,omitempty"`
+	MovingTime         uint32         `json:"moving_time"`
+	Distance           float32        `json:"distance,omitempty"`
+	ID                 string         `json:"id"`
+	HasHeartrate       bool           `json:"has_heartrate"`
+	AverageHeartrate   float32        `json:"average_heartrate,omitempty"`
+	HeartrateData      []int          `json:"heartrate_data"`
+	HevyExercises      []HevyExercise `json:"hevy_exercises,omitempty"`
+	HevyVolumeKG       float64        `json:"hevy_volume_kg,omitempty"`
+	Calories           float32        `json:"calories,omitempty"`
 }
 
 type HevyExercise struct {

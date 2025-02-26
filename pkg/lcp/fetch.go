@@ -34,10 +34,8 @@ func FetchCache[T CacheData](client *Client) (Response[T], error) {
 		cacheName = "github"
 	case []SteamGame:
 		cacheName = "steam"
-	case []StravaActivity:
-		cacheName = "strava"
-	case []HevyWorkout:
-		cacheName = "hevy"
+	case []Activity:
+		cacheName = "workouts"
 	}
 
 	url, err := url.JoinPath("https://lcp.dev.mattglei.ch", cacheName)
