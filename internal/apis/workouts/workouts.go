@@ -3,6 +3,7 @@ package workouts
 import (
 	"net/http"
 	"sort"
+	"time"
 
 	"github.com/minio/minio-go/v7"
 	"go.mattglei.ch/lcp-2/internal/apis/workouts/hevy"
@@ -31,7 +32,11 @@ func fetch(
 	for _, s := range stravaActivities {
 		conflict := false
 		for _, h := range hevyWorkouts {
-			if s.StartDate.UTC().Equal(h.StartDate.UTC()) {
+			diff := s.StartDate.Sub(h.StartDate)
+			if diff < 0 {
+				diff = -diff
+			}
+			if diff < time.Minute {
 				conflict = true
 				break
 			}
@@ -42,7 +47,7 @@ func fetch(
 	}
 
 	sort.Slice(activities, func(i, j int) bool {
-		return activities[i].StartDate.UTC().Before(activities[j].StartDate.UTC())
+		return activities[i].StartDate.After(activities[j].StartDate)
 	})
 
 	return activities, nil
