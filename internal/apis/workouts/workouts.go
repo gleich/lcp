@@ -15,18 +15,18 @@ func fetch(
 	client *http.Client,
 	minioClient minio.Client,
 	stravaTokens strava.Tokens,
-) ([]lcp.Activity, error) {
+) ([]lcp.Workout, error) {
 	stravaActivities, err := strava.FetchActivities(client, minioClient, stravaTokens)
 	if err != nil {
-		return []lcp.Activity{}, err
+		return []lcp.Workout{}, err
 	}
 
 	hevyWorkouts, err := hevy.FetchWorkouts(client)
 	if err != nil {
-		return []lcp.Activity{}, err
+		return []lcp.Workout{}, err
 	}
 
-	activities := []lcp.Activity{}
+	activities := []lcp.Workout{}
 	activities = append(activities, hevyWorkouts...)
 
 	for _, s := range stravaActivities {

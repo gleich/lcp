@@ -21,17 +21,17 @@ type workoutsResponse struct {
 	} `json:"workouts"`
 }
 
-func FetchWorkouts(client *http.Client) ([]lcp.Activity, error) {
+func FetchWorkouts(client *http.Client) ([]lcp.Workout, error) {
 	params := url.Values{"api-key": {secrets.ENV.HevyAccessToken}}
 	workouts, err := sendHevyAPIRequest[workoutsResponse](
 		client,
 		fmt.Sprintf("/v1/workouts?%s", params.Encode()),
 	)
 	if err != nil {
-		return []lcp.Activity{}, fmt.Errorf("%w ", err)
+		return []lcp.Workout{}, fmt.Errorf("%w ", err)
 	}
 
-	var activities []lcp.Activity
+	var activities []lcp.Workout
 	for _, workout := range workouts.Workouts {
 		volume := 0.0
 		for _, exercise := range workout.Exercises {
@@ -39,7 +39,7 @@ func FetchWorkouts(client *http.Client) ([]lcp.Activity, error) {
 				volume += set.WeightKg * float64(set.Reps)
 			}
 		}
-		activities = append(activities, lcp.Activity{
+		activities = append(activities, lcp.Workout{
 			Platform:      "hevy",
 			Name:          workout.Title,
 			StartDate:     workout.StartTime.UTC(),

@@ -3,7 +3,7 @@ package lcp
 import "time"
 
 type CacheData interface {
-	AppleMusicCache | []GitHubRepository | []SteamGame | []Activity
+	AppleMusicCache | []GitHubRepository | []SteamGame | []Workout
 }
 
 type AppleMusicCache struct {
@@ -71,7 +71,7 @@ type SteamAchievement struct {
 	UnlockTime  *time.Time `json:"unlock_time"`
 }
 
-type Activity struct {
+type Workout struct {
 	Platform           string         `json:"platform"`
 	Name               string         `json:"name"`
 	SportType          string         `json:"sport_type"`

@@ -24,11 +24,11 @@ type event struct {
 
 func EventRoute(
 	client *http.Client,
-	workoutsCache *cache.Cache[[]lcp.Activity],
+	workoutsCache *cache.Cache[[]lcp.Workout],
 	minioClient minio.Client,
 	fetch func(client *http.Client,
 		minioClient minio.Client,
-		stravaTokens Tokens) ([]lcp.Activity, error),
+		stravaTokens Tokens) ([]lcp.Workout, error),
 	tokens Tokens,
 ) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

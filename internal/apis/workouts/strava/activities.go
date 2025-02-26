@@ -55,7 +55,7 @@ func FetchActivities(
 	client *http.Client,
 	minioClient minio.Client,
 	tokens Tokens,
-) ([]lcp.Activity, error) {
+) ([]lcp.Workout, error) {
 	stravaActivities, err := sendStravaAPIRequest[[]StravaActivity](
 		client,
 		"api/v3/athlete/activities",
@@ -65,7 +65,7 @@ func FetchActivities(
 		return nil, fmt.Errorf("%w failed to send request to Strava API to get activities", err)
 	}
 
-	var activities []lcp.Activity
+	var activities []lcp.Workout
 	for _, stravaActivity := range stravaActivities {
 		if len(activities) >= 5 {
 			break
@@ -85,7 +85,7 @@ func FetchActivities(
 			return nil, fmt.Errorf("%w failed to fetch HR data", err)
 		}
 
-		a := lcp.Activity{
+		a := lcp.Workout{
 			Platform:           "strava",
 			Name:               stravaActivity.Name,
 			SportType:          stravaActivity.SportType,

@@ -34,7 +34,7 @@ func FetchCache[T CacheData](client *Client) (Response[T], error) {
 		cacheName = "github"
 	case []SteamGame:
 		cacheName = "steam"
-	case []Activity:
+	case []Workout:
 		cacheName = "workouts"
 	}
 

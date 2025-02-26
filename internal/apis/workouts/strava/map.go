@@ -65,7 +65,7 @@ func uploadMap(minioClient minio.Client, id uint64, data []byte) {
 	}
 }
 
-func removeOldMaps(minioClient minio.Client, activities []lcp.Activity) {
+func removeOldMaps(minioClient minio.Client, activities []lcp.Workout) {
 	var validKeys []string
 	for _, activity := range activities {
 		validKeys = append(validKeys, fmt.Sprintf("%s.png", activity.ID))
