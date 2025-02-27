@@ -19,8 +19,8 @@ func fetchMap(polyline string) []byte {
 	var (
 		lineWidth = 2.0
 		lineColor = "000"
-		width     = 440
-		height    = 240
+		width     = 462
+		height    = 252
 		params    = url.Values{"access_token": {secrets.ENV.MapboxAccessToken}}
 	)
 	url := fmt.Sprintf(
