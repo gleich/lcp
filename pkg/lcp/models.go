@@ -89,6 +89,7 @@ type Workout struct {
 	HeartrateData      []int          `json:"heartrate_data"`
 	HevyExercises      []HevyExercise `json:"hevy_exercises,omitempty"`
 	HevyVolumeKG       float64        `json:"hevy_volume_kg,omitempty"`
+	HevySetCount       int            `json:"hevy_set_count,omitempty"`
 	Calories           float32        `json:"calories,omitempty"`
 }
 
