@@ -44,7 +44,7 @@ func FetchWorkouts(client *http.Client) ([]lcp.Workout, error) {
 		activities = append(activities, lcp.Workout{
 			Platform:      "hevy",
 			Name:          workout.Title,
-			StartDate:     workout.StartTime.UTC(),
+			StartDate:     workout.StartTime,
 			MovingTime:    uint32(workout.EndTime.Sub(workout.StartTime).Seconds()),
 			SportType:     "WeightTraining",
 			HasMap:        false,
