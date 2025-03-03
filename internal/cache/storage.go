@@ -8,7 +8,7 @@ import (
 	"go.mattglei.ch/timber"
 )
 
-func (c *Cache[T]) persistToFile() {
+func (c *Cache[T]) persistToFile(bin []byte) {
 	var file *os.File
 	if _, err := os.Stat(c.filePath); os.IsNotExist(err) {
 		folder := filepath.Dir(c.filePath)
@@ -31,17 +31,7 @@ func (c *Cache[T]) persistToFile() {
 	}
 	defer file.Close()
 
-	c.DataMutex.RLock()
-	b, err := json.Marshal(CacheResponse[T]{
-		Data:    c.Data,
-		Updated: c.Updated,
-	})
-	c.DataMutex.RUnlock()
-	if err != nil {
-		timber.Error(err, "encoding data to json failed")
-		return
-	}
-	_, err = file.Write(b)
+	_, err := file.Write(bin)
 	if err != nil {
 		timber.Error(err, "writing data to json failed")
 	}
@@ -57,7 +47,7 @@ func (c *Cache[T]) loadFromFile() {
 		var data CacheResponse[T]
 		err = json.Unmarshal(b, &data)
 		if err != nil {
-			timber.Fatal(err, "unmarshal json data failed from:", string(b))
+			timber.Fatal(err, "unmarshaling json data failed from:", string(b))
 		}
 
 		c.Data = data.Data

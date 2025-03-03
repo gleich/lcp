@@ -18,11 +18,11 @@ import (
 )
 
 type Cache[T lcp.CacheData] struct {
-	name      string
-	DataMutex sync.RWMutex
-	Data      T
-	Updated   time.Time
-	filePath  string
+	name     string
+	Mutex    sync.RWMutex
+	Data     T
+	Updated  time.Time
+	filePath string
 }
 
 func New[T lcp.CacheData](name string, data T, update bool) *Cache[T] {
@@ -48,9 +48,9 @@ func (c *Cache[T]) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	c.DataMutex.RLock()
+	c.Mutex.RLock()
 	err := json.NewEncoder(w).Encode(CacheResponse[T]{Data: c.Data, Updated: c.Updated})
-	c.DataMutex.RUnlock()
+	c.Mutex.RUnlock()
 	if err != nil {
 		err = fmt.Errorf("%w failed to write json data to request", err)
 		timber.Error(err)
@@ -59,29 +59,27 @@ func (c *Cache[T]) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *Cache[T]) Update(data T) {
-	const jsonIndent = "  "
-	c.DataMutex.RLock()
-	oldBin, err := json.MarshalIndent(c.Data, "", jsonIndent)
+	c.Mutex.RLock()
+	oldBin, err := json.Marshal(c.Data)
 	if err != nil {
 		timber.Error(err, "failed to json marshal old data")
 		return
 	}
-	c.DataMutex.RUnlock()
-	newBin, err := json.MarshalIndent(data, "", jsonIndent)
+	c.Mutex.RUnlock()
+	newBin, err := json.Marshal(data)
 	if err != nil {
 		timber.Error(err, "failed to json marshal new data")
 		return
 	}
 
-	old := string(oldBin)
 	new := string(newBin)
-	if old != new && new != "null" && strings.Trim(string(newBin), " ") != "" {
-		c.DataMutex.Lock()
+	if string(oldBin) != new && new != "null" && strings.Trim(new, " ") != "" {
+		c.Mutex.Lock()
 		c.Data = data
 		c.Updated = time.Now()
-		c.DataMutex.Unlock()
+		c.Mutex.Unlock()
 
-		c.persistToFile()
+		c.persistToFile(newBin)
 		timber.Done(fmt.Sprintf("[%s]", c.name), "cache updated")
 	}
 }

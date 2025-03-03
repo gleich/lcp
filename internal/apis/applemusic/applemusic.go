@@ -98,7 +98,7 @@ func serveHTTP(c *cache.Cache[lcp.AppleMusicCache]) http.HandlerFunc {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		c.DataMutex.RLock()
+		c.Mutex.RLock()
 
 		data := cacheDataResponse{}
 		for _, p := range c.Data.Playlists {
@@ -122,7 +122,7 @@ func serveHTTP(c *cache.Cache[lcp.AppleMusicCache]) http.HandlerFunc {
 
 		err := json.NewEncoder(w).
 			Encode(cache.CacheResponse[cacheDataResponse]{Data: data, Updated: c.Updated})
-		c.DataMutex.RUnlock()
+		c.Mutex.RUnlock()
 		if err != nil {
 			err = fmt.Errorf("%w failed to write json data to request", err)
 			timber.Error(err)

@@ -105,7 +105,7 @@ func playlistEndpoint(c *cache.Cache[lcp.AppleMusicCache]) http.HandlerFunc {
 		}
 		id := r.PathValue("id")
 
-		c.DataMutex.RLock()
+		c.Mutex.RLock()
 		var p *lcp.AppleMusicPlaylist
 		for _, plist := range c.Data.Playlists {
 			if plist.ID == id {
@@ -115,13 +115,13 @@ func playlistEndpoint(c *cache.Cache[lcp.AppleMusicCache]) http.HandlerFunc {
 		}
 
 		if p == nil {
-			c.DataMutex.RUnlock()
+			c.Mutex.RUnlock()
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		err := json.NewEncoder(w).Encode(p)
-		c.DataMutex.RUnlock()
+		c.Mutex.RUnlock()
 		if err != nil {
 			err = fmt.Errorf("%w failed to write json data to request", err)
 			timber.Error(err)
