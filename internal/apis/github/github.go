@@ -12,7 +12,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
-const LOG_PREFIX = "[github]"
+const logPrefix = "[github]"
 
 func Setup(mux *http.ServeMux) {
 	githubTokenSource := oauth2.StaticTokenSource(
@@ -30,5 +30,5 @@ func Setup(mux *http.ServeMux) {
 	mux.HandleFunc("GET /github", githubCache.ServeHTTP)
 	go cache.UpdatePeriodically(githubCache, githubClient, fetchPinnedRepos, 1*time.Minute)
 
-	timber.Done(LOG_PREFIX, "setup cache and endpoint")
+	timber.Done(logPrefix, "setup cache and endpoint")
 }

@@ -57,6 +57,6 @@ func (t *Tokens) RefreshIfNeeded(client *http.Client) error {
 	}
 
 	*t = tokens
-	timber.Done(LOG_PREFIX, "new access token", t.Access)
+	timber.Done(logPrefix, "new access token", t.Access)
 	return nil
 }

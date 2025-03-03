@@ -11,7 +11,7 @@ import (
 	"go.mattglei.ch/timber"
 )
 
-const LOG_PREFIX = "[workouts]"
+const logPrefix = "[workouts]"
 
 func Setup(mux *http.ServeMux) {
 	client := http.Client{}
@@ -44,5 +44,5 @@ func Setup(mux *http.ServeMux) {
 	)
 	mux.HandleFunc("GET /strava/event", strava.ChallengeRoute)
 
-	timber.Done(LOG_PREFIX, "setup cache and endpoints")
+	timber.Done(logPrefix, "setup cache and endpoints")
 }

@@ -14,8 +14,8 @@ import (
 	"go.mattglei.ch/timber"
 )
 
-const API_ENDPOINT = "https://api.music.apple.com/"
-const LOG_PREFIX = "[applemusic]"
+const apiEndpoint = "https://api.music.apple.com/"
+const logPrefix = "[applemusic]"
 
 func cacheUpdate(client *http.Client, rdb *redis.Client) (lcp.AppleMusicCache, error) {
 	recentlyPlayed, err := fetchRecentlyPlayed(client, rdb)
@@ -83,7 +83,7 @@ func Setup(mux *http.ServeMux) {
 		30*time.Second,
 	)
 	go updateAlbumArtPeriodically(&client, rdb, 24*time.Hour)
-	timber.Done(LOG_PREFIX, "setup cache and endpoints")
+	timber.Done(logPrefix, "setup cache and endpoints")
 }
 
 type cacheDataResponse struct {

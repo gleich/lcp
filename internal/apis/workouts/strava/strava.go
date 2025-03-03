@@ -1,3 +1,3 @@
 package strava
 
-const LOG_PREFIX = "[strava]"
+const logPrefix = "[strava]"
