@@ -19,10 +19,11 @@ import (
 
 type Cache[T lcp.CacheData] struct {
 	name     string
-	Mutex    sync.RWMutex
-	Data     T
-	Updated  time.Time
 	filePath string
+
+	Mutex   sync.RWMutex
+	Data    T
+	Updated time.Time
 }
 
 func New[T lcp.CacheData](name string, data T, update bool) *Cache[T] {
