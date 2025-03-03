@@ -79,7 +79,7 @@ func (c *Cache[T]) Update(data T) {
 		c.Updated = time.Now()
 		c.Mutex.Unlock()
 
-		c.persistToFile(newBin)
+		c.persistToFile()
 		timber.Done(fmt.Sprintf("[%s]", c.name), "cache updated")
 	}
 }
