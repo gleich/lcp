@@ -1,7 +1,6 @@
 package strava
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -50,10 +49,7 @@ func (t *Tokens) RefreshIfNeeded(client *http.Client) error {
 
 	tokens, err := apis.SendRequest[Tokens](client, req)
 	if err != nil {
-		if !errors.Is(err, apis.IgnoreError) {
-			return fmt.Errorf("%w failed to fetch refresh tokens", err)
-		}
-		return err
+		return fmt.Errorf("%w failed to fetch refresh tokens", err)
 	}
 
 	*t = tokens

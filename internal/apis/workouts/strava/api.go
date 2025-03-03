@@ -1,13 +1,11 @@
 package strava
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"strings"
 
 	"go.mattglei.ch/lcp-2/internal/apis"
-	"go.mattglei.ch/timber"
 )
 
 func sendStravaAPIRequest[T any](client *http.Client, path string, tokens Tokens) (T, error) {
@@ -25,10 +23,7 @@ func sendStravaAPIRequest[T any](client *http.Client, path string, tokens Tokens
 
 	resp, err := apis.SendRequest[T](client, req)
 	if err != nil {
-		if !errors.Is(err, apis.IgnoreError) {
-			timber.Error(err, "failed to make strava API request")
-		}
-		return zeroValue, err
+		return zeroValue, fmt.Errorf("%w failed to make strava API request", err)
 	}
 	return resp, nil
 }

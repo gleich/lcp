@@ -1,7 +1,6 @@
 package hevy
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -24,10 +23,7 @@ func sendHevyAPIRequest[T any](client *http.Client, path string) (T, error) {
 
 	resp, err := apis.SendRequest[T](client, req)
 	if err != nil {
-		if !errors.Is(err, apis.IgnoreError) {
-			return zeroValue, fmt.Errorf("%w failed to make hevy API request", err)
-		}
-		return zeroValue, err
+		return zeroValue, fmt.Errorf("%w failed to make hevy API request", err)
 	}
 	return resp, nil
 }

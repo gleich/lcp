@@ -1,7 +1,6 @@
 package steam
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -40,10 +39,7 @@ func fetchRecentlyPlayedGames(client *http.Client) ([]lcp.SteamGame, error) {
 	}
 	ownedGames, err := apis.SendRequest[ownedGamesResponse](client, req)
 	if err != nil {
-		if !errors.Is(err, apis.IgnoreError) {
-			return nil, fmt.Errorf("%w sending request for owned games failed", err)
-		}
-		return nil, err
+		return nil, fmt.Errorf("%w sending request for owned games failed", err)
 	}
 
 	sort.Slice(ownedGames.Response.Games, func(i, j int) bool {

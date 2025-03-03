@@ -2,13 +2,11 @@ package applemusic
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/redis/go-redis/v9"
-	"go.mattglei.ch/lcp-2/internal/apis"
 	"go.mattglei.ch/lcp-2/internal/auth"
 	"go.mattglei.ch/lcp-2/internal/cache"
 	"go.mattglei.ch/lcp-2/pkg/lcp"
@@ -43,14 +41,11 @@ func fetchPlaylist(
 		fmt.Sprintf("/v1/me/library/playlists/%s", id),
 	)
 	if err != nil {
-		if !errors.Is(err, apis.IgnoreError) {
-			return lcp.AppleMusicPlaylist{}, fmt.Errorf(
-				"%v failed to fetch playlist for %s",
-				err,
-				id,
-			)
-		}
-		return lcp.AppleMusicPlaylist{}, err
+		return lcp.AppleMusicPlaylist{}, fmt.Errorf(
+			"%w failed to fetch playlist for %s",
+			err,
+			id,
+		)
 	}
 
 	var totalResponseData []songResponse
@@ -65,14 +60,11 @@ func fetchPlaylist(
 	for trackData.Next != "" {
 		trackData, err = sendAppleMusicAPIRequest[playlistTracksResponse](client, trackData.Next)
 		if err != nil {
-			if !errors.Is(err, apis.IgnoreError) {
-				return lcp.AppleMusicPlaylist{}, fmt.Errorf(
-					"%v failed to paginate through tracks for playlist with id of %s",
-					err,
-					id,
-				)
-			}
-			return lcp.AppleMusicPlaylist{}, err
+			return lcp.AppleMusicPlaylist{}, fmt.Errorf(
+				"%w failed to paginate through tracks for playlist with id of %s",
+				err,
+				id,
+			)
 		}
 		totalResponseData = append(totalResponseData, trackData.Data...)
 	}
