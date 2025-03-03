@@ -96,6 +96,7 @@ type Workout struct {
 type HevyExercise struct {
 	Title string    `json:"title"`
 	Sets  []HevySet `json:"sets"`
+	ID    string    `json:"exercise_template_id"`
 }
 
 type HevySet struct {
