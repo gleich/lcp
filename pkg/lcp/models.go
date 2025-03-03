@@ -100,7 +100,6 @@ type HevyExercise struct {
 }
 
 type HevySet struct {
-	Index    int     `json:"index"`
 	WeightKg float64 `json:"weight_kg"`
 	Reps     int     `json:"reps"`
 	Type     string  `json:"type"`
