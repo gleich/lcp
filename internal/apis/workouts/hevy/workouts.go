@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"go.mattglei.ch/lcp-2/internal/secrets"
 	"go.mattglei.ch/lcp-2/pkg/lcp"
+	"go.mattglei.ch/timber"
 )
 
 type workoutsResponse struct {
@@ -33,14 +35,20 @@ func FetchWorkouts(client *http.Client) ([]lcp.Workout, error) {
 
 	var activities []lcp.Workout
 	for _, workout := range workouts.Workouts {
-		volume := 0.0
+		totalVolume := 0.0
 		sets := 0
 		for _, exercise := range workout.Exercises {
+			multiplier := 1.0
+			title := strings.ToLower(exercise.Title)
+			if strings.Contains(title, "(dumbbell)") {
+				multiplier = 2.0
+			}
 			for _, set := range exercise.Sets {
-				volume += set.WeightKg * float64(set.Reps)
+				totalVolume += multiplier * set.WeightKg * float64(set.Reps)
 				sets++
 			}
 		}
+		timber.Debug(totalVolume)
 		activities = append(activities, lcp.Workout{
 			Platform:      "hevy",
 			Name:          workout.Title,
@@ -52,7 +60,7 @@ func FetchWorkouts(client *http.Client) ([]lcp.Workout, error) {
 			ID:            workout.ID,
 			HasHeartrate:  false,
 			HevyExercises: workout.Exercises,
-			HevyVolumeKG:  volume,
+			HevyVolumeKG:  totalVolume,
 			HevySetCount:  sets,
 		})
 	}
