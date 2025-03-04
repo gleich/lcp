@@ -8,7 +8,6 @@ import (
 
 	"go.mattglei.ch/lcp-2/internal/secrets"
 	"go.mattglei.ch/lcp-2/pkg/lcp"
-	"go.mattglei.ch/timber"
 )
 
 type workoutsResponse struct {
@@ -42,7 +41,6 @@ func FetchWorkouts(client *http.Client) ([]lcp.Workout, error) {
 				sets++
 			}
 		}
-		timber.Debug(totalVolume)
 		activities = append(activities, lcp.Workout{
 			Platform:      "hevy",
 			Name:          workout.Title,
