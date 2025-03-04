@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"strings"
 	"time"
 
 	"go.mattglei.ch/lcp-2/internal/secrets"
@@ -38,13 +37,8 @@ func FetchWorkouts(client *http.Client) ([]lcp.Workout, error) {
 		totalVolume := 0.0
 		sets := 0
 		for _, exercise := range workout.Exercises {
-			multiplier := 1.0
-			title := strings.ToLower(exercise.Title)
-			if strings.Contains(title, "(dumbbell)") {
-				multiplier = 2.0
-			}
 			for _, set := range exercise.Sets {
-				totalVolume += multiplier * set.WeightKg * float64(set.Reps)
+				totalVolume += set.WeightKg * float64(set.Reps)
 				sets++
 			}
 		}
