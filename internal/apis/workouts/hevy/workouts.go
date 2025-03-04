@@ -6,9 +6,13 @@ import (
 	"net/url"
 	"time"
 
+	"slices"
+
 	"go.mattglei.ch/lcp-2/internal/secrets"
 	"go.mattglei.ch/lcp-2/pkg/lcp"
 )
+
+const weightInLBs = 148
 
 type workoutsResponse struct {
 	Workouts []struct {
@@ -31,12 +35,21 @@ func FetchWorkouts(client *http.Client) ([]lcp.Workout, error) {
 		return []lcp.Workout{}, fmt.Errorf("%w ", err)
 	}
 
+	bodyWeightExercises := []string{
+		"Chest Dip (Assisted)",
+		"Pull Up (Assisted)",
+	}
+
 	var activities []lcp.Workout
 	for _, workout := range workouts.Workouts {
 		totalVolume := 0.0
 		sets := 0
 		for _, exercise := range workout.Exercises {
 			for _, set := range exercise.Sets {
+				// account for bodyweight exercises which are (body weight - weight)
+				if slices.Contains(bodyWeightExercises, exercise.Title) {
+					set.WeightKg = weightInLBs*0.45359237 - set.WeightKg
+				}
 				totalVolume += set.WeightKg * float64(set.Reps)
 				sets++
 			}
