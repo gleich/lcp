@@ -14,7 +14,6 @@ import (
 	"go.mattglei.ch/timber"
 )
 
-const apiEndpoint = "https://api.music.apple.com/"
 const logPrefix = "[applemusic]"
 
 func cacheUpdate(client *http.Client, rdb *redis.Client) (lcp.AppleMusicCache, error) {
