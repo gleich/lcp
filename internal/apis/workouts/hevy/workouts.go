@@ -12,7 +12,7 @@ import (
 	"go.mattglei.ch/lcp-2/pkg/lcp"
 )
 
-const weightInLBs = 148
+const weightInLBs = 145.5
 
 type workoutsResponse struct {
 	Workouts []struct {
