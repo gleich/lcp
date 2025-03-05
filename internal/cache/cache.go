@@ -97,7 +97,7 @@ func UpdatePeriodically[T lcp.CacheData, C any](
 		time.Sleep(interval)
 		data, err := update(client)
 		if err != nil {
-			if !errors.Is(err, apis.IgnoreError) {
+			if !errors.Is(err, apis.WarningError) {
 				timber.Error(err, "updating", cache.name, "cache failed")
 			}
 		} else {
