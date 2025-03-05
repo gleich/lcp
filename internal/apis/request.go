@@ -55,7 +55,7 @@ func Request[T any](logPrefix string, client *http.Client, req *http.Request) (T
 	}
 
 	var data T
-	err = json.NewDecoder(resp.Body).Decode(&data)
+	err = json.Unmarshal(body, &data)
 	if err != nil {
 		timber.Debug(string(body))
 		return zeroValue, fmt.Errorf("%w failed to parse json", err)
