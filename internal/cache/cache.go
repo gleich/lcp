@@ -18,8 +18,9 @@ import (
 )
 
 type Cache[T lcp.CacheData] struct {
-	name     string
-	filePath string
+	name      string
+	filePath  string
+	LogPrefix string
 
 	Mutex   sync.RWMutex
 	Data    T
@@ -28,9 +29,10 @@ type Cache[T lcp.CacheData] struct {
 
 func New[T lcp.CacheData](name string, data T, update bool) *Cache[T] {
 	cache := Cache[T]{
-		name:     name,
-		Updated:  time.Now(),
-		filePath: filepath.Join(secrets.ENV.CacheFolder, fmt.Sprintf("%s.json", name)),
+		name:      name,
+		Updated:   time.Now(),
+		LogPrefix: fmt.Sprintf("[%s]", name),
+		filePath:  filepath.Join(secrets.ENV.CacheFolder, fmt.Sprintf("%s.json", name)),
 	}
 	cache.loadFromFile()
 	if update {

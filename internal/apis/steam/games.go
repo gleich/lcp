@@ -37,7 +37,7 @@ func fetchRecentlyPlayedGames(client *http.Client) ([]lcp.SteamGame, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%w failed to create request for steam API owned games", err)
 	}
-	ownedGames, err := apis.SendRequest[ownedGamesResponse](client, req)
+	ownedGames, err := apis.SendRequest[ownedGamesResponse](logPrefix, client, req)
 	if err != nil {
 		return nil, fmt.Errorf("%w sending request for owned games failed", err)
 	}

@@ -16,7 +16,7 @@ import (
 var IgnoreError = errors.New("Warning error when trying to make request. Ignore error.")
 
 // sends a given http.Request and will unmarshal the JSON from the response body and return that as the given type.
-func SendRequest[T any](client *http.Client, req *http.Request) (T, error) {
+func SendRequest[T any](logPrefix string, client *http.Client, req *http.Request) (T, error) {
 	ctx, cancel := context.WithTimeout(req.Context(), 1*time.Minute)
 	defer cancel()
 	req = req.WithContext(ctx)
@@ -25,15 +25,15 @@ func SendRequest[T any](client *http.Client, req *http.Request) (T, error) {
 	resp, err := client.Do(req)
 	if err != nil {
 		if errors.Is(err, context.DeadlineExceeded) {
-			timber.Warning("request timed out for", req.URL.String())
+			timber.Warning(logPrefix, "request timed out for", req.URL.String())
 			return zeroValue, IgnoreError
 		}
 		if errors.Is(err, io.ErrUnexpectedEOF) {
-			timber.Warning("unexpected EOF from", req.URL.String())
+			timber.Warning(logPrefix, "unexpected EOF from", req.URL.String())
 			return zeroValue, IgnoreError
 		}
 		if strings.Contains(err.Error(), "read: connection reset by peer") {
-			timber.Warning("tcp connection reset by peer from", req.URL.String())
+			timber.Warning(logPrefix, "tcp connection reset by peer from", req.URL.String())
 			return zeroValue, IgnoreError
 		}
 		return zeroValue, fmt.Errorf("%w sending request failed", err)
