@@ -30,18 +30,18 @@ func Request[T any](logPrefix string, client *http.Client, req *http.Request) (T
 	resp, err := client.Do(req)
 	if err != nil {
 		if errors.Is(err, context.DeadlineExceeded) {
-			timber.Warning(logPrefix, "request timed out for", req.URL.String())
+			timber.Warning(logPrefix, "request timed out for", req.URL.Path)
 			return zeroValue, WarningError
 		}
 		if errors.Is(err, io.ErrUnexpectedEOF) {
-			timber.Warning(logPrefix, "unexpected EOF from", req.URL.String())
+			timber.Warning(logPrefix, "unexpected EOF from", req.URL.Path)
 			return zeroValue, WarningError
 		}
 		if strings.Contains(err.Error(), "read: connection reset by peer") {
-			timber.Warning(logPrefix, "tcp connection reset by peer from", req.URL.String())
+			timber.Warning(logPrefix, "tcp connection reset by peer from", req.URL.Path)
 			return zeroValue, WarningError
 		}
-		return zeroValue, fmt.Errorf("%w sending request failed", err)
+		return zeroValue, fmt.Errorf("%w sending request to %s failed", err, req.URL.String())
 	}
 	defer resp.Body.Close()
 
@@ -50,7 +50,13 @@ func Request[T any](logPrefix string, client *http.Client, req *http.Request) (T
 		return zeroValue, fmt.Errorf("%w reading response body failed", err)
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		timber.Warning(logPrefix, resp.StatusCode, "->", req.URL.Path)
+		timber.Warning(
+			logPrefix,
+			resp.StatusCode,
+			fmt.Sprintf("(%s)", strings.ToLower(http.StatusText(resp.StatusCode))),
+			"from",
+			req.URL.Path,
+		)
 		return zeroValue, WarningError
 	}
 
