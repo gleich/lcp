@@ -21,12 +21,13 @@ type blurhashCacheEntry struct {
 	Url      string
 }
 
-// Load an album's album art blurhash either for the first time or from the cache.
-// Instead of just fetching the image and creating the blurhash it checks the cache first.
+// loadAlbumArtBlurhash retrieves the blurhash for album art by first checking
+// the Redis cache. If a cached blurhash is found (using the given id), it is returned.
+// Otherwise, the album art is fetched from the provided URL, a new blurhash is created,
+// and its URI-encoded value is returned.
 //
-// Returns:
-//   - the URI encoded data for the blurhash or nil if there is no blurhash output
-//   - error that might of been encountered
+// If no blurhash can be generated, nil is returned. Any errors encountered during
+// the cache lookup, HTTP request, or processing are returned.
 func loadAlbumArtBlurhash(
 	client *http.Client,
 	rdb *redis.Client,
@@ -73,7 +74,6 @@ func loadAlbumArtBlurhash(
 	return blurhashURL, nil
 }
 
-// Update the album art in the cache every hour
 func updateAlbumArtPeriodically(client *http.Client, rdb *redis.Client, interval time.Duration) {
 	for {
 		time.Sleep(interval)
@@ -135,11 +135,11 @@ func updateAlbumArtPeriodically(client *http.Client, rdb *redis.Client, interval
 	}
 }
 
-// Create an album art in the cache
-//
-// Returns:
-//   - the URI encoded data for the blurhash or nil if there is no blurhash output
-//   - error that might of been encountered
+// createAlbumArtBlurhash generates a blurhash from the album art image fetched via
+// the provided HTTP request. It caches the resulting URI-encoded blurhash in Redis
+// under the given id and returns it. If the HTTP response indicates that the image
+// is unchanged or not found, the function returns nil. Any errors encountered during
+// the request, image processing, or caching are returned.
 func createAlbumArtBlurhash(
 	client *http.Client,
 	rdb *redis.Client,
