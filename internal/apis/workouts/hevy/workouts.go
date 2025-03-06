@@ -32,7 +32,7 @@ func FetchWorkouts(client *http.Client) ([]lcp.Workout, error) {
 		fmt.Sprintf("/v1/workouts?%s", params.Encode()),
 	)
 	if err != nil {
-		return []lcp.Workout{}, fmt.Errorf("%w ", err)
+		return []lcp.Workout{}, fmt.Errorf("%w failed to fetch hevy workouts", err)
 	}
 
 	bodyWeightExercises := []string{
