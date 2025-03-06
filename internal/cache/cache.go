@@ -79,7 +79,7 @@ func (c *Cache[T]) Update(data T) {
 	if string(oldBin) != new && new != "null" && strings.Trim(new, " ") != "" {
 		c.Mutex.Lock()
 		c.Data = data
-		c.Updated = time.Now()
+		c.Updated = time.Now().UTC()
 		c.Mutex.Unlock()
 
 		c.persistToFile()
