@@ -30,7 +30,7 @@ type Cache[T lcp.CacheData] struct {
 func New[T lcp.CacheData](name string, data T, update bool) *Cache[T] {
 	cache := Cache[T]{
 		name:      name,
-		Updated:   time.Now(),
+		Updated:   time.Now().UTC(),
 		LogPrefix: fmt.Sprintf("[%s]", name),
 		filePath:  filepath.Join(secrets.ENV.CacheFolder, fmt.Sprintf("%s.json", name)),
 	}

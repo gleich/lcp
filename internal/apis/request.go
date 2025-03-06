@@ -50,7 +50,7 @@ func Request[T any](logPrefix string, client *http.Client, req *http.Request) (T
 		return zeroValue, fmt.Errorf("%w reading response body failed", err)
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		timber.Warning(resp.StatusCode, "returned from", req.URL.String())
+		timber.Warning(logPrefix, resp.StatusCode, "->", req.URL.Path)
 		return zeroValue, WarningError
 	}
 
