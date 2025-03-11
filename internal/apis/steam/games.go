@@ -37,7 +37,7 @@ func fetchRecentlyPlayedGames(client *http.Client) ([]lcp.SteamGame, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%w failed to create request for steam API owned games", err)
 	}
-	ownedGames, err := apis.Request[ownedGamesResponse](logPrefix, client, req)
+	ownedGames, err := apis.RequestJSON[ownedGamesResponse](logPrefix, client, req)
 	if err != nil {
 		return nil, fmt.Errorf("%w sending request for owned games failed", err)
 	}
@@ -54,18 +54,19 @@ func fetchRecentlyPlayedGames(client *http.Client) ([]lcp.SteamGame, error) {
 		}
 		g := ownedGames.Response.Games[i]
 		i++
+
+		// checking to make sure that library URL exists
 		libraryURL := fmt.Sprintf(
 			"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/%d/library_600x900.jpg",
 			g.AppID,
 		)
-		libraryImageResponse, err := http.Get(libraryURL)
+		req, err := http.NewRequest(http.MethodHead, libraryURL, nil)
 		if err != nil {
-			return nil, fmt.Errorf("%w getting library image for %s failed", err, g.Name)
+			return nil, fmt.Errorf("%w failed to create request for library URL", err)
 		}
-		defer libraryImageResponse.Body.Close()
-
+		_, err = apis.Request(logPrefix, client, req)
 		var libraryURLPtr *string
-		if libraryImageResponse.StatusCode == http.StatusOK {
+		if err == nil {
 			libraryURLPtr = &libraryURL
 		}
 

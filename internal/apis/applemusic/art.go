@@ -5,12 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"image/jpeg"
-	"io"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/redis/go-redis/v9"
+	"go.mattglei.ch/lcp-2/internal/apis"
 	"go.mattglei.ch/lcp-2/internal/images"
 	"go.mattglei.ch/timber"
 )
@@ -147,17 +147,7 @@ func createAlbumArtBlurhash(
 	url string,
 	req *http.Request,
 ) (*string, error) {
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("%w failed to execute request", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode == http.StatusNotModified || resp.StatusCode == http.StatusNotFound {
-		return nil, nil
-	}
-
-	body, err := io.ReadAll(resp.Body)
+	body, err := apis.Request(logPrefix, client, req)
 	if err != nil {
 		return nil, fmt.Errorf("%w failed to read response body from request", err)
 	}

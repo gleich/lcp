@@ -8,6 +8,7 @@ import (
 	"net/url"
 
 	"github.com/minio/minio-go/v7"
+	"go.mattglei.ch/lcp-2/internal/apis"
 	"go.mattglei.ch/lcp-2/internal/secrets"
 	"go.mattglei.ch/lcp-2/pkg/lcp"
 	"go.mattglei.ch/timber"
@@ -15,7 +16,7 @@ import (
 
 const bucketName = "mapbox-maps"
 
-func fetchMap(polyline string) []byte {
+func fetchMap(polyline string, client *http.Client) []byte {
 	var (
 		lineWidth = 2.0
 		lineColor = "000"
@@ -32,20 +33,18 @@ func fetchMap(polyline string) []byte {
 		height,
 		params.Encode(),
 	)
-	resp, err := http.Get(url)
+
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		timber.Error(err, "failed to fetch mapbox image with polyline", url)
-		return nil
+		timber.Error(err, "failed to create get request to", url)
 	}
 
-	var b bytes.Buffer
-	_, err = b.ReadFrom(resp.Body)
+	b, err := apis.Request(logPrefix, client, req)
 	if err != nil {
-		timber.Error(err, "failed to read data from request")
-		return nil
+		timber.Error(err, "failed to send request to", url)
 	}
 
-	return b.Bytes()
+	return b
 }
 
 func uploadMap(minioClient minio.Client, id uint64, data []byte) {

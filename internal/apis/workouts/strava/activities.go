@@ -103,7 +103,7 @@ func FetchActivities(
 		}
 
 		if a.HasMap {
-			mapData := fetchMap(stravaActivity.Map.SummaryPolyline)
+			mapData := fetchMap(stravaActivity.Map.SummaryPolyline, client)
 			uploadMap(minioClient, stravaActivity.ID, mapData)
 			mapBlurURL, err := images.BlurImage(mapData, png.Decode)
 			if err != nil {

@@ -110,7 +110,7 @@ func fetchGameAchievements(
 			appID,
 		)
 	}
-	gameSchema, err := apis.Request[schemaGameResponse](logPrefix, client, req)
+	gameSchema, err := apis.RequestJSON[schemaGameResponse](logPrefix, client, req)
 	if err != nil {
 		return nil, nil, fmt.Errorf("%w failed to get game schema for app id: %d", err, appID)
 	}

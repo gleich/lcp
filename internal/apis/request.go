@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"strings"
 	"time"
@@ -19,35 +20,40 @@ import (
 // rather than a full failure.
 var WarningError = errors.New("non-critical error encountered during request")
 
-// Sends a given http.Request and unmarshal the JSON from the response body and return that as
-// the given type. Handles common errors like 502, unexpected EOFs, and timeouts.
-func Request[T any](logPrefix string, client *http.Client, req *http.Request) (T, error) {
+// Request sends an HTTP request using the provided client with a 1-minute timeout and returns
+// the response body as a byte slice. It handles common transient network errors—including timeouts,
+// unexpected EOFs, and TCP connection resets—by logging warnings and returning a non-critical
+// WarningError. Non-2xx HTTP responses are also treated as warnings.
+func Request(logPrefix string, client *http.Client, req *http.Request) ([]byte, error) {
 	ctx, cancel := context.WithTimeout(req.Context(), 1*time.Minute)
 	defer cancel()
 	req = req.WithContext(ctx)
 
-	var zeroValue T // to be used as "nil" when returning errors
 	resp, err := client.Do(req)
 	if err != nil {
+		if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+			timber.Warning(logPrefix, "connection timed out for", req.URL.Path)
+			return []byte{}, WarningError
+		}
 		if errors.Is(err, context.DeadlineExceeded) {
 			timber.Warning(logPrefix, "request timed out for", req.URL.Path)
-			return zeroValue, WarningError
+			return []byte{}, WarningError
 		}
 		if errors.Is(err, io.ErrUnexpectedEOF) {
 			timber.Warning(logPrefix, "unexpected EOF from", req.URL.Path)
-			return zeroValue, WarningError
+			return []byte{}, WarningError
 		}
 		if strings.Contains(err.Error(), "read: connection reset by peer") {
 			timber.Warning(logPrefix, "tcp connection reset by peer from", req.URL.Path)
-			return zeroValue, WarningError
+			return []byte{}, WarningError
 		}
-		return zeroValue, fmt.Errorf("%w sending request to %s failed", err, req.URL.String())
+		return []byte{}, fmt.Errorf("%w sending request to %s failed", err, req.URL.String())
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return zeroValue, fmt.Errorf("%w reading response body failed", err)
+		return []byte{}, fmt.Errorf("%w reading response body failed", err)
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		timber.Warning(
@@ -57,14 +63,27 @@ func Request[T any](logPrefix string, client *http.Client, req *http.Request) (T
 			"from",
 			req.URL.Path,
 		)
-		return zeroValue, WarningError
+		return []byte{}, WarningError
+	}
+	return body, nil
+}
+
+// RequestJSON sends an HTTP request using the provided client, reads the response body, and
+// unmarshals the JSON into a value of type T. It relies on Request to perform the HTTP call. In
+// case of a request failure or JSON parsing error, it logs the relevant details and returns the
+// error.
+func RequestJSON[T any](logPrefix string, client *http.Client, req *http.Request) (T, error) {
+	var data T
+
+	body, err := Request(logPrefix, client, req)
+	if err != nil {
+		return data, err
 	}
 
-	var data T
 	err = json.Unmarshal(body, &data)
 	if err != nil {
 		timber.Debug(string(body))
-		return zeroValue, fmt.Errorf("%w failed to parse json", err)
+		return data, fmt.Errorf("%w failed to parse json", err)
 	}
 
 	return data, nil
