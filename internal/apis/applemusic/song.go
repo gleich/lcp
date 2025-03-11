@@ -64,18 +64,12 @@ func songFromSongResponse(
 		s.Attributes.URL = u
 	}
 
-	maxAlbumArtSize := 600.0
-	albumArtURL := strings.ReplaceAll(strings.ReplaceAll(
-		s.Attributes.Artwork.URL,
-		"{w}",
-		strconv.Itoa(int(math.Min(float64(s.Attributes.Artwork.Width), maxAlbumArtSize))),
-	), "{h}", strconv.Itoa(int(math.Min(float64(s.Attributes.Artwork.Height), maxAlbumArtSize))))
-
+	artURL := albumArtURL(s, 600.0)
 	id := s.ID
 	if s.Attributes.PlayParams.CatalogID != "" {
 		id = s.Attributes.PlayParams.CatalogID
 	}
-	blurhash, err := loadAlbumArtBlurhash(client, rdb, albumArtURL, id)
+	blurhash, err := loadAlbumArtBlurhash(client, rdb, artURL, id)
 	if err != nil && strings.Contains(err.Error(), "unexpected EOF") {
 		timber.Warning("failed to create blur hash for", albumArtURL)
 	} else if err != nil {
@@ -83,12 +77,21 @@ func songFromSongResponse(
 	}
 
 	return lcp.AppleMusicSong{
-		Track:            s.Attributes.Name,
-		Artist:           s.Attributes.ArtistName,
-		DurationInMillis: s.Attributes.DurationInMillis,
-		AlbumArtURL:      albumArtURL,
-		AlbumArtBlurhash: blurhash,
-		URL:              s.Attributes.URL,
-		ID:               id,
+		Track:              s.Attributes.Name,
+		Artist:             s.Attributes.ArtistName,
+		DurationInMillis:   s.Attributes.DurationInMillis,
+		AlbumArtURL:        artURL,
+		AlbumArtPreviewURL: albumArtURL(s, 200.0),
+		AlbumArtBlurhash:   blurhash,
+		URL:                s.Attributes.URL,
+		ID:                 id,
 	}, nil
+}
+
+func albumArtURL(s songResponse, max float64) string {
+	return strings.ReplaceAll(strings.ReplaceAll(
+		s.Attributes.Artwork.URL,
+		"{w}",
+		strconv.Itoa(int(math.Min(float64(s.Attributes.Artwork.Width), max))),
+	), "{h}", strconv.Itoa(int(math.Min(float64(s.Attributes.Artwork.Height), max))))
 }
