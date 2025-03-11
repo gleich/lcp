@@ -13,10 +13,9 @@ import (
 
 const logPrefix = "[workouts]"
 
-func Setup(mux *http.ServeMux) {
-	client := http.Client{}
+func Setup(mux *http.ServeMux, client *http.Client) {
 	stravaTokens := strava.LoadTokens()
-	err := stravaTokens.RefreshIfNeeded(&client)
+	err := stravaTokens.RefreshIfNeeded(client)
 	if err != nil {
 		timber.Error(err, "failed to refresh strava token data on boot")
 	}
@@ -31,7 +30,7 @@ func Setup(mux *http.ServeMux) {
 	if err != nil {
 		timber.Fatal(err, "failed to create minio client")
 	}
-	activities, err := fetch(&client, *minioClient, stravaTokens)
+	activities, err := fetch(client, *minioClient, stravaTokens)
 	if err != nil {
 		timber.Error(err, "failed to load initial data for workouts cache; not updating")
 	}
@@ -40,7 +39,7 @@ func Setup(mux *http.ServeMux) {
 	mux.HandleFunc("GET /workouts", workoutsCache.ServeHTTP)
 	mux.HandleFunc(
 		"POST /strava/event",
-		strava.EventRoute(&client, workoutsCache, *minioClient, fetch, stravaTokens),
+		strava.EventRoute(client, workoutsCache, *minioClient, fetch, stravaTokens),
 	)
 	mux.HandleFunc("GET /strava/event", strava.ChallengeRoute)
 

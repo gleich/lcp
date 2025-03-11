@@ -56,16 +56,14 @@ func cacheUpdate(client *http.Client, rdb *redis.Client) (lcp.AppleMusicCache, e
 	}, nil
 }
 
-func Setup(mux *http.ServeMux) {
-	client := http.Client{}
-
+func Setup(mux *http.ServeMux, client *http.Client) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     secrets.ENV.RedisAddress,
 		Password: secrets.ENV.RedisPassword,
 		DB:       0,
 	})
 
-	data, err := cacheUpdate(&client, rdb)
+	data, err := cacheUpdate(client, rdb)
 	if err != nil {
 		timber.Error(err, "initial fetch of applemusic cache data failed")
 	}
@@ -75,13 +73,13 @@ func Setup(mux *http.ServeMux) {
 	mux.HandleFunc("GET /applemusic/playlists/{id}", playlistEndpoint(applemusicCache))
 	go cache.UpdatePeriodically(
 		applemusicCache,
-		&client,
+		client,
 		func(client *http.Client) (lcp.AppleMusicCache, error) {
 			return cacheUpdate(client, rdb)
 		},
 		30*time.Second,
 	)
-	go updateAlbumArtPeriodically(&client, rdb, 24*time.Hour)
+	go updateAlbumArtPeriodically(client, rdb, 24*time.Hour)
 	timber.Done(logPrefix, "setup cache and endpoints")
 }
 

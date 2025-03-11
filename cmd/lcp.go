@@ -18,13 +18,16 @@ func main() {
 
 	secrets.Load()
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", rootRedirect)
+	var (
+		client = http.Client{}
+		mux    = http.NewServeMux()
+	)
 
+	mux.HandleFunc("/", rootRedirect)
 	github.Setup(mux)
-	workouts.Setup(mux)
-	steam.Setup(mux)
-	applemusic.Setup(mux)
+	workouts.Setup(mux, &client)
+	steam.Setup(mux, &client)
+	applemusic.Setup(mux, &client)
 
 	timber.Info("starting server")
 	err := http.ListenAndServe(":8000", mux)
