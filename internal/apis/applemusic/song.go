@@ -81,7 +81,7 @@ func songFromSongResponse(
 		Artist:             s.Attributes.ArtistName,
 		DurationInMillis:   s.Attributes.DurationInMillis,
 		AlbumArtURL:        artURL,
-		AlbumArtPreviewURL: albumArtURL(s, 200.0),
+		AlbumArtPreviewURL: albumArtURL(s, 300.0),
 		AlbumArtBlurhash:   blurhash,
 		URL:                s.Attributes.URL,
 		ID:                 id,
