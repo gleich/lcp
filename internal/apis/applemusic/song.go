@@ -93,5 +93,5 @@ func albumArtURL(s songResponse, max float64) string {
 		s.Attributes.Artwork.URL,
 		"{w}",
 		strconv.Itoa(int(math.Min(float64(s.Attributes.Artwork.Width), max))),
-	), "{h}", strconv.Itoa(int(math.Min(float64(s.Attributes.Artwork.Height), max))))
+	), "{h}bb", strconv.Itoa(int(math.Min(float64(s.Attributes.Artwork.Height), max))))
 }
