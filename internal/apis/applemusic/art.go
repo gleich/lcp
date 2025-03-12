@@ -3,10 +3,10 @@ package applemusic
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"image/jpeg"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -67,7 +67,7 @@ func loadAlbumArtBlurhash(
 	}
 
 	blurhashURL, err := createAlbumArtBlurhash(client, rdb, id, url, req)
-	if err != nil {
+	if err != nil && !errors.Is(err, apis.WarningError) {
 		return nil, fmt.Errorf("%v failed to create blurhash", err)
 	}
 
@@ -123,8 +123,8 @@ func updateAlbumArtPeriodically(client *http.Client, rdb *redis.Client, interval
 				cachedBlurHash.Url,
 				req,
 			)
-			if err != nil && strings.Contains(err.Error(), "unexpected EOF") {
-				timber.Warning("failed to create blur hash for", cachedBlurHash.Url)
+			if err != nil && !errors.Is(err, apis.WarningError) {
+				timber.Error(err, "failed to generate blur hash for", key)
 			}
 			if updatedBlurhash != nil && updatedBlurhash != &cachedBlurHash.Blurhash {
 				cachedBlurHash.Blurhash = *updatedBlurhash
