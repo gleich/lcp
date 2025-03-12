@@ -147,6 +147,10 @@ func createAlbumArtBlurhash(
 	url string,
 	req *http.Request,
 ) (*string, error) {
+	req.Header.Set(
+		"User-Agent",
+		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36",
+	)
 	body, err := apis.Request(logPrefix, client, req)
 	if err != nil {
 		return nil, fmt.Errorf("%w failed to read response body from request", err)

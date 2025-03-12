@@ -61,7 +61,7 @@ func Request(logPrefix string, client *http.Client, req *http.Request) ([]byte, 
 			resp.StatusCode,
 			fmt.Sprintf("(%s)", strings.ToLower(http.StatusText(resp.StatusCode))),
 			"from",
-			req.URL.Path,
+			req.URL.String(),
 		)
 		return []byte{}, WarningError
 	}
