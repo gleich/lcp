@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"image/jpeg"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -34,6 +35,10 @@ func loadAlbumArtBlurhash(
 	url string,
 	id string,
 ) (*string, error) {
+	if strings.Contains(url, "blobstore.apple.com") {
+		return nil, nil
+	}
+
 	ctx := context.Background()
 	blurhashIsCached, err := rdb.Exists(ctx, id).Result()
 	if err != nil {
@@ -108,6 +113,10 @@ func updateAlbumArtPeriodically(client *http.Client, rdb *redis.Client, interval
 			if err != nil {
 				timber.Error(err, "failed to decode json for key", key)
 				return
+			}
+
+			if strings.Contains(cachedBlurHash.Url, "blobstore.apple.com") {
+				continue
 			}
 
 			req, err := http.NewRequest(http.MethodGet, cachedBlurHash.Url, nil)
