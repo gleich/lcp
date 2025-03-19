@@ -48,10 +48,10 @@ func FetchWorkouts(client *http.Client) ([]lcp.Workout, error) {
 			for i, set := range exercise.Sets {
 				// account for bodyweight exercises which are (body weight - weight)
 				if slices.Contains(bodyWeightExercises, exercise.Title) {
-					totalVolume += weightInLBs*0.45359237 - set.WeightKg*float64(set.Reps)
+					totalVolume += (weightInLBs*0.45359237 - set.WeightKg) * float64(set.Reps)
 					exercise.Sets[i].WeightKg = -set.WeightKg
 				} else {
-					totalVolume += weightInLBs * float64(set.Reps)
+					totalVolume += set.WeightKg * float64(set.Reps)
 				}
 				sets++
 			}
