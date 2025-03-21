@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"slices"
 
 	"github.com/minio/minio-go/v7"
 	"go.mattglei.ch/lcp-2/internal/apis"
@@ -23,15 +24,15 @@ func fetchMap(polyline string, client *http.Client) []byte {
 		width     = 462
 		height    = 252
 		params    = url.Values{"access_token": {secrets.ENV.MapboxAccessToken}}
-	)
-	url := fmt.Sprintf(
-		"https://api.mapbox.com/styles/v1/mattgleich/clxxsfdfm002401qj7jcxh47e/static/path-%f+%s(%s)/auto/%dx%d@2x?%s",
-		lineWidth,
-		lineColor,
-		url.QueryEscape(polyline),
-		width,
-		height,
-		params.Encode(),
+		url       = fmt.Sprintf(
+			"https://api.mapbox.com/styles/v1/mattgleich/clxxsfdfm002401qj7jcxh47e/static/path-%f+%s(%s)/auto/%dx%d@2x?%s",
+			lineWidth,
+			lineColor,
+			url.QueryEscape(polyline),
+			width,
+			height,
+			params.Encode(),
+		)
 	)
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
@@ -48,8 +49,10 @@ func fetchMap(polyline string, client *http.Client) []byte {
 }
 
 func uploadMap(minioClient minio.Client, id uint64, data []byte) {
-	reader := bytes.NewReader(data)
-	size := int64(len(data))
+	var (
+		reader = bytes.NewReader(data)
+		size   = int64(len(data))
+	)
 
 	_, err := minioClient.PutObject(
 		context.Background(),
@@ -76,14 +79,7 @@ func removeOldMaps(minioClient minio.Client, activities []lcp.Workout) {
 			timber.Error(object.Err, "failed to load object")
 			return
 		}
-		var validObject bool
-		for _, validKey := range validKeys {
-			if validKey == object.Key {
-				validObject = true
-				break
-			}
-		}
-		if !validObject {
+		if !slices.Contains(validKeys, object.Key) {
 			err := minioClient.RemoveObject(
 				context.Background(),
 				bucketName,
