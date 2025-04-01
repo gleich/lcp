@@ -90,7 +90,6 @@ func FetchActivities(
 			Name:               stravaActivity.Name,
 			SportType:          stravaActivity.SportType,
 			StartDate:          stravaActivity.StartDate.UTC(),
-			Timezone:           stravaActivity.Timezone,
 			TotalElevationGain: stravaActivity.TotalElevationGain,
 			MovingTime:         stravaActivity.MovingTime,
 			Distance:           stravaActivity.Distance,

@@ -62,7 +62,6 @@ func FetchWorkouts(client *http.Client) ([]lcp.Workout, error) {
 			StartDate:     workout.StartTime.UTC(),
 			MovingTime:    uint32(workout.EndTime.Sub(workout.StartTime).Seconds()),
 			SportType:     "WeightTraining",
-			Timezone:      "(GMT-05:00) America/New_York",
 			HasMap:        false,
 			ID:            workout.ID,
 			HasHeartrate:  false,

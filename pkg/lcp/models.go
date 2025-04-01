@@ -77,7 +77,6 @@ type Workout struct {
 	Name               string         `json:"name"`
 	SportType          string         `json:"sport_type"`
 	StartDate          time.Time      `json:"start_date"`
-	Timezone           string         `json:"timezone,omitempty"`
 	MapBlurImage       *string        `json:"map_blur_image,omitempty"`
 	MapImageURL        *string        `json:"map_image_url,omitempty"`
 	HasMap             bool           `json:"has_map"`
