@@ -35,6 +35,9 @@ type songResponse struct {
 		PlayParams struct {
 			CatalogID string `json:"catalogId"`
 		} `json:"playParams"`
+		Previews []struct {
+			URL string `json:"url"`
+		} `json:"previews"`
 	} `json:"attributes"`
 }
 
@@ -76,6 +79,11 @@ func songFromSongResponse(
 		return lcp.AppleMusicSong{}, fmt.Errorf("%w failed to get blur hash for %s", err, id)
 	}
 
+	var previewAudioURL *string = nil
+	if len(s.Attributes.Previews) > 0 {
+		previewAudioURL = &s.Attributes.Previews[0].URL
+	}
+
 	return lcp.AppleMusicSong{
 		Track:              s.Attributes.Name,
 		Artist:             s.Attributes.ArtistName,
@@ -85,6 +93,7 @@ func songFromSongResponse(
 		AlbumArtBlurhash:   blurhash,
 		URL:                s.Attributes.URL,
 		ID:                 id,
+		PreviewAudioURL:    previewAudioURL,
 	}, nil
 }
 

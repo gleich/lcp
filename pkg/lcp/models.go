@@ -20,6 +20,7 @@ type AppleMusicSong struct {
 	AlbumArtBlurhash   *string `json:"album_art_blurhash"`
 	URL                string  `json:"url"`
 	ID                 string  `json:"id"`
+	PreviewAudioURL    *string `json:"preview_audio_url"`
 }
 
 type AppleMusicPlaylist struct {
