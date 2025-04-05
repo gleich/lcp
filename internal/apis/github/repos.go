@@ -3,9 +3,12 @@ package github
 import (
 	"context"
 	"fmt"
+	"net"
 
 	"github.com/shurcooL/githubv4"
+	"go.mattglei.ch/lcp-2/internal/apis"
 	"go.mattglei.ch/lcp-2/pkg/lcp"
+	"go.mattglei.ch/timber"
 )
 
 type pinnedItemsQuery struct {
@@ -35,6 +38,10 @@ type pinnedItemsQuery struct {
 func fetchPinnedRepos(client *githubv4.Client) ([]lcp.GitHubRepository, error) {
 	var query pinnedItemsQuery
 	err := client.Query(context.Background(), &query, nil)
+	if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+		timber.Warning(logPrefix, "connection timed out for getting pinned repos")
+		return []lcp.GitHubRepository{}, apis.WarningError
+	}
 	if err != nil {
 		return nil, fmt.Errorf("%w querying github's graphql API failed", err)
 	}
