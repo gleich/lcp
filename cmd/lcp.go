@@ -46,5 +46,5 @@ func setupLogger() {
 }
 
 func rootRedirect(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, "https://mattglei.ch/lcp", http.StatusPermanentRedirect)
+	http.Redirect(w, r, "https://mattglei.ch/writing/lcp", http.StatusPermanentRedirect)
 }
