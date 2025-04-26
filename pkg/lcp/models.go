@@ -57,7 +57,6 @@ type SteamGame struct {
 	PlaytimeForever     int32               `json:"playtime_forever"`
 	URL                 string              `json:"url"`
 	HeaderURL           string              `json:"header_url"`
-	LibraryURL          *string             `json:"library_url"`
 	LibraryHeroURL      string              `json:"library_hero_url"`
 	LibraryHeroLogoURL  string              `json:"library_hero_logo_url"`
 	AchievementProgress *float32            `json:"achievement_progress"`
