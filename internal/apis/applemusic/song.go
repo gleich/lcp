@@ -76,7 +76,7 @@ func songFromSongResponse(
 	if err != nil && strings.Contains(err.Error(), "unexpected EOF") {
 		timber.Warning("failed to create blur hash for", albumArtURL)
 	} else if err != nil {
-		return lcp.AppleMusicSong{}, fmt.Errorf("%w failed to get blur hash for %s", err, id)
+		return lcp.AppleMusicSong{}, fmt.Errorf("%w failed to get blur hash for %s: \"%s\"", err, id, s.Attributes.Name)
 	}
 
 	var previewAudioURL *string = nil
