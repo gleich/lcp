@@ -30,11 +30,12 @@ func cacheUpdate(client *http.Client, rdb *redis.Client) (lcp.AppleMusicCache, e
 		"p.gek1E8efLa68Adp", // classics
 		"p.qQXLxPLtA75zg8e", // 80s
 		"p.LV0PXNoCl0EpDLW", // divorced dad
-		"p.QvDQE5RIVbAeokL", // PARTY
+		"p.QvDQE5RIVbAeokL", // party
 		"p.LV0PXL3Cl0EpDLW", // bops
 		"p.6xZaArOsvzb5OML", // focus
+		"p.AWXoXeAiLrvpJlY", // smooth
 		"p.O1kz7EoFVmvz704", // funk
-		"p.qQXLxPpFA75zg8e", // RAHHHHHHHH
+		"p.qQXLxPpFA75zg8e", // rap
 		"p.qQXLxpDuA75zg8e", // ROCK
 		"p.O1kz7zbsVmvz704", // country
 		"p.QvDQEN0IVbAeokL", // fall
