@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/redis/go-redis/v9"
+	"go.mattglei.ch/lcp-2/internal/cache"
 	"go.mattglei.ch/lcp-2/pkg/lcp"
 	"go.mattglei.ch/timber"
 )
@@ -46,6 +47,12 @@ func songFromSongResponse(
 	rdb *redis.Client,
 	s songResponse,
 ) (lcp.AppleMusicSong, error) {
+	if s.Attributes.Artwork.URL == "" && s.Attributes.Name == "Unknown" &&
+		s.Attributes.URL == "https://music.apple.com/us/song/unknown" {
+		timber.Warning(logPrefix, "unknown song error")
+		return lcp.AppleMusicSong{}, cache.AppleMusicUnknownSongError
+	}
+
 	if s.Attributes.URL == "" {
 		// remove special characters
 		slugURL := regexp.MustCompile(`[^\w\s-]`).ReplaceAllString(s.Attributes.Name, "")

@@ -71,9 +71,6 @@ func fetchPlaylist(
 
 	var tracks []lcp.AppleMusicSong
 	for _, t := range totalResponseData {
-		if t.Attributes.Artwork.URL == "" {
-			continue
-		}
 		song, err := songFromSongResponse(client, rdb, t)
 		if err != nil {
 			return lcp.AppleMusicPlaylist{}, err
