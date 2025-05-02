@@ -97,7 +97,7 @@ func UpdatePeriodically[T lcp.CacheData, C any](
 		time.Sleep(interval)
 		data, err := update(client)
 		if err != nil {
-			if !errors.Is(err, apis.WarningError) && !errors.Is(err, AppleMusicUnknownSongError) {
+			if !errors.Is(err, apis.WarningError) && !errors.Is(err, AppleMusicNoArtworkError) {
 				timber.Error(err, "updating", cache.name, "cache failed")
 			}
 		} else {

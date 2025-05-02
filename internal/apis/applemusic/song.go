@@ -47,10 +47,9 @@ func songFromSongResponse(
 	rdb *redis.Client,
 	s songResponse,
 ) (lcp.AppleMusicSong, error) {
-	if s.Attributes.Artwork.URL == "" && s.Attributes.Name == "Unknown" &&
-		s.Attributes.URL == "https://music.apple.com/us/song/unknown" {
-		timber.Warning(logPrefix, "unknown song error")
-		return lcp.AppleMusicSong{}, cache.AppleMusicUnknownSongError
+	if s.Attributes.Artwork.URL == "" {
+		timber.Warning(logPrefix, "empty artwork url error")
+		return lcp.AppleMusicSong{}, cache.AppleMusicNoArtworkError
 	}
 
 	if s.Attributes.URL == "" {
