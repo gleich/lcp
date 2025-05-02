@@ -26,6 +26,9 @@ func fetchRecentlyPlayed(
 
 	var songs []lcp.AppleMusicSong
 	for _, s := range response.Data {
+		if s.Attributes.Artwork.URL == "" {
+			continue
+		}
 		so, err := songFromSongResponse(client, rdb, s)
 		if err != nil {
 			return []lcp.AppleMusicSong{}, fmt.Errorf(

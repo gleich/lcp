@@ -1,6 +1,7 @@
 package applemusic
 
 import (
+	"encoding/json"
 	"fmt"
 	"math"
 	"net/http"
@@ -68,6 +69,10 @@ func songFromSongResponse(
 	}
 
 	artURL := albumArtURL(s, 600.0)
+	if artURL == "" {
+		songBinary, _ := json.Marshal(s)
+		timber.Debug("empty string returned from albumArtURL", string(songBinary))
+	}
 	id := s.ID
 	if s.Attributes.PlayParams.CatalogID != "" {
 		id = s.Attributes.PlayParams.CatalogID
