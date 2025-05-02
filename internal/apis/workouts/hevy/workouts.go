@@ -8,8 +8,8 @@ import (
 
 	"slices"
 
-	"go.mattglei.ch/lcp-2/internal/secrets"
-	"go.mattglei.ch/lcp-2/pkg/lcp"
+	"go.mattglei.ch/lcp/internal/secrets"
+	"go.mattglei.ch/lcp/pkg/lcp"
 )
 
 const weightInLBs = 150.9

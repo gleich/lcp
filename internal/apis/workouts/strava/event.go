@@ -6,9 +6,9 @@ import (
 	"net/http"
 
 	"github.com/minio/minio-go/v7"
-	"go.mattglei.ch/lcp-2/internal/cache"
-	"go.mattglei.ch/lcp-2/internal/secrets"
-	"go.mattglei.ch/lcp-2/pkg/lcp"
+	"go.mattglei.ch/lcp/internal/cache"
+	"go.mattglei.ch/lcp/internal/secrets"
+	"go.mattglei.ch/lcp/pkg/lcp"
 	"go.mattglei.ch/timber"
 )
 

@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/redis/go-redis/v9"
-	"go.mattglei.ch/lcp-2/pkg/lcp"
+	"go.mattglei.ch/lcp/pkg/lcp"
 )
 
 type recentlyPlayedResponse struct {

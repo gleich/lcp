@@ -4,11 +4,11 @@ import (
 	"net/http"
 	"time"
 
-	"go.mattglei.ch/lcp-2/internal/apis/applemusic"
-	"go.mattglei.ch/lcp-2/internal/apis/github"
-	"go.mattglei.ch/lcp-2/internal/apis/steam"
-	"go.mattglei.ch/lcp-2/internal/apis/workouts"
-	"go.mattglei.ch/lcp-2/internal/secrets"
+	"go.mattglei.ch/lcp/internal/apis/applemusic"
+	"go.mattglei.ch/lcp/internal/apis/github"
+	"go.mattglei.ch/lcp/internal/apis/steam"
+	"go.mattglei.ch/lcp/internal/apis/workouts"
+	"go.mattglei.ch/lcp/internal/secrets"
 	"go.mattglei.ch/timber"
 )
 

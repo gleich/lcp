@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/shurcooL/githubv4"
-	"go.mattglei.ch/lcp-2/internal/cache"
-	"go.mattglei.ch/lcp-2/internal/secrets"
+	"go.mattglei.ch/lcp/internal/cache"
+	"go.mattglei.ch/lcp/internal/secrets"
 	"go.mattglei.ch/timber"
 	"golang.org/x/oauth2"
 )

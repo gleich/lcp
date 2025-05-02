@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"go.mattglei.ch/lcp-2/internal/secrets"
+	"go.mattglei.ch/lcp/internal/secrets"
 )
 
 func IsAuthorized(w http.ResponseWriter, r *http.Request) bool {

@@ -1,4 +1,4 @@
-module go.mattglei.ch/lcp-2
+module go.mattglei.ch/lcp
 
 go 1.24.1
 

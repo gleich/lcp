@@ -6,8 +6,8 @@ import (
 	"net"
 
 	"github.com/shurcooL/githubv4"
-	"go.mattglei.ch/lcp-2/internal/apis"
-	"go.mattglei.ch/lcp-2/pkg/lcp"
+	"go.mattglei.ch/lcp/internal/apis"
+	"go.mattglei.ch/lcp/pkg/lcp"
 	"go.mattglei.ch/timber"
 )
 

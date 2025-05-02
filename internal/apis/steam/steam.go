@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"go.mattglei.ch/lcp-2/internal/cache"
+	"go.mattglei.ch/lcp/internal/cache"
 	"go.mattglei.ch/timber"
 )
 

@@ -5,9 +5,9 @@ import (
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
-	"go.mattglei.ch/lcp-2/internal/apis/workouts/strava"
-	"go.mattglei.ch/lcp-2/internal/cache"
-	"go.mattglei.ch/lcp-2/internal/secrets"
+	"go.mattglei.ch/lcp/internal/apis/workouts/strava"
+	"go.mattglei.ch/lcp/internal/cache"
+	"go.mattglei.ch/lcp/internal/secrets"
 	"go.mattglei.ch/timber"
 )
 

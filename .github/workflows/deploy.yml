@@ -12,11 +12,11 @@ jobs:
       - uses: actions/checkout@v4
       - run: |
           echo ${{ secrets.REGISTRY_PASSWORD }} | docker login docker.mattglei.ch -u admin --password-stdin
-          docker build -t docker.mattglei.ch/lcp-2 .
-          docker push docker.mattglei.ch/lcp-2
+          docker build -t docker.mattglei.ch/lcp .
+          docker push docker.mattglei.ch/lcp
       - uses: caprover/deploy-from-github@v1.1.2
         with:
           server: https://dev.mattglei.ch
           app: lcp
           token: '${{ secrets.CAPROVER_APP_TOKEN }}'
-          image: docker.mattglei.ch/lcp-2
+          image: docker.mattglei.ch/lcp

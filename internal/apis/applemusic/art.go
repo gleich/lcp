@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
-	"go.mattglei.ch/lcp-2/internal/apis"
-	"go.mattglei.ch/lcp-2/internal/images"
+	"go.mattglei.ch/lcp/internal/apis"
+	"go.mattglei.ch/lcp/internal/images"
 	"go.mattglei.ch/timber"
 )
 
