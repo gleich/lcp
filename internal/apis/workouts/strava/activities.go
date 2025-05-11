@@ -111,7 +111,7 @@ func FetchActivities(
 			}
 			a.MapBlurImage = &mapBlurURL
 			imgurl := fmt.Sprintf(
-				"https://minio-api.dev.mattglei.ch/mapbox-maps/%s.png",
+				"https://minio-api.lab.mattglei.ch/mapbox-maps/%s.png",
 				a.ID,
 			)
 			a.MapImageURL = &imgurl
