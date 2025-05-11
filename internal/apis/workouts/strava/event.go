@@ -82,4 +82,5 @@ func ChallengeRoute(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		timber.Error(err, "failed to write json")
 	}
+	timber.Done(logPrefix, "handled challenge successfully")
 }
