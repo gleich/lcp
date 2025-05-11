@@ -38,7 +38,7 @@ func FetchCache[T CacheData](client *Client) (Response[T], error) {
 		cacheName = "workouts"
 	}
 
-	url, err := url.JoinPath("https://lcp.dev.mattglei.ch", cacheName)
+	url, err := url.JoinPath("https://lcp.mattglei.ch", cacheName)
 	if err != nil {
 		return zeroValue, fmt.Errorf("%w failed to join path for URL", err)
 	}
