@@ -12,8 +12,6 @@ import (
 	"go.mattglei.ch/lcp/pkg/lcp"
 )
 
-const weightInLBs = 150.9
-
 type workoutsResponse struct {
 	Workouts []struct {
 		ID        string             `json:"id"`
@@ -48,7 +46,7 @@ func FetchWorkouts(client *http.Client) ([]lcp.Workout, error) {
 			for i, set := range exercise.Sets {
 				// account for bodyweight exercises which are (body weight - weight)
 				if slices.Contains(bodyWeightExercises, exercise.Title) {
-					totalVolume += (weightInLBs*0.45359237 - set.WeightKg) * float64(set.Reps)
+					totalVolume += (secrets.ENV.HevyBodyWeightLBS*0.45359237 - set.WeightKg) * float64(set.Reps)
 					exercise.Sets[i].WeightKg = -set.WeightKg
 				} else {
 					totalVolume += set.WeightKg * float64(set.Reps)

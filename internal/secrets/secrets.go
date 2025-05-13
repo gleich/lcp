@@ -27,7 +27,8 @@ type Secrets struct {
 	MapboxAccessToken    string `env:"MAPBOX_ACCESS_TOKEN"`
 
 	// hevy
-	HevyAccessToken string `env:"HEVY_ACCESS_TOKEN"`
+	HevyAccessToken   string  `env:"HEVY_ACCESS_TOKEN"`
+	HevyBodyWeightLBS float64 `env:"HEVY_BODY_WEIGHT_LBS"`
 
 	// steam
 	SteamKey string `env:"STEAM_KEY"`
