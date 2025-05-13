@@ -18,6 +18,6 @@ func Setup(mux *http.ServeMux, client *http.Client) {
 
 	steamCache := cache.New("steam", games, err == nil)
 	mux.HandleFunc("GET /steam", steamCache.ServeHTTP)
-	go cache.UpdatePeriodically(steamCache, client, fetchRecentlyPlayedGames, 10*time.Minute)
+	go cache.UpdatePeriodically(steamCache, client, fetchRecentlyPlayedGames, 5*time.Minute)
 	timber.Done(logPrefix, "setup cache and endpoint")
 }
