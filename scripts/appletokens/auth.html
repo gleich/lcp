@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Apple Music User Token Generator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Include MusicKit JS -->
+    <script
+      src="https://js-cdn.music.apple.com/musickit/v1/musickit.js"
+      defer
+    ></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        padding: 2em;
+      }
+      #token {
+        margin-top: 1em;
+        word-break: break-word;
+        background-color: #f4f4f4;
+        padding: 1em;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Apple Music User Token Generator</h1>
+    <p>
+      Click the button below to authorize and retrieve your Apple Music User
+      Token.
+    </p>
+    <button id="authorize-button">Authorize with Apple Music</button>
+    <div id="token"></div>
+
+    <script>
+      const developerToken = 'DEVELOPER TOKEN';
+
+      document.addEventListener('musickitloaded', () => {
+        console.log('MusicKit has loaded');
+
+        MusicKit.configure({
+          developerToken: developerToken,
+          app: {
+            name: 'Your App Name',
+            build: '1.0.0',
+          },
+        });
+
+        const music = MusicKit.getInstance();
+
+        document
+          .getElementById('authorize-button')
+          .addEventListener('click', async () => {
+            try {
+              const token = await music.authorize();
+              document.getElementById('token').textContent =
+                'Music User Token: ' + token;
+            } catch (err) {
+              console.error(err);
+            }
+          });
+      });
+    </script>
+  </body>
+</html>

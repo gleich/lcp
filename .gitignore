@@ -16,3 +16,6 @@
 
 # Secrets
 .env
+
+# apple music key
+*.p8
