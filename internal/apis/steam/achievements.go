@@ -78,7 +78,7 @@ func fetchGameAchievements(
 			"returned from API. Code of 200 expected from",
 			resp.Request.URL.String(),
 		)
-		return nil, nil, apis.WarningError
+		return nil, nil, apis.ErrWarning
 	}
 
 	var playerAchievements playerAchievementsResponse

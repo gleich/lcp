@@ -14,11 +14,11 @@ import (
 	"go.mattglei.ch/timber"
 )
 
-// WarningError indicates that a non-critical error occurred during a request. Although the error
+// ErrWarning indicates that a non-critical error occurred during a request. Although the error
 // prevents the cache from being updated, it is expected under certain transient conditions (for
 // example, a 502 Gateway error) that are beyond our control. Such errors warrant only a warning
 // rather than a full failure.
-var WarningError = errors.New("non-critical error encountered during request")
+var ErrWarning = errors.New("non-critical error encountered during request")
 
 // Request sends an HTTP request using the provided client with a 1-minute timeout and returns
 // the response body as a byte slice. It handles common transient network errors—including timeouts,
@@ -33,19 +33,19 @@ func Request(logPrefix string, client *http.Client, req *http.Request) ([]byte, 
 	if err != nil {
 		if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
 			timber.Warning(logPrefix, "connection timed out for", req.URL.Path)
-			return []byte{}, WarningError
+			return []byte{}, ErrWarning
 		}
 		if errors.Is(err, context.DeadlineExceeded) {
 			timber.Warning(logPrefix, "request timed out for", req.URL.Path)
-			return []byte{}, WarningError
+			return []byte{}, ErrWarning
 		}
 		if errors.Is(err, io.ErrUnexpectedEOF) {
 			timber.Warning(logPrefix, "unexpected EOF from", req.URL.Path)
-			return []byte{}, WarningError
+			return []byte{}, ErrWarning
 		}
 		if strings.Contains(err.Error(), "read: connection reset by peer") {
 			timber.Warning(logPrefix, "tcp connection reset by peer from", req.URL.Path)
-			return []byte{}, WarningError
+			return []byte{}, ErrWarning
 		}
 		return []byte{}, fmt.Errorf("%w sending request to %s failed", err, req.URL.String())
 	}
@@ -63,7 +63,7 @@ func Request(logPrefix string, client *http.Client, req *http.Request) ([]byte, 
 			"from",
 			req.URL.String(),
 		)
-		return []byte{}, WarningError
+		return []byte{}, ErrWarning
 	}
 	return body, nil
 }

@@ -72,7 +72,7 @@ func loadAlbumArtBlurhash(
 	}
 
 	blurhashURL, err := createAlbumArtBlurhash(client, rdb, id, url, req)
-	if err != nil && !errors.Is(err, apis.WarningError) {
+	if err != nil && !errors.Is(err, apis.ErrWarning) {
 		return nil, fmt.Errorf("%v failed to create blurhash", err)
 	}
 
@@ -132,7 +132,7 @@ func updateAlbumArtPeriodically(client *http.Client, rdb *redis.Client, interval
 				cachedBlurHash.Url,
 				req,
 			)
-			if err != nil && !errors.Is(err, apis.WarningError) {
+			if err != nil && !errors.Is(err, apis.ErrWarning) {
 				timber.Error(err, "failed to generate blur hash for", key)
 			}
 			if updatedBlurhash != nil && updatedBlurhash != &cachedBlurHash.Blurhash {
