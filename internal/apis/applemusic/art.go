@@ -100,7 +100,12 @@ func updateAlbumArtPeriodically(client *http.Client, rdb *redis.Client, interval
 			cursor = newCursor
 		}
 
-		timber.Info(cacheInstance, "checking album art blurhash for", len(allKeys), "albums")
+		timber.Info(
+			cacheInstance.LogPrefix(),
+			"checking album art blurhash for",
+			len(allKeys),
+			"albums",
+		)
 		updated := 0
 		for _, key := range allKeys {
 			result, err := rdb.Get(ctx, key).Result()
