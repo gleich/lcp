@@ -17,22 +17,47 @@ import (
 	"go.mattglei.ch/timber"
 )
 
+type CacheInstance int
+
+const (
+	AppleMusic CacheInstance = iota
+	Workouts
+	GitHub
+	Steam
+)
+
+func (c CacheInstance) String() string {
+	switch c {
+	case AppleMusic:
+		return "applemusic"
+	case Workouts:
+		return "workouts"
+	case GitHub:
+		return "github"
+	case Steam:
+		return "steam"
+	}
+	return "unknown"
+}
+
+func (c CacheInstance) LogPrefix() string {
+	return fmt.Sprintf("[%s]", c.String())
+}
+
 type Cache[T lcp.CacheData] struct {
-	name      string
-	filePath  string
-	LogPrefix string
+	instance CacheInstance
+	filePath string
 
 	Mutex   sync.RWMutex
 	Data    T
 	Updated time.Time
 }
 
-func New[T lcp.CacheData](name string, data T, update bool) *Cache[T] {
+func New[T lcp.CacheData](instance CacheInstance, data T, update bool) *Cache[T] {
 	cache := Cache[T]{
-		name:      name,
-		Updated:   time.Now().UTC(),
-		LogPrefix: fmt.Sprintf("[%s]", name),
-		filePath:  filepath.Join(secrets.ENV.CacheFolder, fmt.Sprintf("%s.json", name)),
+		instance: instance,
+		Updated:  time.Now().UTC(),
+		filePath: filepath.Join(secrets.ENV.CacheFolder, fmt.Sprintf("%s.json", instance.String())),
 	}
 	cache.loadFromFile()
 	if update {
@@ -83,7 +108,7 @@ func (c *Cache[T]) Update(data T) {
 		c.Mutex.Unlock()
 
 		c.persistToFile()
-		timber.Done(fmt.Sprintf("[%s]", c.name), "cache updated")
+		timber.Done(c.instance.LogPrefix(), "cache updated")
 	}
 }
 
@@ -97,8 +122,8 @@ func UpdatePeriodically[T lcp.CacheData, C any](
 		time.Sleep(interval)
 		data, err := update(client)
 		if err != nil {
-			if !errors.Is(err, apis.WarningError) && !errors.Is(err, AppleMusicNoArtworkError) {
-				timber.Error(err, "updating", cache.name, "cache failed")
+			if !errors.Is(err, apis.ErrWarning) && !errors.Is(err, ErrAppleMusicNoArtwork) {
+				timber.Error(err, "updating", cache.instance.LogPrefix(), "cache failed")
 			}
 		} else {
 			cache.Update(data)

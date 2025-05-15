@@ -39,8 +39,8 @@ func fetchPinnedRepos(client *githubv4.Client) ([]lcp.GitHubRepository, error) {
 	var query pinnedItemsQuery
 	err := client.Query(context.Background(), &query, nil)
 	if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
-		timber.Warning(logPrefix, "connection timed out for getting pinned repos")
-		return []lcp.GitHubRepository{}, apis.WarningError
+		timber.Warning(cacheInstance.LogPrefix(), "connection timed out for getting pinned repos")
+		return []lcp.GitHubRepository{}, apis.ErrWarning
 	}
 	if err != nil {
 		return nil, fmt.Errorf("%w querying github's graphql API failed", err)

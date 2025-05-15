@@ -14,7 +14,7 @@ import (
 	"go.mattglei.ch/timber"
 )
 
-const logPrefix = "[applemusic]"
+const cacheInstance = cache.AppleMusic
 
 func cacheUpdate(client *http.Client, rdb *redis.Client) (lcp.AppleMusicCache, error) {
 	recentlyPlayed, err := fetchRecentlyPlayed(client, rdb)
@@ -67,7 +67,7 @@ func Setup(mux *http.ServeMux, client *http.Client) {
 		timber.Error(err, "initial fetch of applemusic cache data failed")
 	}
 
-	applemusicCache := cache.New("applemusic", data, err == nil)
+	applemusicCache := cache.New(cacheInstance, data, err == nil)
 	mux.HandleFunc("GET /applemusic", serveHTTP(applemusicCache))
 	mux.HandleFunc("GET /applemusic/playlists/{id}", playlistEndpoint(applemusicCache))
 	go cache.UpdatePeriodically(
@@ -79,7 +79,7 @@ func Setup(mux *http.ServeMux, client *http.Client) {
 		30*time.Second,
 	)
 	go updateAlbumArtPeriodically(client, rdb, 24*time.Hour)
-	timber.Done(logPrefix, "setup cache and endpoints")
+	timber.Done(cacheInstance.LogPrefix(), "setup cache and endpoints")
 }
 
 type cacheDataResponse struct {

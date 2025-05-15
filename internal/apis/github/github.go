@@ -12,7 +12,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
-const logPrefix = "[github]"
+const cacheInstance = cache.GitHub
 
 func Setup(mux *http.ServeMux) {
 	githubTokenSource := oauth2.StaticTokenSource(
@@ -26,9 +26,9 @@ func Setup(mux *http.ServeMux) {
 		timber.Error(err, "fetching initial pinned repos failed")
 	}
 
-	githubCache := cache.New("github", pinnedRepos, err == nil)
+	githubCache := cache.New(cacheInstance, pinnedRepos, err == nil)
 	mux.HandleFunc("GET /github", githubCache.ServeHTTP)
 	go cache.UpdatePeriodically(githubCache, githubClient, fetchPinnedRepos, 1*time.Minute)
 
-	timber.Done(logPrefix, "setup cache and endpoint")
+	timber.Done(cacheInstance.LogPrefix(), "setup cache and endpoint")
 }

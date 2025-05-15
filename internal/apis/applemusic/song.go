@@ -48,8 +48,8 @@ func songFromSongResponse(
 	s songResponse,
 ) (lcp.AppleMusicSong, error) {
 	if s.Attributes.Artwork.URL == "" {
-		timber.Warning(logPrefix, "empty artwork url error")
-		return lcp.AppleMusicSong{}, cache.AppleMusicNoArtworkError
+		timber.Warning(cacheInstance.LogPrefix(), "empty artwork url error")
+		return lcp.AppleMusicSong{}, cache.ErrAppleMusicNoArtwork
 	}
 
 	if s.Attributes.URL == "" {

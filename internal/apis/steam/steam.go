@@ -8,7 +8,7 @@ import (
 	"go.mattglei.ch/timber"
 )
 
-const logPrefix = "[steam]"
+const cacheInstance = cache.Steam
 
 func Setup(mux *http.ServeMux, client *http.Client) {
 	games, err := fetchRecentlyPlayedGames(client)
@@ -16,8 +16,8 @@ func Setup(mux *http.ServeMux, client *http.Client) {
 		timber.Error(err, "initial fetch of steam games failed")
 	}
 
-	steamCache := cache.New("steam", games, err == nil)
+	steamCache := cache.New(cacheInstance, games, err == nil)
 	mux.HandleFunc("GET /steam", steamCache.ServeHTTP)
 	go cache.UpdatePeriodically(steamCache, client, fetchRecentlyPlayedGames, 5*time.Minute)
-	timber.Done(logPrefix, "setup cache and endpoint")
+	timber.Done(cacheInstance.LogPrefix(), "setup cache and endpoint")
 }

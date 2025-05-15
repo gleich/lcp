@@ -46,7 +46,11 @@ func fetchRecentlyPlayedGames(client *http.Client) ([]lcp.SteamGame, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%w failed to create request for steam API owned games", err)
 	}
-	recentlyPlayedGames, err := apis.RequestJSON[recentlyPlayedResponse](logPrefix, client, req)
+	recentlyPlayedGames, err := apis.RequestJSON[recentlyPlayedResponse](
+		cacheInstance.LogPrefix(),
+		client,
+		req,
+	)
 	if err != nil {
 		return nil, fmt.Errorf("%w sending request for owned games failed", err)
 	}
@@ -64,7 +68,11 @@ func fetchRecentlyPlayedGames(client *http.Client) ([]lcp.SteamGame, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%w failed to create request for steam API last played games", err)
 	}
-	lastPlayedTimes, err := apis.RequestJSON[lastPlayedTimesResponse](logPrefix, client, req)
+	lastPlayedTimes, err := apis.RequestJSON[lastPlayedTimesResponse](
+		cacheInstance.LogPrefix(),
+		client,
+		req,
+	)
 	if err != nil {
 		return nil, fmt.Errorf("%w sending request for steam API last played games failed", err)
 	}
