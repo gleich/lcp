@@ -39,7 +39,7 @@ func fetchPinnedRepos(client *githubv4.Client) ([]lcp.GitHubRepository, error) {
 	var query pinnedItemsQuery
 	err := client.Query(context.Background(), &query, nil)
 	if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
-		timber.Warning(logPrefix, "connection timed out for getting pinned repos")
+		timber.Warning(cacheInstance.LogPrefix(), "connection timed out for getting pinned repos")
 		return []lcp.GitHubRepository{}, apis.WarningError
 	}
 	if err != nil {

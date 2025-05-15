@@ -11,7 +11,7 @@ import (
 	"go.mattglei.ch/timber"
 )
 
-const logPrefix = "[workouts]"
+const cacheInstance = cache.Workouts
 
 func Setup(mux *http.ServeMux, client *http.Client) {
 	stravaTokens := strava.LoadTokens()
@@ -34,7 +34,7 @@ func Setup(mux *http.ServeMux, client *http.Client) {
 	if err != nil {
 		timber.Error(err, "failed to load initial data for workouts cache; not updating")
 	}
-	workoutsCache := cache.New("workouts", activities, err == nil)
+	workoutsCache := cache.New(cacheInstance, activities, err == nil)
 
 	mux.HandleFunc("GET /workouts", workoutsCache.ServeHTTP)
 	mux.HandleFunc(
@@ -43,5 +43,5 @@ func Setup(mux *http.ServeMux, client *http.Client) {
 	)
 	mux.HandleFunc("GET /strava/event", strava.ChallengeRoute)
 
-	timber.Done(logPrefix, "setup cache and endpoints")
+	timber.Done(cacheInstance.LogPrefix(), "setup cache and endpoints")
 }

@@ -100,7 +100,7 @@ func updateAlbumArtPeriodically(client *http.Client, rdb *redis.Client, interval
 			cursor = newCursor
 		}
 
-		timber.Info(logPrefix, "checking album art blurhash for", len(allKeys), "albums")
+		timber.Info(cacheInstance, "checking album art blurhash for", len(allKeys), "albums")
 		updated := 0
 		for _, key := range allKeys {
 			result, err := rdb.Get(ctx, key).Result()
@@ -160,7 +160,7 @@ func createAlbumArtBlurhash(
 		"User-Agent",
 		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36",
 	)
-	body, err := apis.Request(logPrefix, client, req)
+	body, err := apis.Request(cacheInstance.LogPrefix(), client, req)
 	if err != nil {
 		return nil, fmt.Errorf("%w failed to read response body from request", err)
 	}
