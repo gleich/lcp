@@ -9,7 +9,6 @@ import (
 	"github.com/redis/go-redis/v9"
 	"go.mattglei.ch/lcp/internal/auth"
 	"go.mattglei.ch/lcp/internal/cache"
-	"go.mattglei.ch/lcp/internal/secrets"
 	"go.mattglei.ch/lcp/pkg/lcp"
 	"go.mattglei.ch/timber"
 )
@@ -55,13 +54,7 @@ func cacheUpdate(client *http.Client, rdb *redis.Client) (lcp.AppleMusicCache, e
 	}, nil
 }
 
-func Setup(mux *http.ServeMux, client *http.Client) {
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     secrets.ENV.RedisAddress,
-		Password: secrets.ENV.RedisPassword,
-		DB:       0,
-	})
-
+func Setup(mux *http.ServeMux, client *http.Client, rdb *redis.Client) {
 	data, err := cacheUpdate(client, rdb)
 	if err != nil {
 		timber.Error(err, "initial fetch of applemusic cache data failed")
@@ -78,7 +71,6 @@ func Setup(mux *http.ServeMux, client *http.Client) {
 		},
 		30*time.Second,
 	)
-	go updateAlbumArtPeriodically(client, rdb, 24*time.Hour)
 	timber.Done(cacheInstance.LogPrefix(), "setup cache and endpoints")
 }
 

@@ -2,6 +2,7 @@ package applemusic
 
 import (
 	"fmt"
+	"image/jpeg"
 	"math"
 	"net/http"
 	"net/url"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"go.mattglei.ch/lcp/internal/cache"
+	"go.mattglei.ch/lcp/internal/images"
 	"go.mattglei.ch/lcp/pkg/lcp"
 	"go.mattglei.ch/timber"
 )
@@ -78,7 +80,7 @@ func songFromSongResponse(
 	if s.Attributes.PlayParams.CatalogID != "" {
 		id = s.Attributes.PlayParams.CatalogID
 	}
-	blurhash, err := loadAlbumArtBlurhash(client, rdb, artURL, id)
+	blurhash, err := images.BlurHash(client, rdb, artURL, jpeg.Decode)
 	if err != nil && strings.Contains(err.Error(), "unexpected EOF") {
 		timber.Warning("failed to create blur hash for", albumArtURL)
 	} else if err != nil {

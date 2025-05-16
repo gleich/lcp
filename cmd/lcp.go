@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/redis/go-redis/v9"
 	"go.mattglei.ch/lcp/internal/apis/applemusic"
 	"go.mattglei.ch/lcp/internal/apis/github"
 	"go.mattglei.ch/lcp/internal/apis/steam"
@@ -21,13 +22,18 @@ func main() {
 	var (
 		client = http.Client{}
 		mux    = http.NewServeMux()
+		rdb    = redis.NewClient(&redis.Options{
+			Addr:     secrets.ENV.RedisAddress,
+			Password: secrets.ENV.RedisPassword,
+			DB:       0,
+		})
 	)
 
 	mux.HandleFunc("/", rootRedirect)
 	github.Setup(mux)
-	workouts.Setup(mux, &client)
+	workouts.Setup(mux, &client, rdb)
 	steam.Setup(mux, &client)
-	applemusic.Setup(mux, &client)
+	applemusic.Setup(mux, &client, rdb)
 
 	timber.Info("starting server")
 	err := http.ListenAndServe(":8000", mux)

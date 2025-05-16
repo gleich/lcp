@@ -11,7 +11,9 @@ import (
 	"github.com/buckket/go-blurhash"
 )
 
-func BlurImage(data []byte, decoder func(r io.Reader) (image.Image, error)) (string, error) {
+type ImageDecoder func(r io.Reader) (image.Image, error)
+
+func blur(data []byte, decoder ImageDecoder) (string, error) {
 	reader := bytes.NewReader(data)
 	parsedImage, err := decoder(reader)
 	if err != nil {

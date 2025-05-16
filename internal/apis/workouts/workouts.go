@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/minio/minio-go/v7"
+	"github.com/redis/go-redis/v9"
 	"go.mattglei.ch/lcp/internal/apis/workouts/hevy"
 	"go.mattglei.ch/lcp/internal/apis/workouts/strava"
 	"go.mattglei.ch/lcp/pkg/lcp"
@@ -14,9 +15,10 @@ import (
 func fetch(
 	client *http.Client,
 	minioClient minio.Client,
+	rdb *redis.Client,
 	stravaTokens strava.Tokens,
 ) ([]lcp.Workout, error) {
-	stravaActivities, err := strava.FetchActivities(client, minioClient, stravaTokens)
+	stravaActivities, err := strava.FetchActivities(client, minioClient, rdb, stravaTokens)
 	if err != nil {
 		return []lcp.Workout{}, err
 	}

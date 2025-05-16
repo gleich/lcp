@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/minio/minio-go/v7"
+	"github.com/redis/go-redis/v9"
 	"go.mattglei.ch/lcp/internal/images"
 	"go.mattglei.ch/lcp/pkg/lcp"
 	"go.mattglei.ch/timber"
@@ -54,6 +55,7 @@ type detailedStravaActivity struct {
 func FetchActivities(
 	client *http.Client,
 	minioClient minio.Client,
+	rdb *redis.Client,
 	tokens Tokens,
 ) ([]lcp.Workout, error) {
 	stravaActivities, err := sendStravaAPIRequest[[]StravaActivity](
@@ -104,17 +106,17 @@ func FetchActivities(
 		if a.HasMap {
 			mapData := fetchMap(stravaActivity.Map.SummaryPolyline, client)
 			uploadMap(minioClient, stravaActivity.ID, mapData)
-			mapBlurURL, err := images.BlurImage(mapData, png.Decode)
-			if err != nil {
-				timber.Error(err, "failed to create blur image")
-				continue
-			}
-			a.MapBlurImage = &mapBlurURL
-			imgurl := fmt.Sprintf(
+			imgURL := fmt.Sprintf(
 				"https://minio-api.lab.mattglei.ch/mapbox-maps/%s.png",
 				a.ID,
 			)
-			a.MapImageURL = &imgurl
+			mapBlurHash, err := images.BlurHash(client, rdb, imgURL, png.Decode)
+			if err != nil {
+				timber.Error(err, logPrefix, "failed to create blur image")
+				continue
+			}
+			a.MapBlurImage = &mapBlurHash
+			a.MapImageURL = &imgURL
 		}
 		activities = append(activities, a)
 	}
