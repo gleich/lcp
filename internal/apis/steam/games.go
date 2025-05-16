@@ -94,11 +94,11 @@ func fetchRecentlyPlayedGames(client *http.Client, rdb *redis.Client) ([]lcp.Ste
 			}
 		}
 
-		libraryHeroURL := fmt.Sprintf(
-			"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/%d/library_hero.jpg",
+		headerURL := fmt.Sprintf(
+			"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/%d/header.jpg",
 			g.AppID,
 		)
-		libraryHeroBlurHash, err := images.BlurHash(client, rdb, libraryHeroURL, jpeg.Decode)
+		headerBlurHash, err := images.BlurHash(client, rdb, headerURL, jpeg.Decode)
 		if err != nil {
 			return nil, fmt.Errorf("%w failed to load blurhash image data for library hero", err)
 		}
@@ -118,8 +118,11 @@ func fetchRecentlyPlayedGames(client *http.Client, rdb *redis.Client) ([]lcp.Ste
 				"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/%d/header.jpg",
 				g.AppID,
 			),
-			LibraryHeroURL:      libraryHeroURL,
-			LibraryHeroBlurHash: libraryHeroBlurHash,
+			HeaderBlurHash: headerBlurHash,
+			LibraryHeroURL: fmt.Sprintf(
+				"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/%d/library_hero.jpg",
+				g.AppID,
+			),
 			LibraryHeroLogoURL: fmt.Sprintf(
 				"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/%d/logo.png",
 				g.AppID,
