@@ -5,6 +5,7 @@ import (
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"github.com/redis/go-redis/v9"
 	"go.mattglei.ch/lcp/internal/apis/workouts/strava"
 	"go.mattglei.ch/lcp/internal/cache"
 	"go.mattglei.ch/lcp/internal/secrets"
@@ -13,7 +14,7 @@ import (
 
 const cacheInstance = cache.Workouts
 
-func Setup(mux *http.ServeMux, client *http.Client) {
+func Setup(mux *http.ServeMux, client *http.Client, rdb *redis.Client) {
 	stravaTokens := strava.LoadTokens()
 	err := stravaTokens.RefreshIfNeeded(client)
 	if err != nil {
@@ -30,7 +31,7 @@ func Setup(mux *http.ServeMux, client *http.Client) {
 	if err != nil {
 		timber.Fatal(err, "failed to create minio client")
 	}
-	activities, err := fetch(client, *minioClient, stravaTokens)
+	activities, err := fetch(client, *minioClient, rdb, stravaTokens)
 	if err != nil {
 		timber.Error(err, "failed to load initial data for workouts cache; not updating")
 	}
@@ -39,7 +40,7 @@ func Setup(mux *http.ServeMux, client *http.Client) {
 	mux.HandleFunc("GET /workouts", workoutsCache.ServeHTTP)
 	mux.HandleFunc(
 		"POST /strava/event",
-		strava.EventRoute(client, workoutsCache, *minioClient, fetch, stravaTokens),
+		strava.EventRoute(client, workoutsCache, *minioClient, rdb, fetch, stravaTokens),
 	)
 	mux.HandleFunc("GET /strava/event", strava.ChallengeRoute)
 

@@ -2,12 +2,15 @@ package steam
 
 import (
 	"fmt"
+	"image/jpeg"
 	"net/http"
 	"net/url"
 	"sort"
 	"time"
 
+	"github.com/redis/go-redis/v9"
 	"go.mattglei.ch/lcp/internal/apis"
+	"go.mattglei.ch/lcp/internal/images"
 	"go.mattglei.ch/lcp/internal/secrets"
 	"go.mattglei.ch/lcp/pkg/lcp"
 )
@@ -32,7 +35,7 @@ type lastPlayedTimesResponse struct {
 	}
 }
 
-func fetchRecentlyPlayedGames(client *http.Client) ([]lcp.SteamGame, error) {
+func fetchRecentlyPlayedGames(client *http.Client, rdb *redis.Client) ([]lcp.SteamGame, error) {
 	params := url.Values{
 		"key":     {secrets.ENV.SteamKey},
 		"steamid": {secrets.ENV.SteamID},
@@ -91,6 +94,15 @@ func fetchRecentlyPlayedGames(client *http.Client) ([]lcp.SteamGame, error) {
 			}
 		}
 
+		libraryHeroURL := fmt.Sprintf(
+			"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/%d/library_hero.jpg",
+			g.AppID,
+		)
+		libraryHeroBlurHash, err := images.BlurHash(client, rdb, libraryHeroURL, jpeg.Decode)
+		if err != nil {
+			return nil, fmt.Errorf("%w failed to load blurhash image data for library hero", err)
+		}
+
 		games = append(games, lcp.SteamGame{
 			Name:  g.Name,
 			AppID: g.AppID,
@@ -106,10 +118,8 @@ func fetchRecentlyPlayedGames(client *http.Client) ([]lcp.SteamGame, error) {
 				"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/%d/header.jpg",
 				g.AppID,
 			),
-			LibraryHeroURL: fmt.Sprintf(
-				"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/%d/library_hero.jpg",
-				g.AppID,
-			),
+			LibraryHeroURL:      libraryHeroURL,
+			LibraryHeroBlurHash: libraryHeroBlurHash,
 			LibraryHeroLogoURL: fmt.Sprintf(
 				"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/%d/logo.png",
 				g.AppID,

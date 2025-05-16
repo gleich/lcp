@@ -17,7 +17,7 @@ type AppleMusicSong struct {
 	DurationInMillis   int     `json:"duration_in_millis"`
 	AlbumArtURL        string  `json:"album_art_url"`
 	AlbumArtPreviewURL string  `json:"album_art_preview_url"`
-	AlbumArtBlurhash   *string `json:"album_art_blurhash"`
+	AlbumArtBlurhash   string  `json:"album_art_blurhash"`
 	URL                string  `json:"url"`
 	ID                 string  `json:"id"`
 	PreviewAudioURL    *string `json:"preview_audio_url"`
@@ -58,6 +58,7 @@ type SteamGame struct {
 	URL                 string              `json:"url"`
 	HeaderURL           string              `json:"header_url"`
 	LibraryHeroURL      string              `json:"library_hero_url"`
+	LibraryHeroBlurHash string              `json:"library_hero_blur_hash"`
 	LibraryHeroLogoURL  string              `json:"library_hero_logo_url"`
 	AchievementProgress *float32            `json:"achievement_progress"`
 	Achievements        *[]SteamAchievement `json:"achievements"`

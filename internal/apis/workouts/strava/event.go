@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/minio/minio-go/v7"
+	"github.com/redis/go-redis/v9"
 	"go.mattglei.ch/lcp/internal/cache"
 	"go.mattglei.ch/lcp/internal/secrets"
 	"go.mattglei.ch/lcp/pkg/lcp"
@@ -26,8 +27,10 @@ func EventRoute(
 	client *http.Client,
 	workoutsCache *cache.Cache[[]lcp.Workout],
 	minioClient minio.Client,
+	rdb *redis.Client,
 	fetch func(client *http.Client,
 		minioClient minio.Client,
+		rdb *redis.Client,
 		stravaTokens Tokens) ([]lcp.Workout, error),
 	tokens Tokens,
 ) http.HandlerFunc {
@@ -58,7 +61,7 @@ func EventRoute(
 			return
 		}
 
-		activities, err := fetch(client, minioClient, tokens)
+		activities, err := fetch(client, minioClient, rdb, tokens)
 		if err != nil {
 			timber.ErrorMsg("failed to update strava cache")
 			return
