@@ -28,7 +28,7 @@ func BlurHash(
 	ctx := context.Background()
 	result, err := rdb.Get(ctx, url).Result()
 	if err == redis.Nil {
-		blurhash, err := createCacheEntry(client, rdb, url, decoder)
+		blurhash, err := createCacheEntry(client, rdb, url, decoder, ctx)
 		if err != nil {
 			return "", fmt.Errorf("%w failed to generate blurhash for %s", err, url)
 		}
@@ -52,6 +52,7 @@ func createCacheEntry(
 	rdb *redis.Client,
 	url string,
 	decoder ImageDecoder,
+	ctx context.Context,
 ) (string, error) {
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
@@ -82,7 +83,7 @@ func createCacheEntry(
 	}
 
 	// approximately a 1 week long cache lifetime
-	err = rdb.Set(context.Background(), url, string(cacheData), 168*time.Hour).
+	err = rdb.Set(ctx, url, string(cacheData), 168*time.Hour).
 		Err()
 	if err != nil {
 		return "", fmt.Errorf("%v failed to set %s to %s", err, url, string(cacheData))

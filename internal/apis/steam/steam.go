@@ -23,7 +23,7 @@ func Setup(mux *http.ServeMux, client *http.Client, rdb *redis.Client) {
 	go cache.UpdatePeriodically(
 		steamCache,
 		client,
-		func(cleint *http.Client) ([]lcp.SteamGame, error) {
+		func(client *http.Client) ([]lcp.SteamGame, error) {
 			return fetchRecentlyPlayedGames(client, rdb)
 		},
 		5*time.Minute,
