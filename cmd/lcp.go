@@ -32,7 +32,7 @@ func main() {
 	mux.HandleFunc("/", rootRedirect)
 	github.Setup(mux)
 	workouts.Setup(mux, &client, rdb)
-	steam.Setup(mux, &client)
+	steam.Setup(mux, &client, rdb)
 	applemusic.Setup(mux, &client, rdb)
 
 	timber.Info("starting server")

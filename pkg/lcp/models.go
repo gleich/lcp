@@ -58,6 +58,7 @@ type SteamGame struct {
 	URL                 string              `json:"url"`
 	HeaderURL           string              `json:"header_url"`
 	LibraryHeroURL      string              `json:"library_hero_url"`
+	LibraryHeroBlurHash string              `json:"library_hero_blur_hash"`
 	LibraryHeroLogoURL  string              `json:"library_hero_logo_url"`
 	AchievementProgress *float32            `json:"achievement_progress"`
 	Achievements        *[]SteamAchievement `json:"achievements"`
