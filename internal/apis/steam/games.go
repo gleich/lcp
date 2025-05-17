@@ -15,11 +15,12 @@ import (
 	"go.mattglei.ch/lcp/pkg/lcp"
 )
 
-type recentlyPlayedResponse struct {
+type ownedGamesResponse struct {
 	Response struct {
 		Games []struct {
 			Name            string `json:"name"`
 			AppID           int32  `json:"appid"`
+			LastPlayed      int64  `json:"rtime_last_played"`
 			ImgIconURL      string `json:"img_icon_url"`
 			PlaytimeForever int32  `json:"playtime_forever"`
 		} `json:"games"`
@@ -37,19 +38,19 @@ type lastPlayedTimesResponse struct {
 
 func fetchRecentlyPlayedGames(client *http.Client, rdb *redis.Client) ([]lcp.SteamGame, error) {
 	params := url.Values{
-		"key":     {secrets.ENV.SteamKey},
-		"steamid": {secrets.ENV.SteamID},
-		"format":  {"json"},
+		"key":             {secrets.ENV.SteamKey},
+		"steamid":         {secrets.ENV.SteamID},
+		"include_appinfo": {"true"},
 	}
 	req, err := http.NewRequest(
 		http.MethodGet,
-		"https://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v0001/?"+params.Encode(),
+		"https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?"+params.Encode(),
 		nil,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("%w failed to create request for steam API owned games", err)
 	}
-	recentlyPlayedGames, err := apis.RequestJSON[recentlyPlayedResponse](
+	ownedGames, err := apis.RequestJSON[ownedGamesResponse](
 		cacheInstance.LogPrefix(),
 		client,
 		req,
@@ -58,40 +59,15 @@ func fetchRecentlyPlayedGames(client *http.Client, rdb *redis.Client) ([]lcp.Ste
 		return nil, fmt.Errorf("%w sending request for owned games failed", err)
 	}
 
-	// undocumented API access being used here. could potentially cause problems due to pagination
-	// especially when I own over 100 games
-	params = url.Values{
-		"key": {secrets.ENV.SteamKey},
-	}
-	req, err = http.NewRequest(
-		http.MethodGet,
-		"https://api.steampowered.com/IPlayerService/ClientGetLastPlayedTimes/v1/?"+params.Encode(),
-		nil,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("%w failed to create request for steam API last played games", err)
-	}
-	lastPlayedTimes, err := apis.RequestJSON[lastPlayedTimesResponse](
-		cacheInstance.LogPrefix(),
-		client,
-		req,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("%w sending request for steam API last played games failed", err)
-	}
+	sort.Slice(ownedGames.Response.Games, func(i, j int) bool {
+		return ownedGames.Response.Games[j].LastPlayed < ownedGames.Response.Games[i].LastPlayed
+	})
 
 	var games []lcp.SteamGame
-	for _, g := range recentlyPlayedGames.Response.Games {
+	for _, g := range ownedGames.Response.Games[:10] {
 		achievementPercentage, achievements, err := fetchGameAchievements(client, g.AppID)
 		if err != nil {
 			return nil, err
-		}
-
-		lastPlaytime := int64(0)
-		for _, game := range lastPlayedTimes.Response.Games {
-			if g.AppID == game.AppID {
-				lastPlaytime = game.LastPlaytime
-			}
 		}
 
 		headerURL := fmt.Sprintf(
@@ -111,7 +87,7 @@ func fetchRecentlyPlayedGames(client *http.Client, rdb *redis.Client) ([]lcp.Ste
 				g.AppID,
 				g.ImgIconURL,
 			),
-			RTimeLastPlayed: time.Unix(lastPlaytime, 0),
+			RTimeLastPlayed: time.Unix(g.LastPlayed, 0),
 			PlaytimeForever: g.PlaytimeForever,
 			URL:             fmt.Sprintf("https://store.steampowered.com/app/%d/", g.AppID),
 			HeaderURL: fmt.Sprintf(
@@ -132,10 +108,6 @@ func fetchRecentlyPlayedGames(client *http.Client, rdb *redis.Client) ([]lcp.Ste
 		})
 
 	}
-
-	sort.Slice(games, func(i, j int) bool {
-		return games[j].RTimeLastPlayed.Before(games[i].RTimeLastPlayed)
-	})
 
 	return games, nil
 }
