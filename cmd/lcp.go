@@ -22,7 +22,7 @@ func main() {
 	secrets.Load()
 
 	var (
-		client = http.Client{}
+		client = http.Client{Timeout: 20 * time.Second}
 		mux    = http.NewServeMux()
 		rdb    = redis.NewClient(&redis.Options{
 			Addr:     secrets.ENV.RedisAddress,
