@@ -13,8 +13,6 @@ import (
 	"go.mattglei.ch/timber"
 )
 
-var foo = "bar"
-
 func main() {
 	setupLogger()
 	timber.Info("booted")
