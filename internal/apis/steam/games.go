@@ -27,15 +27,6 @@ type ownedGamesResponse struct {
 	} `json:"response"`
 }
 
-type lastPlayedTimesResponse struct {
-	Response struct {
-		Games []struct {
-			AppID        int32 `json:"appid"`
-			LastPlaytime int64 `json:"last_playtime"`
-		}
-	}
-}
-
 func fetchRecentlyPlayedGames(client *http.Client, rdb *redis.Client) ([]lcp.SteamGame, error) {
 	params := url.Values{
 		"key":             {secrets.ENV.SteamKey},
