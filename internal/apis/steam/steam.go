@@ -26,7 +26,7 @@ func Setup(mux *http.ServeMux, client *http.Client, rdb *redis.Client) {
 		func(client *http.Client) ([]lcp.SteamGame, error) {
 			return fetchRecentlyPlayedGames(client, rdb)
 		},
-		5*time.Minute,
+		10*time.Minute,
 	)
 	timber.Done(cacheInstance.LogPrefix(), "setup cache and endpoint")
 }
