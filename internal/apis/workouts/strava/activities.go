@@ -54,7 +54,7 @@ type detailedStravaActivity struct {
 
 func FetchActivities(
 	client *http.Client,
-	minioClient minio.Client,
+	minioClient *minio.Client,
 	rdb *redis.Client,
 	tokens Tokens,
 ) ([]lcp.Workout, error) {

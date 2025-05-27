@@ -31,7 +31,7 @@ func Setup(mux *http.ServeMux, client *http.Client, rdb *redis.Client) {
 	if err != nil {
 		timber.Fatal(err, "failed to create minio client")
 	}
-	activities, err := fetch(client, *minioClient, rdb, stravaTokens)
+	activities, err := fetch(client, minioClient, rdb, stravaTokens)
 	if err != nil {
 		timber.Error(err, "failed to load initial data for workouts cache; not updating")
 	}
@@ -40,7 +40,7 @@ func Setup(mux *http.ServeMux, client *http.Client, rdb *redis.Client) {
 	mux.HandleFunc("GET /workouts", workoutsCache.ServeHTTP)
 	mux.HandleFunc(
 		"POST /strava/event",
-		strava.EventRoute(client, workoutsCache, *minioClient, rdb, fetch, stravaTokens),
+		strava.EventRoute(client, workoutsCache, minioClient, rdb, fetch, stravaTokens),
 	)
 	mux.HandleFunc("GET /strava/event", strava.ChallengeRoute)
 

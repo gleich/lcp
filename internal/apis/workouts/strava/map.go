@@ -48,7 +48,7 @@ func fetchMap(polyline string, client *http.Client) []byte {
 	return b
 }
 
-func uploadMap(minioClient minio.Client, id uint64, data []byte) {
+func uploadMap(minioClient *minio.Client, id uint64, data []byte) {
 	var (
 		reader = bytes.NewReader(data)
 		size   = int64(len(data))
@@ -67,7 +67,7 @@ func uploadMap(minioClient minio.Client, id uint64, data []byte) {
 	}
 }
 
-func removeOldMaps(minioClient minio.Client, activities []lcp.Workout) {
+func removeOldMaps(minioClient *minio.Client, activities []lcp.Workout) {
 	var validKeys []string
 	for _, activity := range activities {
 		validKeys = append(validKeys, fmt.Sprintf("%s.png", activity.ID))

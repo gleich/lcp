@@ -14,7 +14,7 @@ import (
 
 func fetch(
 	client *http.Client,
-	minioClient minio.Client,
+	minioClient *minio.Client,
 	rdb *redis.Client,
 	stravaTokens strava.Tokens,
 ) ([]lcp.Workout, error) {

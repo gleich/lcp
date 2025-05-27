@@ -26,10 +26,10 @@ type event struct {
 func EventRoute(
 	client *http.Client,
 	workoutsCache *cache.Cache[[]lcp.Workout],
-	minioClient minio.Client,
+	minioClient *minio.Client,
 	rdb *redis.Client,
 	fetch func(client *http.Client,
-		minioClient minio.Client,
+		minioClient *minio.Client,
 		rdb *redis.Client,
 		stravaTokens Tokens) ([]lcp.Workout, error),
 	tokens Tokens,
