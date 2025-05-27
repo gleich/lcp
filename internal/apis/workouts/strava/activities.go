@@ -107,7 +107,7 @@ func FetchActivities(
 			mapData := fetchMap(stravaActivity.Map.SummaryPolyline, client)
 			uploadMap(minioClient, stravaActivity.ID, mapData)
 			imgURL := fmt.Sprintf(
-				"https://minio-api.lab.mattglei.ch/mapbox-maps/%s.png",
+				"https://s3.mattglei.ch/mapbox-maps/%s.png",
 				a.ID,
 			)
 			mapBlurHash, err := images.BlurHash(client, rdb, imgURL, png.Decode)
