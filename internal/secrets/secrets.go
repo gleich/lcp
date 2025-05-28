@@ -59,10 +59,10 @@ func Load() {
 		}
 	}
 
-	loadedSecrets, err := env.ParseAs[Secrets]()
+	secrets, err := env.ParseAs[Secrets]()
 	if err != nil {
 		timber.Fatal(err, "parsing required env vars failed")
 	}
-	ENV = loadedSecrets
+	ENV = secrets
 	timber.Done("loaded secrets")
 }
