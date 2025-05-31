@@ -1,16 +1,12 @@
 package applemusic
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/redis/go-redis/v9"
-	"go.mattglei.ch/lcp/internal/auth"
-	"go.mattglei.ch/lcp/internal/cache"
 	"go.mattglei.ch/lcp/pkg/lcp"
-	"go.mattglei.ch/timber"
 )
 
 type playlistTracksResponse struct {
@@ -88,36 +84,4 @@ func fetchPlaylist(
 			playlistData.Data[0].Attributes.PlayParams.GlobalID,
 		),
 	}, nil
-}
-
-func playlistEndpoint(c *cache.Cache[lcp.AppleMusicCache]) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !auth.IsAuthorized(w, r) {
-			return
-		}
-		id := r.PathValue("id")
-
-		c.Mutex.RLock()
-		var p *lcp.AppleMusicPlaylist
-		for _, plist := range c.Data.Playlists {
-			if plist.ID == id {
-				p = &plist
-				break
-			}
-		}
-
-		if p == nil {
-			c.Mutex.RUnlock()
-			w.WriteHeader(http.StatusNotFound)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		err := json.NewEncoder(w).Encode(p)
-		c.Mutex.RUnlock()
-		if err != nil {
-			err = fmt.Errorf("%w failed to write json data to request", err)
-			timber.Error(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-	})
 }
