@@ -112,5 +112,5 @@ func fetch(
 		return nil, fmt.Errorf("%w failed to remove old maps", err)
 	}
 
-	return activities, nil
+	return activities[:20], nil
 }
