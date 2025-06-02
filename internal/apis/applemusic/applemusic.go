@@ -22,7 +22,7 @@ func cacheUpdate(client *http.Client, rdb *redis.Client) (lcp.AppleMusicCache, e
 		"p.V7VYVB0hZo53MQv", // old man
 		"p.AWXoZoxHLrvpJlY", // chill
 		"p.AWXoXPYSLrvpJlY", // alt
-		"p.LV0PX3EIl0EpDLW", // jazz
+		"p.qQXLX2rHA75zg8e", // after hours
 		"p.gek1E8efLa68Adp", // classics
 		"p.qQXLxPLtA75zg8e", // 80s
 		"p.LV0PXNoCl0EpDLW", // divorced dad
