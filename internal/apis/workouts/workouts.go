@@ -55,7 +55,10 @@ func fetch(
 		return activities[i].StartDate.After(activities[j].StartDate)
 	})
 
-	// fill in data for collected strava activities
+	// fill in data for collected strava activities. this is done to keep the number of API requests
+	// to strava to a minimum. Rate limits were getting hit when making requests for all strava
+	// activities, so this should help mitigate that (especially when having to restart the
+	// application during updates).
 	for i := range activities {
 		activity := &activities[i]
 		if activity.Platform == "strava" {
