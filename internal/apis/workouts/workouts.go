@@ -61,7 +61,7 @@ func fetch(
 	// application during updates).
 	for i := range activities {
 		activity := &activities[i]
-		if activity.Platform == "strava" {
+		if activity.Platform != "strava" {
 			continue
 		}
 
