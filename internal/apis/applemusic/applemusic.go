@@ -19,12 +19,12 @@ func cacheUpdate(client *http.Client, rdb *redis.Client) (lcp.AppleMusicCache, e
 	}
 
 	playlistsIDs := []string{
-		"p.V7VYVB0hZo53MQv", // old man
 		"p.AWXoZoxHLrvpJlY", // chill
 		"p.AWXoXPYSLrvpJlY", // alt
 		"p.qQXLX2rHA75zg8e", // after hours
 		"p.gek1E8efLa68Adp", // classics
 		"p.qQXLxPLtA75zg8e", // 80s
+		"p.V7VYVB0hZo53MQv", // old man
 		"p.LV0PXNoCl0EpDLW", // divorced dad
 		"p.QvDQE5RIVbAeokL", // party
 		"p.LV0PXL3Cl0EpDLW", // bops
