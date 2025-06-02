@@ -86,7 +86,6 @@ func FetchActivities(
 		}
 		activities = append(activities, a)
 	}
-	RemoveOldMaps(minioClient, activities)
 
 	return activities, nil
 }
