@@ -80,6 +80,7 @@ type Workout struct {
 	StartDate          time.Time      `json:"start_date"`
 	MapBlurImage       *string        `json:"map_blur_image,omitempty"`
 	MapImageURL        *string        `json:"map_image_url,omitempty"`
+	MapPolyline        string         `json:"-"` // not included in JSON response
 	HasMap             bool           `json:"has_map"`
 	TotalElevationGain float32        `json:"total_elevation_gain,omitempty"`
 	MovingTime         uint32         `json:"moving_time"`

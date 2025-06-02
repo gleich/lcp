@@ -2,16 +2,13 @@ package strava
 
 import (
 	"fmt"
-	"image/png"
 	"net/http"
 	"net/url"
 	"time"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/redis/go-redis/v9"
-	"go.mattglei.ch/lcp/internal/images"
 	"go.mattglei.ch/lcp/pkg/lcp"
-	"go.mattglei.ch/timber"
 )
 
 type StravaActivity struct {
@@ -73,17 +70,6 @@ func FetchActivities(
 			continue
 		}
 
-		details, err := fetchActivityDetails(client, stravaActivity.ID, tokens)
-		if err != nil {
-			timber.Error(err, "failed to fetch activity details")
-			continue
-		}
-
-		hrStream, err := fetchHeartrate(client, stravaActivity.ID, tokens)
-		if err != nil {
-			return nil, fmt.Errorf("%w failed to fetch HR data", err)
-		}
-
 		a := lcp.Workout{
 			Platform:           "strava",
 			Name:               stravaActivity.Name,
@@ -95,34 +81,17 @@ func FetchActivities(
 			ID:                 fmt.Sprint(stravaActivity.ID),
 			AverageHeartrate:   stravaActivity.AverageHeartrate,
 			HasMap:             stravaActivity.Map.SummaryPolyline != "",
-			HeartrateData:      hrStream,
+			MapPolyline:        stravaActivity.Map.SummaryPolyline,
 			HasHeartrate:       true,
-			Calories:           details.Calories,
-		}
-
-		if a.HasMap {
-			mapData := fetchMap(stravaActivity.Map.SummaryPolyline, client)
-			uploadMap(minioClient, stravaActivity.ID, mapData)
-			imgURL := fmt.Sprintf(
-				"https://s3.mattglei.ch/mapbox-maps/%s.png",
-				a.ID,
-			)
-			mapBlurHash, err := images.BlurHash(client, rdb, imgURL, png.Decode)
-			if err != nil {
-				timber.Error(err, logPrefix, "failed to create blur image")
-				continue
-			}
-			a.MapBlurImage = &mapBlurHash
-			a.MapImageURL = &imgURL
 		}
 		activities = append(activities, a)
 	}
-	removeOldMaps(minioClient, activities)
+	RemoveOldMaps(minioClient, activities)
 
 	return activities, nil
 }
 
-func fetchHeartrate(client *http.Client, id uint64, tokens Tokens) ([]int, error) {
+func FetchHeartrate(client *http.Client, id string, tokens Tokens) ([]int, error) {
 	params := url.Values{
 		"key_by_type": {"true"},
 		"keys":        {"heartrate"},
@@ -130,12 +99,12 @@ func fetchHeartrate(client *http.Client, id uint64, tokens Tokens) ([]int, error
 	}
 	stream, err := sendStravaAPIRequest[struct{ Heartrate activityStream }](
 		client,
-		fmt.Sprintf("api/v3/activities/%d/streams?%s", id, params.Encode()),
+		fmt.Sprintf("api/v3/activities/%s/streams?%s", id, params.Encode()),
 		tokens,
 	)
 	if err != nil {
 		return []int{}, fmt.Errorf(
-			"%v failed to send request for HR data from activity with ID of %d",
+			"%v failed to send request for HR data from activity with ID of %s",
 			err,
 			id,
 		)
@@ -144,19 +113,19 @@ func fetchHeartrate(client *http.Client, id uint64, tokens Tokens) ([]int, error
 	return stream.Heartrate.Data, nil
 }
 
-func fetchActivityDetails(
+func FetchActivityDetails(
 	client *http.Client,
-	id uint64,
+	id string,
 	tokens Tokens,
 ) (detailedStravaActivity, error) {
 	details, err := sendStravaAPIRequest[detailedStravaActivity](
 		client,
-		fmt.Sprintf("api/v3/activities/%d", id),
+		fmt.Sprintf("api/v3/activities/%s", id),
 		tokens,
 	)
 	if err != nil {
 		return detailedStravaActivity{}, fmt.Errorf(
-			"%v failed to request detailed activity data for %d",
+			"%v failed to request detailed activity data for %s",
 			err,
 			id,
 		)

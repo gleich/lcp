@@ -17,7 +17,7 @@ import (
 
 const bucketName = "mapbox-maps"
 
-func fetchMap(polyline string, client *http.Client) []byte {
+func FetchMap(client *http.Client, polyline string) ([]byte, error) {
 	var (
 		lineWidth = 2.0
 		lineColor = "000"
@@ -39,18 +39,19 @@ func fetchMap(polyline string, client *http.Client) []byte {
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		timber.Error(err, "failed to create get request to", url)
+		return nil, fmt.Errorf("%w failed to create get request to %s", err, url)
 	}
 
 	b, err := apis.Request(logPrefix, client, req)
 	if err != nil {
 		timber.Error(err, "failed to send request to", url)
+		return nil, fmt.Errorf("%w failed to send request to %s", err, url)
 	}
 
-	return b
+	return b, nil
 }
 
-func uploadMap(minioClient *minio.Client, id uint64, data []byte) {
+func UploadMap(minioClient *minio.Client, id string, data []byte) error {
 	var (
 		reader = bytes.NewReader(data)
 		size   = int64(len(data))
@@ -59,17 +60,18 @@ func uploadMap(minioClient *minio.Client, id uint64, data []byte) {
 	_, err := minioClient.PutObject(
 		context.Background(),
 		bucketName,
-		fmt.Sprintf("%d.png", id),
+		fmt.Sprintf("%s.png", id),
 		reader,
 		size,
 		minio.PutObjectOptions{ContentType: "image/png"},
 	)
 	if err != nil {
-		timber.Error(err, "failed to upload to minio")
+		return fmt.Errorf("%w failed to upload to minio", err)
 	}
+	return nil
 }
 
-func removeOldMaps(minioClient *minio.Client, activities []lcp.Workout) {
+func RemoveOldMaps(minioClient *minio.Client, activities []lcp.Workout) error {
 	var validKeys []string
 	for _, activity := range activities {
 		validKeys = append(validKeys, fmt.Sprintf("%s.png", activity.ID))
@@ -78,8 +80,7 @@ func removeOldMaps(minioClient *minio.Client, activities []lcp.Workout) {
 	objects := minioClient.ListObjects(context.Background(), bucketName, minio.ListObjectsOptions{})
 	for object := range objects {
 		if object.Err != nil {
-			timber.Error(object.Err, "failed to load object")
-			return
+			return fmt.Errorf("%w failed to load object", object.Err)
 		}
 		if !slices.Contains(validKeys, object.Key) {
 			err := minioClient.RemoveObject(
@@ -89,9 +90,9 @@ func removeOldMaps(minioClient *minio.Client, activities []lcp.Workout) {
 				minio.RemoveObjectOptions{},
 			)
 			if err != nil {
-				timber.Error(err, "failed to remove object")
-				return
+				return fmt.Errorf("%w failed to remove object", err)
 			}
 		}
 	}
+	return nil
 }
