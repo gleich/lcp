@@ -55,6 +55,9 @@ func fetch(
 		return activities[i].StartDate.After(activities[j].StartDate)
 	})
 
+	// only store the first 20 activities
+	activities = activities[:20]
+
 	// fill in data for collected strava activities. this is done to keep the number of API requests
 	// to strava to a minimum. Rate limits were getting hit when making requests for all strava
 	// activities, so this should help mitigate that (especially when having to restart the
@@ -112,5 +115,5 @@ func fetch(
 		return nil, fmt.Errorf("%w failed to remove old maps", err)
 	}
 
-	return activities[:20], nil
+	return activities, nil
 }
