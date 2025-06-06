@@ -22,12 +22,12 @@ func blur(data []byte, decoder ImageDecoder) (string, error) {
 
 	width := parsedImage.Bounds().Dx()
 	height := parsedImage.Bounds().Dy()
-	blurData, err := blurhash.Encode(1, 1, parsedImage)
+	blurData, err := blurhash.Encode(4, 3, parsedImage)
 	if err != nil {
 		return "", fmt.Errorf("%w encoding image into blurhash failed", err)
 	}
 
-	scaleDownFactor := 30
+	scaleDownFactor := 25
 	blurImage, err := blurhash.Decode(blurData, width/scaleDownFactor, height/scaleDownFactor, 1)
 	if err != nil {
 		return "", fmt.Errorf("%w decoding blurhash data into img failed", err)
