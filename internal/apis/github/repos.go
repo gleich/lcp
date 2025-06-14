@@ -45,8 +45,8 @@ func fetchPinnedRepos(client *githubv4.Client) ([]lcp.GitHubRepository, error) {
 		timber.Warning(cacheInstance.LogPrefix(), "connection timed out for getting pinned repos")
 		return []lcp.GitHubRepository{}, apis.ErrWarning
 	}
-	if errors.Is(err, syscall.ECONNRESET) ||
-		strings.Contains(err.Error(), "connection reset by peer") {
+	if err != nil && (errors.Is(err, syscall.ECONNRESET) ||
+		strings.Contains(err.Error(), "connection reset by peer")) {
 		timber.Warning(cacheInstance.LogPrefix(),
 			"connection reset by peer while getting pinned repos")
 		return []lcp.GitHubRepository{}, apis.ErrWarning
