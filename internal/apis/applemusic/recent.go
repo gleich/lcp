@@ -29,7 +29,7 @@ func fetchRecentlyPlayed(
 		so, err := songFromSongResponse(client, rdb, s)
 		if err != nil {
 			return []lcp.AppleMusicSong{}, fmt.Errorf(
-				"%v failed to parse song from song response",
+				"%w failed to parse song from song response",
 				err,
 			)
 		}
