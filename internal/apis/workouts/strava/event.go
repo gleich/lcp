@@ -40,7 +40,10 @@ func EventRoute(
 			timber.Error(err, "reading response body failed")
 			return
 		}
-		defer r.Body.Close()
+		err = r.Body.Close()
+		if err != nil {
+			timber.Error(err, "closing response body failed")
+		}
 
 		var eventData event
 		err = json.Unmarshal(body, &eventData)

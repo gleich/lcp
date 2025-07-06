@@ -58,7 +58,6 @@ func fetchGameAchievements(
 			appID,
 		)
 	}
-	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -79,6 +78,11 @@ func fetchGameAchievements(
 			resp.Request.URL.String(),
 		)
 		return nil, nil, apis.ErrWarning
+	}
+
+	err = resp.Body.Close()
+	if err != nil {
+		return nil, nil, fmt.Errorf("%w failed to close response body", err)
 	}
 
 	var playerAchievements playerAchievementsResponse

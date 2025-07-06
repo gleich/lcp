@@ -53,11 +53,15 @@ func FetchCache[T CacheData](client *Client) (Response[T], error) {
 	if err != nil {
 		return zeroValue, fmt.Errorf("%w failed to execute request", err)
 	}
-	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return zeroValue, fmt.Errorf("%w reading request body failed", err)
+	}
+
+	err = resp.Body.Close()
+	if err != nil {
+		return zeroValue, fmt.Errorf("%w failed to close response body", err)
 	}
 
 	var response Response[T]
@@ -65,5 +69,6 @@ func FetchCache[T CacheData](client *Client) (Response[T], error) {
 	if err != nil {
 		return zeroValue, fmt.Errorf("%w failed to parse json", err)
 	}
+
 	return response, nil
 }

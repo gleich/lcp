@@ -49,7 +49,6 @@ func Request(logPrefix string, client *http.Client, req *http.Request) ([]byte, 
 		}
 		return []byte{}, fmt.Errorf("%w sending request to %s failed", err, req.URL.String())
 	}
-	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -65,6 +64,12 @@ func Request(logPrefix string, client *http.Client, req *http.Request) ([]byte, 
 		)
 		return []byte{}, ErrWarning
 	}
+
+	err = resp.Body.Close()
+	if err != nil {
+		return []byte{}, fmt.Errorf("%w failed to close response body", err)
+	}
+
 	return body, nil
 }
 
