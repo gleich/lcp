@@ -4,6 +4,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/x509"
 	"encoding/pem"
+	"fmt"
 	"os"
 	"time"
 
@@ -57,5 +58,5 @@ func main() {
 		timber.Fatal(err, "failed to sign token")
 	}
 
-	timber.Info("token:", signed)
+	fmt.Println(signed)
 }
