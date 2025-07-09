@@ -12,5 +12,7 @@ TEAM_ID="..." KEY_ID="..." go run main.go
 ```
 
 5. Copy and save the given JWT that is outputted from the script. This is our **DEVELOPER TOKEN**.
-6. To get the user auth token replace the `DEVELOPER TOKEN` in [auth.html](./auth.html) with the given developer token from step 5.
+6. To get the user auth token replace the `DEVELOPER TOKEN` in [auth.html](./auth.html) with the given developer token from step 5. This webpage needs to be visited from `http` and not `file://`. This can be done using the "Show Preview" command when right clicking on the file in vscode.
 7. Copy the user token that is outputted on the web page.
+8. Update the `APPLE_MUSIC_APP_TOKEN` to the developer token from step 4.
+9. Update the `APPLE_MUSIC_USER_TOKEN` to the user token from step 6.
