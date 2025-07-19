@@ -31,6 +31,7 @@ func fetchPlaylist(
 	client *http.Client,
 	rdb *redis.Client,
 	id string,
+	spotifyURL string,
 ) (lcp.AppleMusicPlaylist, error) {
 	playlistData, err := sendAppleMusicAPIRequest[playlistResponse](
 		client,
@@ -83,5 +84,6 @@ func fetchPlaylist(
 			"https://music.apple.com/us/playlist/alt/%s",
 			playlistData.Data[0].Attributes.PlayParams.GlobalID,
 		),
+		SpotifyURL: spotifyURL,
 	}, nil
 }

@@ -28,6 +28,7 @@ type AppleMusicPlaylist struct {
 	Tracks       []AppleMusicSong `json:"tracks"`
 	LastModified time.Time        `json:"last_modified"`
 	URL          string           `json:"url"`
+	SpotifyURL   string           `json:"spotify_url"`
 	ID           string           `json:"id"`
 }
 
