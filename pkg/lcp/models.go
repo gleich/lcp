@@ -31,13 +31,6 @@ type AppleMusicPlaylist struct {
 	ID           string           `json:"id"`
 }
 
-type AppleMusicPlaylistSummary struct {
-	Name            string           `json:"name"`
-	TrackCount      int              `json:"track_count"`
-	FirstFourTracks []AppleMusicSong `json:"first_four_tracks"`
-	ID              string           `json:"id"`
-}
-
 type GitHubRepository struct {
 	Name          string    `json:"name"`
 	Owner         string    `json:"owner"`
