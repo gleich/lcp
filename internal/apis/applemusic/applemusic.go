@@ -74,6 +74,11 @@ func cacheUpdate(client *http.Client, rdb *redis.Client) (lcp.AppleMusicCache, e
 			ID:         "p.6xZaArOsvzb5OML",
 			SpotifyURL: "https://open.spotify.com/playlist/261XCji6XWsXktcMumPIqa?si=WE1l-BPjRG-Li2Sx8znm7Q",
 		},
+		// house
+		{
+			ID:         "p.gek1EWzCLa68Adp",
+			SpotifyURL: "https://open.spotify.com/playlist/3iMi8ew4XvYCCcS9P2iARw",
+		},
 		// focus
 		{
 			ID:         "p.AWXoXeAiLrvpJlY",
@@ -98,11 +103,6 @@ func cacheUpdate(client *http.Client, rdb *redis.Client) (lcp.AppleMusicCache, e
 		{
 			ID:         "p.O1kz7zbsVmvz704",
 			SpotifyURL: "https://open.spotify.com/playlist/3jR0MH0NwzEdYuUY8nohmf?si=u5pJqEM5TUu3t8IVo5XNxQ",
-		},
-		// fall
-		{
-			ID:         "p.QvDQEN0IVbAeokL",
-			SpotifyURL: "https://open.spotify.com/playlist/2QZIyEGgLToF97wqMgU9yZ?si=N-mX-sXNS4W0_SIEJYAzpw",
 		},
 	}
 	appleMusicPlaylists := []lcp.AppleMusicPlaylist{}
