@@ -36,7 +36,14 @@ func main() {
 	applemusic.Setup(mux, &client, rdb)
 
 	timber.Info("starting server")
-	err := http.ListenAndServe(":8000", mux)
+	server := &http.Server{
+		Addr:         ":8000",
+		Handler:      mux,
+		ReadTimeout:  20 * time.Second,
+		WriteTimeout: 20 * time.Second,
+		IdleTimeout:  60 * time.Second,
+	}
+	err := server.ListenAndServe()
 	if err != nil {
 		timber.Fatal(err, "failed to start router")
 	}
