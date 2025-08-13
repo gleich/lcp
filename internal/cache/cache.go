@@ -122,7 +122,8 @@ func UpdatePeriodically[T lcp.CacheData, C any](
 		time.Sleep(interval)
 		data, err := update(client)
 		if err != nil {
-			if !errors.Is(err, apis.ErrWarning) && !errors.Is(err, ErrAppleMusicNoArtwork) {
+			if !errors.Is(err, apis.ErrWarning) && !errors.Is(err, ErrAppleMusicNoArtwork) &&
+				!errors.Is(err, ErrSteamOwnedGamesEmpty) {
 				timber.Error(err, "updating", cache.instance.LogPrefix(), "cache failed")
 			}
 		} else {

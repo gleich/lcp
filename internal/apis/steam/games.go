@@ -10,6 +10,7 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"go.mattglei.ch/lcp/internal/apis"
+	"go.mattglei.ch/lcp/internal/cache"
 	"go.mattglei.ch/lcp/internal/images"
 	"go.mattglei.ch/lcp/internal/secrets"
 	"go.mattglei.ch/lcp/pkg/lcp"
@@ -53,6 +54,10 @@ func fetchRecentlyPlayedGames(client *http.Client, rdb *redis.Client) ([]lcp.Ste
 	sort.Slice(ownedGames.Response.Games, func(i, j int) bool {
 		return ownedGames.Response.Games[j].LastPlayed < ownedGames.Response.Games[i].LastPlayed
 	})
+
+	if len(ownedGames.Response.Games) < 10 {
+		return nil, cache.ErrSteamOwnedGamesEmpty
+	}
 
 	var games []lcp.SteamGame
 	for _, g := range ownedGames.Response.Games[:10] {
