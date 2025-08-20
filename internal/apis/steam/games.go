@@ -18,25 +18,27 @@ import (
 
 type ownedGamesResponse struct {
 	Response struct {
-		Games []struct {
-			Name            string `json:"name"`
-			AppID           int32  `json:"appid"`
-			LastPlayed      int64  `json:"rtime_last_played"`
-			ImgIconURL      string `json:"img_icon_url"`
-			PlaytimeForever int32  `json:"playtime_forever"`
-		} `json:"games"`
+		Apps []struct {
+			AppID        int    `json:"appid"`
+			Name         string `json:"name"`
+			RtLastPlayed int    `json:"rt_last_played"`
+			RtPlaytime   int    `json:"rt_playtime"`
+		} `json:"apps"`
 	} `json:"response"`
 }
 
 func fetchRecentlyPlayedGames(client *http.Client, rdb *redis.Client) ([]lcp.SteamGame, error) {
 	params := url.Values{
-		"key":             {secrets.ENV.SteamKey},
-		"steamid":         {secrets.ENV.SteamID},
-		"include_appinfo": {"true"},
+		"access_token":      {secrets.ENV.SteamWebAjaxToken},
+		"family_groupid":    {"0"},
+		"include_own":       {"true"},
+		"include_excluded":  {"true"},
+		"include_free":      {"true"},
+		"include_non_games": {"false"},
 	}
 	req, err := http.NewRequest(
 		http.MethodGet,
-		"https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?"+params.Encode(),
+		"https://api.steampowered.com/IFamilyGroupsService/GetSharedLibraryApps/v1/?"+params.Encode(),
 		nil,
 	)
 	if err != nil {
@@ -51,16 +53,16 @@ func fetchRecentlyPlayedGames(client *http.Client, rdb *redis.Client) ([]lcp.Ste
 		return nil, fmt.Errorf("%w sending request for owned games failed", err)
 	}
 
-	sort.Slice(ownedGames.Response.Games, func(i, j int) bool {
-		return ownedGames.Response.Games[j].LastPlayed < ownedGames.Response.Games[i].LastPlayed
+	sort.Slice(ownedGames.Response.Apps, func(i, j int) bool {
+		return ownedGames.Response.Apps[j].RtLastPlayed < ownedGames.Response.Apps[i].RtLastPlayed
 	})
 
-	if len(ownedGames.Response.Games) < 10 {
+	if len(ownedGames.Response.Apps) < 10 {
 		return nil, cache.ErrSteamOwnedGamesEmpty
 	}
 
 	var games []lcp.SteamGame
-	for _, g := range ownedGames.Response.Games[:10] {
+	for _, g := range ownedGames.Response.Apps[:10] {
 		achievementPercentage, achievements, err := fetchGameAchievements(client, g.AppID)
 		if err != nil {
 			return nil, err
@@ -76,15 +78,10 @@ func fetchRecentlyPlayedGames(client *http.Client, rdb *redis.Client) ([]lcp.Ste
 		}
 
 		games = append(games, lcp.SteamGame{
-			Name:  g.Name,
-			AppID: g.AppID,
-			IconURL: fmt.Sprintf(
-				"https://media.steampowered.com/steamcommunity/public/images/apps/%d/%s.jpg",
-				g.AppID,
-				g.ImgIconURL,
-			),
-			RTimeLastPlayed: time.Unix(g.LastPlayed, 0),
-			PlaytimeForever: g.PlaytimeForever,
+			Name:            g.Name,
+			AppID:           g.AppID,
+			RTimeLastPlayed: time.Unix(int64(g.RtLastPlayed), 0),
+			PlaytimeForever: g.RtPlaytime,
 			URL:             fmt.Sprintf("https://store.steampowered.com/app/%d/", g.AppID),
 			HeaderURL: fmt.Sprintf(
 				"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/%d/header.jpg",

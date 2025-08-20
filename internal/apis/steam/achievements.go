@@ -40,7 +40,7 @@ type schemaGameResponse struct {
 
 func fetchGameAchievements(
 	client *http.Client,
-	appID int32,
+	appID int,
 ) (*float32, *[]lcp.SteamAchievement, error) {
 	params := url.Values{
 		"key":     {secrets.ENV.SteamKey},

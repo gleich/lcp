@@ -24,30 +24,30 @@ var ErrWarning = errors.New("non-critical error encountered during request")
 // the response body as a byte slice. It handles common transient network errors—including timeouts,
 // unexpected EOFs, and TCP connection resets—by logging warnings and returning a non-critical
 // WarningError. Non-2xx HTTP responses are also treated as warnings.
-func Request(logPrefix string, client *http.Client, req *http.Request) ([]byte, error) {
-	ctx, cancel := context.WithTimeout(req.Context(), 1*time.Minute)
+func Request(logPrefix string, client *http.Client, request *http.Request) ([]byte, error) {
+	ctx, cancel := context.WithTimeout(request.Context(), 1*time.Minute)
 	defer cancel()
-	req = req.WithContext(ctx)
+	request = request.WithContext(ctx)
 
-	resp, err := client.Do(req)
+	resp, err := client.Do(request)
 	if err != nil {
 		if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
-			timber.Warning(logPrefix, "connection timed out for", req.URL.Path)
+			timber.Warning(logPrefix, "connection timed out for", request.URL.Path)
 			return []byte{}, ErrWarning
 		}
 		if errors.Is(err, context.DeadlineExceeded) {
-			timber.Warning(logPrefix, "request timed out for", req.URL.Path)
+			timber.Warning(logPrefix, "request timed out for", request.URL.Path)
 			return []byte{}, ErrWarning
 		}
 		if errors.Is(err, io.ErrUnexpectedEOF) {
-			timber.Warning(logPrefix, "unexpected EOF from", req.URL.Path)
+			timber.Warning(logPrefix, "unexpected EOF from", request.URL.Path)
 			return []byte{}, ErrWarning
 		}
 		if strings.Contains(err.Error(), "read: connection reset by peer") {
-			timber.Warning(logPrefix, "tcp connection reset by peer from", req.URL.Path)
+			timber.Warning(logPrefix, "tcp connection reset by peer from", request.URL.Path)
 			return []byte{}, ErrWarning
 		}
-		return []byte{}, fmt.Errorf("%w sending request to %s failed", err, req.URL.String())
+		return []byte{}, fmt.Errorf("%w sending request to %s failed", err, request.URL.String())
 	}
 
 	body, err := io.ReadAll(resp.Body)
@@ -60,7 +60,7 @@ func Request(logPrefix string, client *http.Client, req *http.Request) ([]byte, 
 			resp.StatusCode,
 			fmt.Sprintf("(%s)", strings.ToLower(http.StatusText(resp.StatusCode))),
 			"from",
-			req.URL.String(),
+			request.URL.String(),
 		)
 		return []byte{}, ErrWarning
 	}
@@ -77,10 +77,10 @@ func Request(logPrefix string, client *http.Client, req *http.Request) ([]byte, 
 // unmarshals the JSON into a value of type T. It relies on Request to perform the HTTP call. In
 // case of a request failure or JSON parsing error, it logs the relevant details and returns the
 // error.
-func RequestJSON[T any](logPrefix string, client *http.Client, req *http.Request) (T, error) {
+func RequestJSON[T any](logPrefix string, client *http.Client, request *http.Request) (T, error) {
 	var data T
 
-	body, err := Request(logPrefix, client, req)
+	body, err := Request(logPrefix, client, request)
 	if err != nil {
 		return data, err
 	}

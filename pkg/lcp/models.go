@@ -45,10 +45,9 @@ type GitHubRepository struct {
 
 type SteamGame struct {
 	Name                string              `json:"name"`
-	AppID               int32               `json:"app_id"`
-	IconURL             string              `json:"icon_url"`
+	AppID               int                 `json:"app_id"`
 	RTimeLastPlayed     time.Time           `json:"rtime_last_played"`
-	PlaytimeForever     int32               `json:"playtime_forever"`
+	PlaytimeForever     int                 `json:"playtime_forever"`
 	URL                 string              `json:"url"`
 	HeaderURL           string              `json:"header_url"`
 	HeaderBlurHash      string              `json:"header_blur_hash"`
