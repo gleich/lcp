@@ -57,12 +57,12 @@ func fetchRecentlyPlayedGames(client *http.Client, rdb *redis.Client) ([]lcp.Ste
 		return ownedGames.Response.Apps[j].RtLastPlayed < ownedGames.Response.Apps[i].RtLastPlayed
 	})
 
-	if len(ownedGames.Response.Apps) < 10 {
+	if len(ownedGames.Response.Apps) < 6 {
 		return nil, cache.ErrSteamOwnedGamesEmpty
 	}
 
 	var games []lcp.SteamGame
-	for _, g := range ownedGames.Response.Apps[:10] {
+	for _, g := range ownedGames.Response.Apps[:6] {
 		achievementPercentage, err := fetchAchievementsPercentage(client, g.AppID)
 		if err != nil {
 			return nil, err
