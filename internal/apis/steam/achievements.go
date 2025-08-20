@@ -6,12 +6,9 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"sort"
-	"time"
 
 	"go.mattglei.ch/lcp/internal/apis"
 	"go.mattglei.ch/lcp/internal/secrets"
-	"go.mattglei.ch/lcp/pkg/lcp"
 	"go.mattglei.ch/timber"
 )
 
@@ -38,10 +35,14 @@ type schemaGameResponse struct {
 	} `json:"game"`
 }
 
-func fetchGameAchievements(
+type achievement struct {
+	Achieved bool `json:"achieved"`
+}
+
+func fetchAchievementsPercentage(
 	client *http.Client,
 	appID int,
-) (*float32, *[]lcp.SteamAchievement, error) {
+) (*float32, error) {
 	params := url.Values{
 		"key":     {secrets.ENV.SteamKey},
 		"steamid": {secrets.ENV.SteamID},
@@ -52,7 +53,7 @@ func fetchGameAchievements(
 		"https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v0001?" + params.Encode(),
 	)
 	if err != nil {
-		return nil, nil, fmt.Errorf(
+		return nil, fmt.Errorf(
 			"%v sending request for player achievements from %d failed",
 			err,
 			appID,
@@ -61,14 +62,14 @@ func fetchGameAchievements(
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, nil, fmt.Errorf(
+		return nil, fmt.Errorf(
 			"%v reading response body for player achievements from %d failed",
 			err,
 			appID,
 		)
 	}
 	if string(body) == `{"playerstats":{"error":"Requested app has no stats","success":false}}` {
-		return nil, nil, nil
+		return nil, nil
 	}
 	if resp.StatusCode != http.StatusOK {
 		timber.Warning(
@@ -77,12 +78,12 @@ func fetchGameAchievements(
 			"returned from API. Code of 200 expected from",
 			resp.Request.URL.String(),
 		)
-		return nil, nil, apis.ErrWarning
+		return nil, apis.ErrWarning
 	}
 
 	err = resp.Body.Close()
 	if err != nil {
-		return nil, nil, fmt.Errorf("%w failed to close response body", err)
+		return nil, fmt.Errorf("%w failed to close response body", err)
 	}
 
 	var playerAchievements playerAchievementsResponse
@@ -90,11 +91,11 @@ func fetchGameAchievements(
 	if err != nil {
 		err = fmt.Errorf("%w failed to parse json for player achievements for %d", err, appID)
 		timber.Debug("body:", string(body))
-		return nil, nil, err
+		return nil, err
 	}
 
 	if playerAchievements.PlayerStats.Achievements == nil {
-		return nil, nil, nil
+		return nil, nil
 	}
 
 	params = url.Values{
@@ -108,7 +109,7 @@ func fetchGameAchievements(
 		nil,
 	)
 	if err != nil {
-		return nil, nil, fmt.Errorf(
+		return nil, fmt.Errorf(
 			"%v creating request for owned games failed for app id: %d",
 			err,
 			appID,
@@ -116,24 +117,15 @@ func fetchGameAchievements(
 	}
 	gameSchema, err := apis.RequestJSON[schemaGameResponse](cacheInstance.LogPrefix(), client, req)
 	if err != nil {
-		return nil, nil, fmt.Errorf("%w failed to get game schema for app id: %d", err, appID)
+		return nil, fmt.Errorf("%w failed to get game schema for app id: %d", err, appID)
 	}
 
-	var achievements []lcp.SteamAchievement
+	var achievements []achievement
 	for _, playerAchievement := range *playerAchievements.PlayerStats.Achievements {
 		for _, schemaAchievement := range gameSchema.Game.GameStats.Achievements {
 			if playerAchievement.ApiName == schemaAchievement.Name {
-				var unlockTime time.Time
-				if playerAchievement.UnlockTime != nil && *playerAchievement.UnlockTime != 0 {
-					unlockTime = time.Unix(*playerAchievement.UnlockTime, 0)
-				}
-				achievements = append(achievements, lcp.SteamAchievement{
-					ApiName:     playerAchievement.ApiName,
-					Achieved:    playerAchievement.Achieved == 1,
-					Icon:        schemaAchievement.Icon,
-					DisplayName: schemaAchievement.DisplayName,
-					Description: schemaAchievement.Description,
-					UnlockTime:  &unlockTime,
+				achievements = append(achievements, achievement{
+					Achieved: playerAchievement.Achieved == 1,
 				})
 			}
 		}
@@ -147,22 +139,5 @@ func fetchGameAchievements(
 	}
 	achievementPercentage := (float32(totalAchieved) / float32(len(achievements))) * 100.0
 
-	sort.Slice(achievements, func(i, j int) bool {
-		if achievements[i].UnlockTime == nil && achievements[j].UnlockTime == nil {
-			return false
-		}
-		if achievements[i].UnlockTime == nil {
-			return false
-		}
-		if achievements[j].UnlockTime == nil {
-			return true
-		}
-		return achievements[i].UnlockTime.After(*achievements[j].UnlockTime)
-	})
-
-	if len(achievements) > 5 {
-		achievements = achievements[:5]
-	}
-
-	return &achievementPercentage, &achievements, nil
+	return &achievementPercentage, nil
 }

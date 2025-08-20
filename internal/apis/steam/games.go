@@ -63,7 +63,7 @@ func fetchRecentlyPlayedGames(client *http.Client, rdb *redis.Client) ([]lcp.Ste
 
 	var games []lcp.SteamGame
 	for _, g := range ownedGames.Response.Apps[:10] {
-		achievementPercentage, achievements, err := fetchGameAchievements(client, g.AppID)
+		achievementPercentage, err := fetchAchievementsPercentage(client, g.AppID)
 		if err != nil {
 			return nil, err
 		}
@@ -97,7 +97,6 @@ func fetchRecentlyPlayedGames(client *http.Client, rdb *redis.Client) ([]lcp.Ste
 				g.AppID,
 			),
 			AchievementProgress: achievementPercentage,
-			Achievements:        achievements,
 		})
 
 	}

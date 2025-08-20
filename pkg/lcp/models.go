@@ -44,26 +44,16 @@ type GitHubRepository struct {
 }
 
 type SteamGame struct {
-	Name                string              `json:"name"`
-	AppID               int                 `json:"app_id"`
-	RTimeLastPlayed     time.Time           `json:"rtime_last_played"`
-	PlaytimeForever     int                 `json:"playtime_forever"`
-	URL                 string              `json:"url"`
-	HeaderURL           string              `json:"header_url"`
-	HeaderBlurHash      string              `json:"header_blur_hash"`
-	LibraryHeroURL      string              `json:"library_hero_url"`
-	LibraryHeroLogoURL  string              `json:"library_hero_logo_url"`
-	AchievementProgress *float32            `json:"achievement_progress"`
-	Achievements        *[]SteamAchievement `json:"achievements"`
-}
-
-type SteamAchievement struct {
-	ApiName     string     `json:"api_name"`
-	Achieved    bool       `json:"achieved"`
-	Icon        string     `json:"icon"`
-	DisplayName string     `json:"display_name"`
-	Description *string    `json:"description"`
-	UnlockTime  *time.Time `json:"unlock_time"`
+	Name                string    `json:"name"`
+	AppID               int       `json:"app_id"`
+	RTimeLastPlayed     time.Time `json:"rtime_last_played"`
+	PlaytimeForever     int       `json:"playtime_forever"`
+	URL                 string    `json:"url"`
+	HeaderURL           string    `json:"header_url"`
+	HeaderBlurHash      string    `json:"header_blur_hash"`
+	LibraryHeroURL      string    `json:"library_hero_url"`
+	LibraryHeroLogoURL  string    `json:"library_hero_logo_url"`
+	AchievementProgress *float32  `json:"achievement_progress"`
 }
 
 type Workout struct {
