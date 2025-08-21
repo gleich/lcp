@@ -20,10 +20,10 @@ type ownedGamesResponse struct {
 	Response struct {
 		Games []struct {
 			Name            string `json:"name"`
-			AppID           int32  `json:"appid"`
+			AppID           int    `json:"appid"`
 			LastPlayed      int64  `json:"rtime_last_played"`
 			ImgIconURL      string `json:"img_icon_url"`
-			PlaytimeForever int32  `json:"playtime_forever"`
+			PlaytimeForever int    `json:"playtime_forever"`
 		} `json:"games"`
 	} `json:"response"`
 }
@@ -55,13 +55,13 @@ func fetchRecentlyPlayedGames(client *http.Client, rdb *redis.Client) ([]lcp.Ste
 		return ownedGames.Response.Games[j].LastPlayed < ownedGames.Response.Games[i].LastPlayed
 	})
 
-	if len(ownedGames.Response.Apps) < 6 {
+	if len(ownedGames.Response.Games) < 6 {
 		return nil, cache.ErrSteamOwnedGamesEmpty
 	}
 
 	var games []lcp.SteamGame
-	for _, g := range ownedGames.Response.Apps[:10] {
-		achievementPercentage, achievements, err := fetchGameAchievements(client, g.AppID)
+	for _, g := range ownedGames.Response.Games[:10] {
+		achievementPercentage, err := fetchAchievementsPercentage(client, g.AppID)
 		if err != nil {
 			return nil, err
 		}
