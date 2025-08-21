@@ -31,9 +31,8 @@ type Secrets struct {
 	HevyBodyWeightLBS float64 `env:"HEVY_BODY_WEIGHT_LBS"`
 
 	// steam
-	SteamKey          string `env:"STEAM_KEY"`
-	SteamID           string `env:"STEAM_ID"`
-	SteamWebAjaxToken string `env:"STEAM_WEB_AJAX_TOKEN"`
+	SteamKey string `env:"STEAM_KEY"`
+	SteamID  string `env:"STEAM_ID"`
 
 	// github
 	GitHubAccessToken string `env:"GITHUB_ACCESS_TOKEN"`
