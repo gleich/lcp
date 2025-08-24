@@ -59,7 +59,7 @@ func Load() {
 		}
 	}
 
-	secrets, err := env.ParseAs[Secrets]()
+	secrets, err := env.ParseAsWithOptions[Secrets](env.Options{RequiredIfNoDef: true})
 	if err != nil {
 		timber.Fatal(err, "parsing required env vars failed")
 	}
