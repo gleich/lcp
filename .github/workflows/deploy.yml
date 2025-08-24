@@ -15,6 +15,9 @@ jobs:
           registry: docker.mattglei.ch
           username: admin
           password: ${{ secrets.REGISTRY_PASSWORD }}
+      - run: |
+          docker build -t docker.mattglei.ch/lcp .
+          docker push docker.mattglei.ch/lcp
       - uses: caprover/deploy-from-github@v1.1.2
         with:
           server: https://lab.mattglei.ch
