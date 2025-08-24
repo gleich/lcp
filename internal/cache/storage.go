@@ -31,7 +31,7 @@ func (c *Cache[T]) persistToFile() {
 	}
 
 	c.Mutex.RLock()
-	bin, err := json.Marshal(CacheResponse[T]{
+	bin, err := json.Marshal(HttpResponse[T]{
 		Data:    c.Data,
 		Updated: c.Updated,
 	})
@@ -58,7 +58,7 @@ func (c *Cache[T]) loadFromFile() {
 			timber.Fatal(err, "reading from cache file from", c.filePath, "failed")
 		}
 
-		var data CacheResponse[T]
+		var data HttpResponse[T]
 		err = json.Unmarshal(b, &data)
 		if err != nil {
 			timber.Fatal(err, "unmarshaling json data from", c.filePath, "failed:", string(b))
