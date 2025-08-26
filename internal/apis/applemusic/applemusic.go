@@ -49,10 +49,10 @@ func cacheUpdate(client *http.Client, rdb *redis.Client) (lcp.AppleMusicCache, e
 			ID:         "p.qQXLxPLtA75zg8e",
 			SpotifyURL: "https://open.spotify.com/playlist/1DB0cG12kphRKvNzKPGmpf?si=P9ALlLDzSE2MU2eIrPF0mg",
 		},
-		// old man
+  // smooth
 		{
-			ID:         "p.V7VYVB0hZo53MQv",
-			SpotifyURL: "https://open.spotify.com/playlist/3fDlIqV43BvPvtPs9ASsgU?si=e3QywoGZT76f6MPINPh1JA",
+			ID:         "p.6xZaArOsvzb5OML",
+			SpotifyURL: "https://open.spotify.com/playlist/261XCji6XWsXktcMumPIqa?si=WE1l-BPjRG-Li2Sx8znm7Q",
 		},
 		// divorced dad
 		{
@@ -69,11 +69,6 @@ func cacheUpdate(client *http.Client, rdb *redis.Client) (lcp.AppleMusicCache, e
 			ID:         "p.LV0PXL3Cl0EpDLW",
 			SpotifyURL: "https://open.spotify.com/playlist/2Bc0msBHeRaNYUFO8LfHct?si=GrzK7i4BQjmC0hXWScpiCg",
 		},
-		// smooth
-		{
-			ID:         "p.6xZaArOsvzb5OML",
-			SpotifyURL: "https://open.spotify.com/playlist/261XCji6XWsXktcMumPIqa?si=WE1l-BPjRG-Li2Sx8znm7Q",
-		},
 		// house
 		{
 			ID:         "p.gek1EWzCLa68Adp",
@@ -88,6 +83,11 @@ func cacheUpdate(client *http.Client, rdb *redis.Client) (lcp.AppleMusicCache, e
 		{
 			ID:         "p.O1kz7EoFVmvz704",
 			SpotifyURL: "https://open.spotify.com/playlist/1EDwymox6cXQlk7JGDMCbz?si=f-I1H6duSxuXtLy9K_gBqA",
+		},
+  // old man
+		{
+			ID:         "p.V7VYVB0hZo53MQv",
+			SpotifyURL: "https://open.spotify.com/playlist/3fDlIqV43BvPvtPs9ASsgU?si=e3QywoGZT76f6MPINPh1JA",
 		},
 		// rap
 		{
