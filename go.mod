@@ -10,7 +10,7 @@ require (
 	github.com/minio/minio-go/v7 v7.0.95
 	github.com/redis/go-redis/v9 v9.12.1
 	github.com/shurcooL/githubv4 v0.0.0-20240727222349-48295856cce7
-	go.mattglei.ch/timber v1.2.6
+	go.mattglei.ch/timber v1.3.1
 	golang.org/x/oauth2 v0.30.0
 )
 
@@ -40,7 +40,7 @@ require (
 	github.com/rs/xid v1.6.0 // indirect
 	github.com/shurcooL/graphql v0.0.0-20230722043721-ed46e5a46466 // indirect
 	github.com/stretchr/testify v1.10.0 // indirect
-	github.com/tinylib/msgp v1.3.0 // indirect
+	github.com/tinylib/msgp v1.4.0 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	golang.org/x/crypto v0.41.0 // indirect
 	golang.org/x/net v0.43.0 // indirect
