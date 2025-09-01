@@ -67,11 +67,10 @@ func fetchPlaylist(
 			tracks = append(tracks, song)
 		}
 
-		if trackData.Next != "" {
-			path = trackData.Next
-			continue
+		if trackData.Next == "" {
+			break
 		}
-		break
+		path = trackData.Next
 	}
 
 	return lcp.AppleMusicPlaylist{
