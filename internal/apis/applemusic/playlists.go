@@ -45,34 +45,36 @@ func fetchPlaylist(
 		)
 	}
 
-	var totalResponseData []songResponse
-	trackData, err := sendAppleMusicAPIRequest[playlistTracksResponse](
-		client,
-		fmt.Sprintf("/v1/me/library/playlists/%s/tracks", id),
-	)
-	if err != nil {
-		return lcp.AppleMusicPlaylist{}, err
-	}
-	totalResponseData = append(totalResponseData, trackData.Data...)
-	for trackData.Next != "" {
-		trackData, err = sendAppleMusicAPIRequest[playlistTracksResponse](client, trackData.Next)
+	var tracks []lcp.AppleMusicSong
+	path := fmt.Sprintf("/v1/me/library/playlists/%s/tracks", id)
+	for {
+		trackData, err := sendAppleMusicAPIRequest[playlistTracksResponse](
+			client,
+			fmt.Sprintf("/v1/me/library/playlists/%s/tracks", id),
+		)
 		if err != nil {
 			return lcp.AppleMusicPlaylist{}, fmt.Errorf(
-				"%w failed to paginate through tracks for playlist with id of %s",
+				"%w failed to fetch playlist data for %s",
 				err,
-				id,
+				path,
 			)
 		}
-		totalResponseData = append(totalResponseData, trackData.Data...)
-	}
-
-	var tracks []lcp.AppleMusicSong
-	for _, t := range totalResponseData {
-		song, err := songFromSongResponse(client, rdb, t)
-		if err != nil {
-			return lcp.AppleMusicPlaylist{}, err
+		for _, track := range trackData.Data {
+			song, err := songFromSongResponse(client, rdb, track)
+			if err != nil {
+				return lcp.AppleMusicPlaylist{}, fmt.Errorf(
+					"%w failed create song from apple music song response",
+					err,
+				)
+			}
+			tracks = append(tracks, song)
 		}
-		tracks = append(tracks, song)
+
+		if trackData.Next != "" {
+			path = trackData.Next
+			continue
+		}
+		break
 	}
 
 	return lcp.AppleMusicPlaylist{
