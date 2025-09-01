@@ -48,10 +48,7 @@ func fetchPlaylist(
 	var tracks []lcp.AppleMusicSong
 	path := fmt.Sprintf("/v1/me/library/playlists/%s/tracks", id)
 	for {
-		trackData, err := sendAppleMusicAPIRequest[playlistTracksResponse](
-			client,
-			fmt.Sprintf("/v1/me/library/playlists/%s/tracks", id),
-		)
+		trackData, err := sendAppleMusicAPIRequest[playlistTracksResponse](client, path)
 		if err != nil {
 			return lcp.AppleMusicPlaylist{}, fmt.Errorf(
 				"%w failed to fetch playlist data for %s",
