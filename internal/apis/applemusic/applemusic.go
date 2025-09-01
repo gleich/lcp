@@ -39,6 +39,11 @@ func cacheUpdate(client *http.Client, rdb *redis.Client) (lcp.AppleMusicCache, e
 			ID:         "p.qQXLX2rHA75zg8e",
 			SpotifyURL: "https://open.spotify.com/playlist/1NMII2bpE3l7CvBxYVK7Fu?si=MYRsVTZpQz6x1TouvOXb1g",
 		},
+		// smooth
+		{
+			ID:         "p.6xZaArOsvzb5OML",
+			SpotifyURL: "https://open.spotify.com/playlist/261XCji6XWsXktcMumPIqa?si=WE1l-BPjRG-Li2Sx8znm7Q",
+		},
 		// classics
 		{
 			ID:         "p.gek1E8efLa68Adp",
@@ -48,11 +53,6 @@ func cacheUpdate(client *http.Client, rdb *redis.Client) (lcp.AppleMusicCache, e
 		{
 			ID:         "p.qQXLxPLtA75zg8e",
 			SpotifyURL: "https://open.spotify.com/playlist/1DB0cG12kphRKvNzKPGmpf?si=P9ALlLDzSE2MU2eIrPF0mg",
-		},
-  // smooth
-		{
-			ID:         "p.6xZaArOsvzb5OML",
-			SpotifyURL: "https://open.spotify.com/playlist/261XCji6XWsXktcMumPIqa?si=WE1l-BPjRG-Li2Sx8znm7Q",
 		},
 		// divorced dad
 		{
@@ -84,7 +84,7 @@ func cacheUpdate(client *http.Client, rdb *redis.Client) (lcp.AppleMusicCache, e
 			ID:         "p.O1kz7EoFVmvz704",
 			SpotifyURL: "https://open.spotify.com/playlist/1EDwymox6cXQlk7JGDMCbz?si=f-I1H6duSxuXtLy9K_gBqA",
 		},
-  // old man
+		// old man
 		{
 			ID:         "p.V7VYVB0hZo53MQv",
 			SpotifyURL: "https://open.spotify.com/playlist/3fDlIqV43BvPvtPs9ASsgU?si=e3QywoGZT76f6MPINPh1JA",
