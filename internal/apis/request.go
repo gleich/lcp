@@ -50,10 +50,6 @@ func Request(logPrefix string, client *http.Client, request *http.Request) ([]by
 		return []byte{}, fmt.Errorf("%w sending request to %s failed", err, request.URL.String())
 	}
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return []byte{}, fmt.Errorf("%w reading response body failed", err)
-	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		timber.Warning(
 			logPrefix,
@@ -63,6 +59,11 @@ func Request(logPrefix string, client *http.Client, request *http.Request) ([]by
 			request.URL.String(),
 		)
 		return []byte{}, ErrWarning
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return []byte{}, fmt.Errorf("%w reading response body failed", err)
 	}
 
 	err = resp.Body.Close()
