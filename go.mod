@@ -1,6 +1,6 @@
 module go.mattglei.ch/lcp
 
-go 1.25.0
+go 1.25.1
 
 require (
 	github.com/buckket/go-blurhash v1.1.0
