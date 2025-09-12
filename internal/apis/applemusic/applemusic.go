@@ -92,10 +92,10 @@ func cacheUpdate(client *http.Client, rdb *redis.Client) (lcp.AppleMusicCache, e
 			ID:         "p.V7VYVB0hZo53MQv",
 			SpotifyURL: "https://open.spotify.com/playlist/3fDlIqV43BvPvtPs9ASsgU?si=e3QywoGZT76f6MPINPh1JA",
 		},
-		// rap
+		// quiet
 		{
-			ID:         "p.qQXLxPpFA75zg8e",
-			SpotifyURL: "https://open.spotify.com/playlist/6MLAGkQPdSBMjit5O1hrws?si=V5n6ge43SruIycU6mRsQSQ",
+			ID:         "p.AWXoXbWfLrvpJlY",
+			SpotifyURL: "",
 		},
 		// rock
 		{
