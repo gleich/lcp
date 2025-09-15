@@ -24,8 +24,8 @@ type AppleMusicSong struct {
 }
 
 type AppleMusicSyncedPlaylist struct {
-	ID         string `json:"apple_music_id"`
-	SpotifyURL string `json:"spotify_url"`
+	AppleMusicID string `json:"apple_music_id"`
+	SpotifyID    string `json:"spotify_id"`
 }
 
 type AppleMusicPlaylist struct {
@@ -33,7 +33,7 @@ type AppleMusicPlaylist struct {
 	Tracks       []AppleMusicSong `json:"tracks"`
 	LastModified time.Time        `json:"last_modified"`
 	URL          string           `json:"url"`
-	SpotifyURL   string           `json:"spotify_url"`
+	SpotifyID    string           `json:"spotify_id"`
 	ID           string           `json:"id"`
 }
 
