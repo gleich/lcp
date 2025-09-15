@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	playlists = []lcp.SyncedPlaylist{
+	playlists = []lcp.AppleMusicSyncedPlaylist{
 		// chill
 		{
 			ID:         "p.AWXoZoxHLrvpJlY",

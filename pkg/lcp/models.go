@@ -23,7 +23,7 @@ type AppleMusicSong struct {
 	PreviewAudioURL    *string `json:"preview_audio_url"`
 }
 
-type SyncedPlaylist struct {
+type AppleMusicSyncedPlaylist struct {
 	ID         string `json:"apple_music_id"`
 	SpotifyURL string `json:"spotify_url"`
 }

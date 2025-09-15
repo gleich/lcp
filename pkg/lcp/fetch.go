@@ -15,32 +15,21 @@ type Client struct {
 	httpClient http.Client
 }
 
-type Response[T CacheData] struct {
+type CacheResponse[T CacheData] struct {
 	Data    T
 	Updated time.Time
 }
 
-func FetchCache[T CacheData](client *Client) (Response[T], error) {
-	var zeroValue Response[T] // acts as "nil" value to be used when returning an error
+func fetch[T any](client *Client, path string) (T, error) {
+	var zeroValue T // acts as "nil" value to be used when returning an error
+
 	if client.Token == "" {
 		return zeroValue, errors.New("no token provided in client")
 	}
 
-	var cacheName string
-	switch any(zeroValue.Data).(type) {
-	case AppleMusicCache:
-		cacheName = "applemusic"
-	case []GitHubRepository:
-		cacheName = "github"
-	case []SteamGame:
-		cacheName = "steam"
-	case []Workout:
-		cacheName = "workouts"
-	}
-
-	url, err := url.JoinPath("https://lcp.mattglei.ch", cacheName)
+	url, err := url.JoinPath("https://lcp.mattglei.ch", path)
 	if err != nil {
-		return zeroValue, fmt.Errorf("%w failed to join path for URL", err)
+		return zeroValue, fmt.Errorf("%w failed to join url", err)
 	}
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
@@ -64,11 +53,41 @@ func FetchCache[T CacheData](client *Client) (Response[T], error) {
 		return zeroValue, fmt.Errorf("%w failed to close response body", err)
 	}
 
-	var response Response[T]
+	var response T
 	err = json.Unmarshal(body, &response)
 	if err != nil {
 		return zeroValue, fmt.Errorf("%w failed to parse json", err)
 	}
 
-	return response, nil
+	return zeroValue, nil
+}
+
+func FetchCache[T CacheData](client *Client) (CacheResponse[T], error) {
+	var zeroValue CacheResponse[T] // acts as "nil" value to be used when returning an error
+
+	var cacheName string
+	switch any(zeroValue.Data).(type) {
+	case AppleMusicCache:
+		cacheName = "applemusic"
+	case []GitHubRepository:
+		cacheName = "github"
+	case []SteamGame:
+		cacheName = "steam"
+	case []Workout:
+		cacheName = "workouts"
+	}
+
+	resp, err := fetch[CacheResponse[T]](client, cacheName)
+	if err != nil {
+		return zeroValue, fmt.Errorf("%w failed to fetch data", err)
+	}
+	return resp, nil
+}
+
+func FetchAppleMusicSyncedPlaylists(client *Client) ([]AppleMusicSyncedPlaylist, error) {
+	resp, err := fetch[[]AppleMusicSyncedPlaylist](client, "applemusic/playlists")
+	if err != nil {
+		return []AppleMusicSyncedPlaylist{}, fmt.Errorf("%w failed to fetch data", err)
+	}
+	return resp, nil
 }
