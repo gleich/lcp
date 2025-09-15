@@ -59,7 +59,7 @@ func fetch[T any](client *Client, path string) (T, error) {
 		return zeroValue, fmt.Errorf("%w failed to parse json", err)
 	}
 
-	return zeroValue, nil
+	return response, nil
 }
 
 func FetchCache[T CacheData](client *Client) (CacheResponse[T], error) {
