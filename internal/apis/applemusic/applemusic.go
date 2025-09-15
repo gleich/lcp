@@ -15,11 +15,6 @@ import (
 
 const cacheInstance = cache.AppleMusic
 
-type playlist struct {
-	ID         string
-	SpotifyURL string
-}
-
 func cacheUpdate(client *http.Client, rdb *redis.Client) (lcp.AppleMusicCache, error) {
 	recentlyPlayed, err := fetchRecentlyPlayed(client, rdb)
 	if err != nil {
