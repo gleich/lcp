@@ -15,22 +15,30 @@ import (
 
 var (
 	playlists = []lcp.AppleMusicSyncedPlaylist{
-		{AppleMusicID: "p.AWXoZoxHLrvpJlY", SpotifyID: "5SnoWhWIJRmJNkvdxCpMAe"}, // chill
-		{AppleMusicID: "p.AWXoXPYSLrvpJlY", SpotifyID: "7tN57nLbiiw4bliUyw2oYL"}, // alt
-		{AppleMusicID: "p.qQXLX2rHA75zg8e", SpotifyID: "1NMII2bpE3l7CvBxYVK7Fu"}, // after hours
-		{AppleMusicID: "p.AWXoXeAiLrvpJlY", SpotifyID: "2CvjwmuE5CekSZ1CfezOQO"}, // smooth
-		{AppleMusicID: "p.gek1E8efLa68Adp", SpotifyID: "2HYOAlwB570McLyD3nIJKG"}, // classics
-		{AppleMusicID: "p.qQXLxPLtA75zg8e", SpotifyID: "1DB0cG12kphRKvNzKPGmpf"}, // 80s
-		{AppleMusicID: "p.LV0PXNoCl0EpDLW", SpotifyID: "3p0bSspMsoZ0QodpDCcb3U"}, // divorced dad
-		{AppleMusicID: "p.QvDQE5RIVbAeokL", SpotifyID: "6AFH5WO2uZeSwKdirNvryH"}, // party
-		{AppleMusicID: "p.LV0PXL3Cl0EpDLW", SpotifyID: "2Bc0msBHeRaNYUFO8LfHct"}, // bops
-		{AppleMusicID: "p.gek1EWzCLa68Adp", SpotifyID: "3iMi8ew4XvYCCcS9P2iARw"}, // house
-		{AppleMusicID: "p.6xZaArOsvzb5OML", SpotifyID: "261XCji6XWsXktcMumPIqa"}, // focus
-		{AppleMusicID: "p.O1kz7EoFVmvz704", SpotifyID: "1EDwymox6cXQlk7JGDMCbz"}, // funk
-		{AppleMusicID: "p.V7VYVB0hZo53MQv", SpotifyID: "3fDlIqV43BvPvtPs9ASsgU"}, // old man
-		{AppleMusicID: "p.AWXoXbWfLrvpJlY", SpotifyID: "6ex8usE1U41m4wM6NwT9cg"}, // quiet
-		{AppleMusicID: "p.qQXLxpDuA75zg8e", SpotifyID: "1Yh42cCAPWPFy55hw8VaWJ"}, // rock
-		{AppleMusicID: "p.O1kz7zbsVmvz704", SpotifyID: "3jR0MH0NwzEdYuUY8nohmf"}, // country
+		{Name: "chill", AppleMusicID: "p.AWXoZoxHLrvpJlY", SpotifyID: "5SnoWhWIJRmJNkvdxCpMAe"},
+		{Name: "alt", AppleMusicID: "p.AWXoXPYSLrvpJlY", SpotifyID: "7tN57nLbiiw4bliUyw2oYL"},
+		{
+			Name:         "after hours",
+			AppleMusicID: "p.qQXLX2rHA75zg8e",
+			SpotifyID:    "1NMII2bpE3l7CvBxYVK7Fu",
+		},
+		{Name: "smooth", AppleMusicID: "p.AWXoXeAiLrvpJlY", SpotifyID: "2CvjwmuE5CekSZ1CfezOQO"},
+		{Name: "classics", AppleMusicID: "p.gek1E8efLa68Adp", SpotifyID: "2HYOAlwB570McLyD3nIJKG"},
+		{Name: "80s", AppleMusicID: "p.qQXLxPLtA75zg8e", SpotifyID: "1DB0cG12kphRKvNzKPGmpf"},
+		{
+			Name:         "divorced dad",
+			AppleMusicID: "p.LV0PXNoCl0EpDLW",
+			SpotifyID:    "3p0bSspMsoZ0QodpDCcb3U",
+		},
+		{Name: "bops", AppleMusicID: "p.QvDQE5RIVbAeokL", SpotifyID: "6AFH5WO2uZeSwKdirNvryH"},
+		{Name: "house", AppleMusicID: "p.LV0PXL3Cl0EpDLW", SpotifyID: "2Bc0msBHeRaNYUFO8LfHct"},
+		{Name: "focus", AppleMusicID: "p.gek1EWzCLa68Adp", SpotifyID: "3iMi8ew4XvYCCcS9P2iARw"},
+		{Name: "focus", AppleMusicID: "p.6xZaArOsvzb5OML", SpotifyID: "261XCji6XWsXktcMumPIqa"},
+		{Name: "funk", AppleMusicID: "p.O1kz7EoFVmvz704", SpotifyID: "1EDwymox6cXQlk7JGDMCbz"},
+		{Name: "old man", AppleMusicID: "p.V7VYVB0hZo53MQv", SpotifyID: "3fDlIqV43BvPvtPs9ASsgU"},
+		{Name: "quiet", AppleMusicID: "p.AWXoXbWfLrvpJlY", SpotifyID: "6ex8usE1U41m4wM6NwT9cg"},
+		{Name: "rock", AppleMusicID: "p.qQXLxpDuA75zg8e", SpotifyID: "1Yh42cCAPWPFy55hw8VaWJ"},
+		{Name: "country", AppleMusicID: "p.O1kz7zbsVmvz704", SpotifyID: "3jR0MH0NwzEdYuUY8nohmf"},
 	}
 )
 

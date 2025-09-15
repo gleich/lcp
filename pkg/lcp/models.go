@@ -24,6 +24,7 @@ type AppleMusicSong struct {
 }
 
 type AppleMusicSyncedPlaylist struct {
+	Name         string `json:"name"`
 	AppleMusicID string `json:"apple_music_id"`
 	SpotifyID    string `json:"spotify_id"`
 }
