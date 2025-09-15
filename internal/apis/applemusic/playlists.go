@@ -63,23 +63,22 @@ type playlistResponse struct {
 func fetchPlaylist(
 	client *http.Client,
 	rdb *redis.Client,
-	id string,
-	spotifyURL string,
+	playlist lcp.AppleMusicSyncedPlaylist,
 ) (lcp.AppleMusicPlaylist, error) {
 	playlistData, err := sendAppleMusicAPIRequest[playlistResponse](
 		client,
-		fmt.Sprintf("/v1/me/library/playlists/%s", id),
+		fmt.Sprintf("/v1/me/library/playlists/%s", playlist.AppleMusicID),
 	)
 	if err != nil {
 		return lcp.AppleMusicPlaylist{}, fmt.Errorf(
 			"%w failed to fetch playlist for %s",
 			err,
-			id,
+			playlist.AppleMusicID,
 		)
 	}
 
 	var tracks []lcp.AppleMusicSong
-	path := fmt.Sprintf("/v1/me/library/playlists/%s/tracks", id)
+	path := fmt.Sprintf("/v1/me/library/playlists/%s/tracks", playlist.AppleMusicID)
 	for {
 		trackData, err := sendAppleMusicAPIRequest[playlistTracksResponse](client, path)
 		if err != nil {
@@ -115,7 +114,7 @@ func fetchPlaylist(
 			"https://music.apple.com/us/playlist/alt/%s",
 			playlistData.Data[0].Attributes.PlayParams.GlobalID,
 		),
-		SpotifyID: spotifyURL,
+		SpotifyID: playlist.SpotifyID,
 	}, nil
 }
 

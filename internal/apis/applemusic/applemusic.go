@@ -23,7 +23,7 @@ func cacheUpdate(client *http.Client, rdb *redis.Client) (lcp.AppleMusicCache, e
 
 	appleMusicPlaylists := []lcp.AppleMusicPlaylist{}
 	for _, playlist := range playlists {
-		playlistData, err := fetchPlaylist(client, rdb, playlist.AppleMusicID, playlist.SpotifyID)
+		playlistData, err := fetchPlaylist(client, rdb, playlist)
 		if err != nil {
 			return lcp.AppleMusicCache{}, err
 		}
