@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"go.mattglei.ch/lcp/internal/apis"
-	"go.mattglei.ch/lcp/internal/auth"
 	"go.mattglei.ch/lcp/internal/secrets"
 	"go.mattglei.ch/lcp/pkg/lcp"
 	"go.mattglei.ch/timber"
@@ -72,9 +71,6 @@ type HttpResponse[T any] struct {
 }
 
 func (c *Cache[T]) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if !auth.IsAuthorized(w, r) {
-		return
-	}
 	w.Header().Set("Content-Type", "application/json")
 	c.Mutex.RLock()
 	err := json.NewEncoder(w).Encode(HttpResponse[T]{Data: c.Data, Updated: c.Updated})

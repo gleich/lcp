@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
-	"go.mattglei.ch/lcp/internal/auth"
 	"go.mattglei.ch/lcp/internal/cache"
 	"go.mattglei.ch/lcp/pkg/lcp"
 	"go.mattglei.ch/timber"
@@ -120,10 +119,6 @@ func fetchPlaylist(
 
 func syncedPlaylistsEndpoint() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !auth.IsAuthorized(w, r) {
-			return
-		}
-
 		w.Header().Set("Content-Type", "application/json")
 		err := json.NewEncoder(w).Encode(playlists)
 		if err != nil {
@@ -136,9 +131,6 @@ func syncedPlaylistsEndpoint() http.HandlerFunc {
 
 func playlistEndpoint(c *cache.Cache[lcp.AppleMusicCache]) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !auth.IsAuthorized(w, r) {
-			return
-		}
 		id := r.PathValue("id")
 
 		c.Mutex.RLock()
