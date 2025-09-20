@@ -3,7 +3,6 @@ package hevy
 import (
 	"fmt"
 	"net/http"
-	"net/url"
 	"time"
 
 	"slices"
@@ -24,11 +23,7 @@ type workoutsResponse struct {
 }
 
 func FetchWorkouts(client *http.Client) ([]lcp.Workout, error) {
-	params := url.Values{"api-key": {secrets.ENV.HevyAccessToken}}
-	workouts, err := sendHevyAPIRequest[workoutsResponse](
-		client,
-		fmt.Sprintf("/v1/workouts?%s", params.Encode()),
-	)
+	workouts, err := sendHevyAPIRequest[workoutsResponse](client, "/v1/workouts")
 	if err != nil {
 		return []lcp.Workout{}, fmt.Errorf("%w failed to fetch hevy workouts", err)
 	}
