@@ -35,6 +35,7 @@ func FetchWorkouts(client *http.Client) ([]lcp.Workout, error) {
 
 	bodyWeightExercises := []string{
 		"Chest Dip (Assisted)",
+		"Chest Dip",
 		"Pull Up (Assisted)",
 	}
 
@@ -46,7 +47,9 @@ func FetchWorkouts(client *http.Client) ([]lcp.Workout, error) {
 			for i, set := range exercise.Sets {
 				// account for bodyweight exercises which are (body weight - weight)
 				if slices.Contains(bodyWeightExercises, exercise.Title) {
-					totalVolume += (secrets.ENV.HevyBodyWeightLBS*0.45359237 - set.WeightKg) * float64(set.Reps)
+					totalVolume += (secrets.ENV.HevyBodyWeightLBS*0.45359237 - set.WeightKg) * float64(
+						set.Reps,
+					)
 					exercise.Sets[i].WeightKg = -set.WeightKg
 				} else {
 					totalVolume += set.WeightKg * float64(set.Reps)
