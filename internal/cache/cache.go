@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net/http"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -63,23 +62,6 @@ func New[T lcp.CacheData](instance CacheInstance, data T, update bool) *Cache[T]
 		cache.Update(data)
 	}
 	return &cache
-}
-
-type HttpResponse[T any] struct {
-	Data    T         `json:"data"`
-	Updated time.Time `json:"updated"`
-}
-
-func (c *Cache[T]) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	c.Mutex.RLock()
-	err := json.NewEncoder(w).Encode(HttpResponse[T]{Data: c.Data, Updated: c.Updated})
-	c.Mutex.RUnlock()
-	if err != nil {
-		err = fmt.Errorf("%w failed to write json data to request", err)
-		timber.Error(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
 }
 
 func (c *Cache[T]) Update(data T) {

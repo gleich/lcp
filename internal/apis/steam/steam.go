@@ -19,7 +19,7 @@ func Setup(mux *http.ServeMux, client *http.Client, rdb *redis.Client) {
 	}
 
 	steamCache := cache.New(cacheInstance, games, err == nil)
-	mux.HandleFunc("GET /steam", steamCache.ServeHTTP)
+	mux.HandleFunc("GET /steam", steamCache.Serve)
 	go cache.UpdatePeriodically(
 		steamCache,
 		client,

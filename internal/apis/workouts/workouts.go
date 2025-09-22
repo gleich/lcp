@@ -37,7 +37,7 @@ func Setup(mux *http.ServeMux, client *http.Client, rdb *redis.Client) {
 	}
 	workoutsCache := cache.New(cacheInstance, activities, err == nil)
 
-	mux.HandleFunc("GET /workouts", workoutsCache.ServeHTTP)
+	mux.HandleFunc("GET /workouts", workoutsCache.Serve)
 	mux.HandleFunc(
 		"POST /strava/event",
 		strava.EventRoute(client, workoutsCache, minioClient, rdb, fetch, stravaTokens),

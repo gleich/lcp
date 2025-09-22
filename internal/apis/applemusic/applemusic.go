@@ -87,7 +87,7 @@ func serveHTTP(c *cache.Cache[lcp.AppleMusicCache]) http.HandlerFunc {
 		data.RecentlyPlayed = c.Data.RecentlyPlayed
 
 		err := json.NewEncoder(w).
-			Encode(cache.HttpResponse[cacheDataResponse]{Data: data, Updated: c.Updated})
+			Encode(cache.Response[cacheDataResponse]{Data: data, Updated: c.Updated})
 		c.Mutex.RUnlock()
 		if err != nil {
 			err = fmt.Errorf("%w failed to write json data to request", err)
