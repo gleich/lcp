@@ -9,6 +9,7 @@ import (
 	"go.mattglei.ch/lcp/internal/apis/workouts/strava"
 	"go.mattglei.ch/lcp/internal/cache"
 	"go.mattglei.ch/lcp/internal/secrets"
+	"go.mattglei.ch/lcp/pkg/lcp"
 	"go.mattglei.ch/timber"
 )
 
@@ -35,7 +36,7 @@ func Setup(mux *http.ServeMux, client *http.Client, rdb *redis.Client) {
 	if err != nil {
 		timber.Error(err, "failed to load initial data for workouts cache; not updating")
 	}
-	workoutsCache := cache.New(cacheInstance, activities, err == nil)
+	workoutsCache := cache.New[[]lcp.Workout](cacheInstance, activities, err == nil)
 
 	mux.HandleFunc("GET /workouts", workoutsCache.Serve)
 	mux.HandleFunc(

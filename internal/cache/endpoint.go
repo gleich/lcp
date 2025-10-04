@@ -1,7 +1,6 @@
 package cache
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -17,11 +16,15 @@ type Response[T any] struct {
 func (c *Cache[T]) Serve(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	c.Mutex.RLock()
-	err := json.NewEncoder(w).Encode(Response[T]{Data: c.Data, Updated: c.Updated})
-	c.Mutex.RUnlock()
+	data, err := c.MarshalResponse(c)
 	if err != nil {
-		responseError(w, err, "failed to write json data to request")
+		errorResponse(w, err, "failed to create endpoint data")
 	}
+	_, err = w.Write([]byte(data))
+	if err != nil {
+		errorResponse(w, err, "failed to write data to request")
+	}
+	c.Mutex.RUnlock()
 }
 
 func (c *Cache[T]) ServeStream(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +32,7 @@ func (c *Cache[T]) ServeStream(w http.ResponseWriter, r *http.Request) {
 	if rc := http.NewResponseController(w); rc != nil {
 		err := rc.SetWriteDeadline(time.Time{})
 		if err != nil {
-			responseError(w, err, "failed to set write deadline to zero")
+			errorResponse(w, err, "failed to set write deadline to zero")
 			return
 		}
 	}
@@ -50,10 +53,23 @@ func (c *Cache[T]) ServeStream(w http.ResponseWriter, r *http.Request) {
 	// telling client how long to wait before reconnecting
 	_, err := w.Write([]byte("retry: 5000\n\n"))
 	if err != nil {
-		responseError(w, err, "failed to write retry information")
+		errorResponse(w, err, "failed to write retry information")
 		return
 	}
 	flusher.Flush()
+
+	// add connection to connections pool
+	channel := make(chan string, 8)
+	c.connectionsMutex.Lock()
+	c.connections[channel] = struct{}{}
+	c.connectionsMutex.Unlock()
+
+	// remove connection from connection pool when done
+	defer func() {
+		c.connectionsMutex.Lock()
+		delete(c.connections, channel)
+		c.connectionsMutex.Unlock()
+	}()
 
 	ticker := time.NewTicker(2 * time.Second)
 	defer ticker.Stop()
@@ -65,14 +81,23 @@ func (c *Cache[T]) ServeStream(w http.ResponseWriter, r *http.Request) {
 		case <-ticker.C:
 			_, err := fmt.Fprintf(w, ": heartbeat\n\n")
 			if err != nil {
-				responseError(w, err, "failed to write heartbeat")
+				errorResponse(w, err, "failed to write heartbeat")
+			}
+			flusher.Flush()
+		case frame, ok := <-channel:
+			if !ok {
+				timber.ErrorMsg("failed to get data from channel for update")
+			}
+			_, err = fmt.Fprintf(w, ": data: %s\n\n", frame)
+			if err != nil {
+				errorResponse(w, err, "failed to write data")
 			}
 			flusher.Flush()
 		}
 	}
 }
 
-func responseError(w http.ResponseWriter, err error, msg string) {
+func errorResponse(w http.ResponseWriter, err error, msg string) {
 	err = fmt.Errorf("%w %s", err, msg)
 	timber.Error(err)
 	http.Error(w, err.Error(), http.StatusInternalServerError)

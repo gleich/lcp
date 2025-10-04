@@ -42,7 +42,8 @@ func Setup(mux *http.ServeMux, client *http.Client, rdb *redis.Client) {
 	}
 
 	applemusicCache := cache.New(cacheInstance, data, err == nil)
-	mux.HandleFunc("GET /applemusic", serveHTTP(applemusicCache))
+	applemusicCache.MarshalResponse = MarshalResponse
+	mux.HandleFunc("GET /applemusic", applemusicCache.Serve)
 	mux.HandleFunc("GET /applemusic/playlists", syncedPlaylistsEndpoint())
 	mux.HandleFunc("GET /applemusic/playlists/{id}", playlistEndpoint(applemusicCache))
 	go cache.UpdatePeriodically(
@@ -56,43 +57,32 @@ func Setup(mux *http.ServeMux, client *http.Client, rdb *redis.Client) {
 	timber.Done(cacheInstance.LogPrefix(), "setup cache and endpoints")
 }
 
-type cacheDataResponse struct {
-	PlaylistSummaries []lcp.AppleMusicPlaylistSummary `json:"playlist_summaries"`
-	RecentlyPlayed    []lcp.AppleMusicSong            `json:"recently_played"`
-}
-
-func serveHTTP(c *cache.Cache[lcp.AppleMusicCache]) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		c.Mutex.RLock()
-
-		data := cacheDataResponse{}
-		for _, p := range c.Data.Playlists {
-			firstFourTracks := []lcp.AppleMusicSong{}
-			for _, track := range p.Tracks {
-				if len(firstFourTracks) < 4 {
-					firstFourTracks = append(firstFourTracks, track)
-				}
+func MarshalResponse(
+	c *cache.Cache[lcp.AppleMusicCache],
+) (string, error) {
+	response := lcp.CacheResponse[lcp.AppleMusicCacheResponse]{Updated: c.Updated}
+	response.Data.RecentlyPlayed = c.Data.RecentlyPlayed
+	for _, p := range c.Data.Playlists {
+		firstFourTracks := []lcp.AppleMusicSong{}
+		for _, track := range p.Tracks {
+			if len(firstFourTracks) < 4 {
+				firstFourTracks = append(firstFourTracks, track)
 			}
-			data.PlaylistSummaries = append(
-				data.PlaylistSummaries,
-				lcp.AppleMusicPlaylistSummary{
-					Name:            p.Name,
-					ID:              p.ID,
-					TrackCount:      len(p.Tracks),
-					FirstFourTracks: firstFourTracks,
-				},
-			)
 		}
-		data.RecentlyPlayed = c.Data.RecentlyPlayed
+		response.Data.PlaylistSummaries = append(
+			response.Data.PlaylistSummaries,
+			lcp.AppleMusicPlaylistSummary{
+				Name:            p.Name,
+				ID:              p.ID,
+				TrackCount:      len(p.Tracks),
+				FirstFourTracks: firstFourTracks,
+			},
+		)
+	}
 
-		err := json.NewEncoder(w).
-			Encode(cache.Response[cacheDataResponse]{Data: data, Updated: c.Updated})
-		c.Mutex.RUnlock()
-		if err != nil {
-			err = fmt.Errorf("%w failed to write json data to request", err)
-			timber.Error(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-	})
+	data, err := json.Marshal(response)
+	if err != nil {
+		return "", fmt.Errorf("%w failed to json encode data", err)
+	}
+	return string(data), nil
 }

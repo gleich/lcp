@@ -15,7 +15,7 @@ type Client struct {
 	httpClient http.Client
 }
 
-type CacheResponse[T CacheData] struct {
+type CacheResponse[T any] struct {
 	Data    T
 	Updated time.Time
 }
@@ -62,7 +62,7 @@ func fetch[T any](client *Client, path string) (T, error) {
 	return response, nil
 }
 
-func FetchCache[T CacheData](client *Client) (CacheResponse[T], error) {
+func FetchCache[T CacheResponseData](client *Client) (CacheResponse[T], error) {
 	var zeroValue CacheResponse[T] // acts as "nil" value to be used when returning an error
 
 	var cacheName string
