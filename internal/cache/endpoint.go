@@ -13,6 +13,11 @@ type Response[T any] struct {
 	Updated time.Time `json:"updated"`
 }
 
+func (c *Cache[T]) Endpoints(mux *http.ServeMux) {
+	mux.HandleFunc(fmt.Sprintf("GET /%s", c.instance), c.Serve)
+	mux.HandleFunc(fmt.Sprintf("GET /%s/stream", c.instance), c.ServeStream)
+}
+
 func (c *Cache[T]) Serve(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	c.Mutex.RLock()

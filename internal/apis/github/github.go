@@ -27,8 +27,7 @@ func Setup(mux *http.ServeMux) {
 	}
 
 	githubCache := cache.New(cacheInstance, pinnedRepos, err == nil)
-	mux.HandleFunc("GET /github", githubCache.Serve)
-	mux.HandleFunc("GET /github/stream", githubCache.ServeStream)
+	githubCache.Endpoints(mux)
 	go cache.UpdatePeriodically(githubCache, githubClient, fetchPinnedRepos, 30*time.Second)
 
 	timber.Done(cacheInstance.LogPrefix(), "setup cache and endpoint")
