@@ -117,7 +117,7 @@ func (c *Cache[T]) Update(data T) {
 	c.connectionsMutex.Lock()
 	for connection := range c.connections {
 		select {
-		case connection <- string(frame):
+		case connection <- frame:
 		default:
 			delete(c.connections, connection)
 			close(connection)

@@ -93,7 +93,7 @@ func (c *Cache[T]) ServeStream(w http.ResponseWriter, r *http.Request) {
 			if !ok {
 				timber.ErrorMsg("failed to get data from channel for update")
 			}
-			_, err = fmt.Fprintf(w, ": data: %s\n\n", frame)
+			_, err = fmt.Fprintf(w, "data: %s\n\n", frame)
 			if err != nil {
 				errorResponse(w, err, "failed to write data")
 			}
