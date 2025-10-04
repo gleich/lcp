@@ -20,13 +20,20 @@ func (c *Cache[T]) Serve(w http.ResponseWriter, r *http.Request) {
 	err := json.NewEncoder(w).Encode(Response[T]{Data: c.Data, Updated: c.Updated})
 	c.Mutex.RUnlock()
 	if err != nil {
-		err = fmt.Errorf("%w failed to write json data to request", err)
-		timber.Error(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		responseError(w, err, "failed to write json data to request")
 	}
 }
 
 func (c *Cache[T]) ServeStream(w http.ResponseWriter, r *http.Request) {
+	// we globally set the write timeout to 20 seconds, but for SSE we want to disable this
+	if rc := http.NewResponseController(w); rc != nil {
+		err := rc.SetWriteDeadline(time.Time{})
+		if err != nil {
+			responseError(w, err, "failed to set write deadline to zero")
+			return
+		}
+	}
+
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
@@ -34,31 +41,39 @@ func (c *Cache[T]) ServeStream(w http.ResponseWriter, r *http.Request) {
 
 	flusher, ok := w.(http.Flusher)
 	if !ok {
-		err := "failed to create flusher"
-		timber.ErrorMsg(err)
-		http.Error(w, err, http.StatusInternalServerError)
+		msg := "failed to create flusher"
+		timber.ErrorMsg(msg)
+		http.Error(w, msg, http.StatusInternalServerError)
+		return
 	}
 
 	// telling client how long to wait before reconnecting
-	_, _ = w.Write([]byte("retry: 5000\n\n"))
+	_, err := w.Write([]byte("retry: 5000\n\n"))
+	if err != nil {
+		responseError(w, err, "failed to write retry information")
+		return
+	}
 	flusher.Flush()
 
-	ctx := r.Context()
 	ticker := time.NewTicker(2 * time.Second)
 	defer ticker.Stop()
 
-	for i := 0; i < 10; i++ {
+	for {
 		select {
-		case <-ctx.Done(): // client disconnected / request canceled
+		case <-r.Context().Done(): // client disconnected / request canceled
 			return
 		case <-ticker.C:
-			// NOTE: SSE events need a blank line after the data block
-			fmt.Fprintf(w, "data: %s\n\n", fmt.Sprintf("Event %d", i+1))
+			_, err := fmt.Fprintf(w, ": heartbeat\n\n")
+			if err != nil {
+				responseError(w, err, "failed to write heartbeat")
+			}
 			flusher.Flush()
 		}
 	}
+}
 
-	// Optionally send a final comment, then exit
-	_, _ = w.Write([]byte(": done\n\n"))
-	flusher.Flush()
+func responseError(w http.ResponseWriter, err error, msg string) {
+	err = fmt.Errorf("%w %s", err, msg)
+	timber.Error(err)
+	http.Error(w, err.Error(), http.StatusInternalServerError)
 }
