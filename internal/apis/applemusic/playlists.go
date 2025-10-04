@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
-	"go.mattglei.ch/lcp/internal/auth"
 	"go.mattglei.ch/lcp/internal/cache"
 	"go.mattglei.ch/lcp/pkg/lcp"
 	"go.mattglei.ch/timber"
@@ -16,22 +15,22 @@ import (
 var (
 	playlists = []lcp.AppleMusicSyncedPlaylist{
 		{Name: "chill", AppleMusicID: "p.AWXoZoxHLrvpJlY", SpotifyID: "5SnoWhWIJRmJNkvdxCpMAe"},
-		{Name: "alt", AppleMusicID: "p.AWXoXPYSLrvpJlY", SpotifyID: "7tN57nLbiiw4bliUyw2oYL"},
 		{
 			Name:         "after hours",
 			AppleMusicID: "p.qQXLX2rHA75zg8e",
 			SpotifyID:    "1NMII2bpE3l7CvBxYVK7Fu",
 		},
+		{Name: "bops", AppleMusicID: "p.LV0PXL3Cl0EpDLW", SpotifyID: "2Bc0msBHeRaNYUFO8LfHct"},
 		{Name: "smooth", AppleMusicID: "p.AWXoXeAiLrvpJlY", SpotifyID: "2CvjwmuE5CekSZ1CfezOQO"},
 		{Name: "classics", AppleMusicID: "p.gek1E8efLa68Adp", SpotifyID: "2HYOAlwB570McLyD3nIJKG"},
 		{Name: "80s", AppleMusicID: "p.qQXLxPLtA75zg8e", SpotifyID: "1DB0cG12kphRKvNzKPGmpf"},
+		{Name: "alt", AppleMusicID: "p.AWXoXPYSLrvpJlY", SpotifyID: "7tN57nLbiiw4bliUyw2oYL"},
 		{
 			Name:         "divorced dad",
 			AppleMusicID: "p.LV0PXNoCl0EpDLW",
 			SpotifyID:    "3p0bSspMsoZ0QodpDCcb3U",
 		},
 		{Name: "party", AppleMusicID: "p.QvDQE5RIVbAeokL", SpotifyID: "6AFH5WO2uZeSwKdirNvryH"},
-		{Name: "bops", AppleMusicID: "p.LV0PXL3Cl0EpDLW", SpotifyID: "2Bc0msBHeRaNYUFO8LfHct"},
 		{Name: "house", AppleMusicID: "p.gek1EWzCLa68Adp", SpotifyID: "3iMi8ew4XvYCCcS9P2iARw"},
 		{Name: "focus", AppleMusicID: "p.6xZaArOsvzb5OML", SpotifyID: "261XCji6XWsXktcMumPIqa"},
 		{Name: "funk", AppleMusicID: "p.O1kz7EoFVmvz704", SpotifyID: "1EDwymox6cXQlk7JGDMCbz"},
@@ -120,10 +119,6 @@ func fetchPlaylist(
 
 func syncedPlaylistsEndpoint() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !auth.IsAuthorized(w, r) {
-			return
-		}
-
 		w.Header().Set("Content-Type", "application/json")
 		err := json.NewEncoder(w).Encode(playlists)
 		if err != nil {
@@ -136,9 +131,6 @@ func syncedPlaylistsEndpoint() http.HandlerFunc {
 
 func playlistEndpoint(c *cache.Cache[lcp.AppleMusicCache]) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !auth.IsAuthorized(w, r) {
-			return
-		}
 		id := r.PathValue("id")
 
 		c.Mutex.RLock()

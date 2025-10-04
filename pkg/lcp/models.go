@@ -2,6 +2,10 @@ package lcp
 
 import "time"
 
+type CacheResponseData interface {
+	AppleMusicCacheResponse | []GitHubRepository | []SteamGame | []Workout
+}
+
 type CacheData interface {
 	AppleMusicCache | []GitHubRepository | []SteamGame | []Workout
 }
@@ -9,6 +13,11 @@ type CacheData interface {
 type AppleMusicCache struct {
 	RecentlyPlayed []AppleMusicSong     `json:"recently_played"`
 	Playlists      []AppleMusicPlaylist `json:"playlists"`
+}
+
+type AppleMusicCacheResponse struct {
+	RecentlyPlayed    []AppleMusicSong            `json:"recently_played"`
+	PlaylistSummaries []AppleMusicPlaylistSummary `json:"playlist_summaries"`
 }
 
 type AppleMusicSong struct {

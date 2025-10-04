@@ -13,7 +13,6 @@ import (
 var ENV Secrets
 
 type Secrets struct {
-	ValidTokens string `env:"VALID_TOKENS"`
 	CacheFolder string `env:"CACHE_FOLDER"`
 
 	// strava

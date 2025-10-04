@@ -4,14 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net/http"
 	"path/filepath"
 	"strings"
 	"sync"
 	"time"
 
 	"go.mattglei.ch/lcp/internal/apis"
-	"go.mattglei.ch/lcp/internal/auth"
 	"go.mattglei.ch/lcp/internal/secrets"
 	"go.mattglei.ch/lcp/pkg/lcp"
 	"go.mattglei.ch/timber"
@@ -51,39 +49,35 @@ type Cache[T lcp.CacheData] struct {
 	Mutex   sync.RWMutex
 	Data    T
 	Updated time.Time
+
+	MarshalResponse func(c *Cache[T]) (string, error)
+
+	connections      map[chan string]struct{}
+	connectionsMutex sync.Mutex
 }
 
 func New[T lcp.CacheData](instance CacheInstance, data T, update bool) *Cache[T] {
 	cache := Cache[T]{
 		instance: instance,
 		Updated:  time.Now().UTC(),
-		filePath: filepath.Join(secrets.ENV.CacheFolder, fmt.Sprintf("%s.json", instance.String())),
+		filePath: filepath.Join(
+			secrets.ENV.CacheFolder,
+			fmt.Sprintf("%s.json", instance.String()),
+		),
+		connections: make(map[chan string]struct{}),
+		MarshalResponse: func(c *Cache[T]) (string, error) {
+			data, err := json.Marshal(lcp.CacheResponse[any]{Data: c.Data, Updated: c.Updated})
+			if err != nil {
+				return "", fmt.Errorf("%w failed to encode json data", err)
+			}
+			return string(data), nil
+		},
 	}
 	cache.loadFromFile()
 	if update {
 		cache.Update(data)
 	}
 	return &cache
-}
-
-type HttpResponse[T any] struct {
-	Data    T         `json:"data"`
-	Updated time.Time `json:"updated"`
-}
-
-func (c *Cache[T]) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if !auth.IsAuthorized(w, r) {
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	c.Mutex.RLock()
-	err := json.NewEncoder(w).Encode(HttpResponse[T]{Data: c.Data, Updated: c.Updated})
-	c.Mutex.RUnlock()
-	if err != nil {
-		err = fmt.Errorf("%w failed to write json data to request", err)
-		timber.Error(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
 }
 
 func (c *Cache[T]) Update(data T) {
@@ -110,6 +104,26 @@ func (c *Cache[T]) Update(data T) {
 		c.persistToFile()
 		timber.Done(c.instance.LogPrefix(), "cache updated")
 	}
+
+	// broadcast update to connections
+	c.Mutex.RLock()
+	frame, err := c.MarshalResponse(c)
+	if err != nil {
+		timber.Error(err, "failed to create endpoint data")
+		return
+	}
+	c.Mutex.RUnlock()
+
+	c.connectionsMutex.Lock()
+	for connection := range c.connections {
+		select {
+		case connection <- frame:
+		default:
+			delete(c.connections, connection)
+			close(connection)
+		}
+	}
+	c.connectionsMutex.Unlock()
 }
 
 func UpdatePeriodically[T lcp.CacheData, C any](
