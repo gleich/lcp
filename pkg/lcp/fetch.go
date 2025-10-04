@@ -16,8 +16,8 @@ type Client struct {
 }
 
 type CacheResponse[T any] struct {
-	Data    T
-	Updated time.Time
+	Data    T         `json:"data"`
+	Updated time.Time `json:"updated"`
 }
 
 func fetch[T any](client *Client, path string) (T, error) {
