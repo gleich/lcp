@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"go.mattglei.ch/lcp/internal/auth"
 	"go.mattglei.ch/timber"
 )
 
@@ -19,6 +20,9 @@ func (c *Cache[T]) Endpoints(mux *http.ServeMux) {
 }
 
 func (c *Cache[T]) Serve(w http.ResponseWriter, r *http.Request) {
+	if !auth.IsAuthorized(w, r) {
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	c.Mutex.RLock()
 	data, err := c.MarshalResponse(c)
