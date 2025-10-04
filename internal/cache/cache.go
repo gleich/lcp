@@ -103,27 +103,31 @@ func (c *Cache[T]) Update(data T) {
 
 		c.persistToFile()
 		timber.Done(c.instance.LogPrefix(), "cache updated")
-	}
 
-	// broadcast update to connections
-	c.Mutex.RLock()
-	frame, err := c.MarshalResponse(c)
-	if err != nil {
-		timber.Error(err, "failed to create endpoint data")
-		return
-	}
-	c.Mutex.RUnlock()
+		if len(c.connections) != 0 {
+			// broadcast update to connections
+			c.Mutex.RLock()
+			frame, err := c.MarshalResponse(c)
+			if err != nil {
+				timber.Error(err, "failed to create endpoint data")
+				return
+			}
+			c.Mutex.RUnlock()
 
-	c.connectionsMutex.Lock()
-	for connection := range c.connections {
-		select {
-		case connection <- frame:
-		default:
-			delete(c.connections, connection)
-			close(connection)
+			c.connectionsMutex.Lock()
+			for connection := range c.connections {
+				select {
+				case connection <- frame:
+				default:
+					delete(c.connections, connection)
+					close(connection)
+				}
+			}
+			c.connectionsMutex.Unlock()
+			timber.Done(c.instance.LogPrefix(), "updated", len(c.connections), "connection(s)")
 		}
 	}
-	c.connectionsMutex.Unlock()
+
 }
 
 func UpdatePeriodically[T lcp.CacheData, C any](
