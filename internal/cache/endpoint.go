@@ -93,7 +93,7 @@ func (c *Cache[T]) ServeStream(w http.ResponseWriter, r *http.Request) {
 
 	for {
 		select {
-		case <-r.Context().Done(): // client disconnected / request canceled
+		case <-r.Context().Done():
 			return
 		case <-ticker.C:
 			_, err := fmt.Fprintf(w, ": heartbeat\n\n")
