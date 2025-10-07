@@ -73,6 +73,7 @@ func fetchAchievementsPercentage(
 	}
 	if resp.StatusCode != http.StatusOK {
 		timber.Warning(
+			cacheInstance.LogPrefix(),
 			"status code of",
 			resp.StatusCode,
 			"returned from API. Code of 200 expected from",
