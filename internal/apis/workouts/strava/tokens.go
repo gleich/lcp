@@ -19,7 +19,7 @@ type Tokens struct {
 
 func LoadTokens() Tokens {
 	return Tokens{
-		Access:    secrets.ENV.StravaAccessToken,
+		Access:    "",
 		Refresh:   secrets.ENV.StravaRefreshToken,
 		ExpiresAt: 0, // starts at zero to force a refresh on boot
 	}

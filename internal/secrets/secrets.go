@@ -20,7 +20,6 @@ type Secrets struct {
 	StravaClientID       string `env:"STRAVA_CLIENT_ID"`
 	StravaClientSecret   string `env:"STRAVA_CLIENT_SECRET"`
 	StravaOAuthCode      string `env:"STRAVA_OAUTH_CODE"`
-	StravaAccessToken    string `env:"STRAVA_ACCESS_TOKEN"`
 	StravaRefreshToken   string `env:"STRAVA_REFRESH_TOKEN"`
 	StravaSubscriptionID int64  `env:"STRAVA_SUBSCRIPTION_ID"`
 	StravaVerifyToken    string `env:"STRAVA_VERIFY_TOKEN"`
