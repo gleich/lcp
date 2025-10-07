@@ -100,6 +100,7 @@ func (c *Cache[T]) ServeStream(w http.ResponseWriter, r *http.Request) {
 			_, err := fmt.Fprintf(w, ": heartbeat\n\n")
 			if err != nil {
 				errorResponse(w, err, "failed to write heartbeat")
+				return
 			}
 			flusher.Flush()
 		case frame, ok := <-channel:
@@ -109,6 +110,7 @@ func (c *Cache[T]) ServeStream(w http.ResponseWriter, r *http.Request) {
 			_, err = fmt.Fprintf(w, "event: message\ndata: %s\n\n", frame)
 			if err != nil {
 				errorResponse(w, err, "failed to write data")
+				return
 			}
 			flusher.Flush()
 		}
