@@ -3,7 +3,6 @@ package steam
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 
@@ -49,9 +48,13 @@ func fetchAchievementsPercentage(
 		"appid":   {fmt.Sprint(appID)},
 		"format":  {"json"},
 	}
-	resp, err := client.Get(
-		"https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v0001?" + params.Encode(),
-	)
+
+	req, err := http.NewRequest(http.MethodGet, "https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v0001?"+params.Encode(), nil)
+	if err != nil {
+		return nil, fmt.Errorf("%w failed to create request for player achievements", err)
+	}
+
+	body, err := apis.Request(cacheInstance.LogPrefix(), client, req)
 	if err != nil {
 		return nil, fmt.Errorf(
 			"%v sending request for player achievements from %d failed",
@@ -60,31 +63,8 @@ func fetchAchievementsPercentage(
 		)
 	}
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf(
-			"%v reading response body for player achievements from %d failed",
-			err,
-			appID,
-		)
-	}
 	if string(body) == `{"playerstats":{"error":"Requested app has no stats","success":false}}` {
 		return nil, nil
-	}
-	if resp.StatusCode != http.StatusOK {
-		timber.Warning(
-			cacheInstance.LogPrefix(),
-			"status code of",
-			resp.StatusCode,
-			"returned from API. Code of 200 expected from",
-			resp.Request.URL.String(),
-		)
-		return nil, apis.ErrWarning
-	}
-
-	err = resp.Body.Close()
-	if err != nil {
-		return nil, fmt.Errorf("%w failed to close response body", err)
 	}
 
 	var playerAchievements playerAchievementsResponse
@@ -104,7 +84,7 @@ func fetchAchievementsPercentage(
 		"appid":  {fmt.Sprint(appID)},
 		"format": {"json"},
 	}
-	req, err := http.NewRequest(
+	req, err = http.NewRequest(
 		http.MethodGet,
 		"https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2?"+params.Encode(),
 		nil,
