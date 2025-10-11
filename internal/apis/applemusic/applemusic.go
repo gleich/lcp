@@ -52,7 +52,7 @@ func Setup(mux *http.ServeMux, client *http.Client, rdb *redis.Client) {
 		func(client *http.Client) (lcp.AppleMusicCache, error) {
 			return cacheUpdate(client, rdb)
 		},
-		20*time.Second,
+		10*time.Second,
 	)
 	timber.Done(cacheInstance.LogPrefix(), "setup cache and endpoints")
 }

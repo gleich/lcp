@@ -58,7 +58,7 @@ func EventRoute(
 			return
 		}
 
-		err = tokens.RefreshIfNeeded(client)
+		err = tokens.RefreshIfExpired(client)
 		if err != nil {
 			timber.Error(err)
 			return

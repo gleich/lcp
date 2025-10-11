@@ -16,7 +16,7 @@ const cacheInstance = cache.Workouts
 
 func Setup(mux *http.ServeMux, client *http.Client, rdb *redis.Client) {
 	stravaTokens := strava.LoadTokens()
-	err := stravaTokens.RefreshIfNeeded(client)
+	err := stravaTokens.RefreshIfExpired(client)
 	if err != nil {
 		timber.Error(err, "failed to refresh strava token data on boot")
 	}

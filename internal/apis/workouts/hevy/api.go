@@ -21,7 +21,7 @@ func sendHevyAPIRequest[T any](client *http.Client, path string) (T, error) {
 	}
 	req.Header.Set("api-key", secrets.ENV.HevyAccessToken)
 
-	resp, err := apis.RequestJSON[T](logPrefix, client, req)
+	resp, err := apis.RequestJSON[T]("[hevy]", client, req)
 	if err != nil {
 		return zeroValue, fmt.Errorf("%w failed to make hevy API request", err)
 	}
