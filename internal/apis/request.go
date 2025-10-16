@@ -9,7 +9,6 @@ import (
 	"net"
 	"net/http"
 	"strings"
-	"time"
 
 	"go.mattglei.ch/timber"
 )
@@ -25,10 +24,6 @@ var ErrWarning = errors.New("non-critical error encountered during request")
 // unexpected EOFs, and TCP connection resets—by logging warnings and returning a non-critical
 // WarningError. Non-2xx HTTP responses are also treated as warnings.
 func Request(logPrefix string, client *http.Client, request *http.Request) ([]byte, error) {
-	ctx, cancel := context.WithTimeout(request.Context(), 1*time.Minute)
-	defer cancel()
-	request = request.WithContext(ctx)
-
 	resp, err := client.Do(request)
 	if err != nil {
 		if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
