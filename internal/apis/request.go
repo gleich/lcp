@@ -52,7 +52,7 @@ func Request(logPrefix string, client *http.Client, request *http.Request) ([]by
 			resp.StatusCode,
 			fmt.Sprintf("(%s)", strings.ToLower(http.StatusText(resp.StatusCode))),
 			"from",
-			request.URL.String(),
+			request.URL.Path,
 		)
 		return []byte{}, ErrWarning
 	}
