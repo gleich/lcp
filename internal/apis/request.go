@@ -26,23 +26,24 @@ var ErrWarning = errors.New("non-critical error encountered during request")
 func Request(logPrefix string, client *http.Client, request *http.Request) ([]byte, error) {
 	resp, err := client.Do(request)
 	if err != nil {
+		path := request.URL.Path
 		if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
-			timber.Warning(logPrefix, "connection timed out for", request.URL.Path)
+			timber.Warning(logPrefix, "connection timed out for", path)
 			return []byte{}, ErrWarning
 		}
 		if errors.Is(err, context.DeadlineExceeded) {
-			timber.Warning(logPrefix, "request timed out for", request.URL.Path)
+			timber.Warning(logPrefix, "request timed out for", path)
 			return []byte{}, ErrWarning
 		}
 		if errors.Is(err, io.ErrUnexpectedEOF) {
-			timber.Warning(logPrefix, "unexpected EOF from", request.URL.Path)
+			timber.Warning(logPrefix, "unexpected EOF from", path)
 			return []byte{}, ErrWarning
 		}
 		if strings.Contains(err.Error(), "read: connection reset by peer") {
-			timber.Warning(logPrefix, "tcp connection reset by peer from", request.URL.Path)
+			timber.Warning(logPrefix, "tcp connection reset by peer from", path)
 			return []byte{}, ErrWarning
 		}
-		return []byte{}, fmt.Errorf("%w sending request to %s failed", err, request.URL.String())
+		return []byte{}, fmt.Errorf("%w sending request to %s failed", err, path)
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
