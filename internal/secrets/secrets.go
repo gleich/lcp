@@ -3,7 +3,6 @@ package secrets
 import (
 	"errors"
 	"io/fs"
-	"os"
 
 	"github.com/caarlos0/env/v11"
 	"github.com/joho/godotenv"
@@ -51,11 +50,9 @@ type Secrets struct {
 }
 
 func Load() {
-	if _, err := os.Stat(".env"); !errors.Is(err, fs.ErrNotExist) {
-		err := godotenv.Load()
-		if err != nil {
-			timber.Fatal(err, "loading .env file failed")
-		}
+	err := godotenv.Load()
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		timber.Fatal(err, "loading .env file failed")
 	}
 
 	secrets, err := env.ParseAsWithOptions[Secrets](env.Options{RequiredIfNoDef: true})
