@@ -60,7 +60,7 @@ func Request(logPrefix string, client *http.Client, request *http.Request) ([]by
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		if errors.Is(err, io.ErrUnexpectedEOF) {
-			timber.Warning(logPrefix, "unexpected EOF from", path)
+			timber.Warning(logPrefix, "unexpected EOF while reading body from", path)
 			return []byte{}, ErrWarning
 		}
 		return []byte{}, fmt.Errorf("%w reading response body failed", err)
