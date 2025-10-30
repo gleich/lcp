@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
+	"github.com/redis/go-redis/v9/maintnotifications"
 	"go.mattglei.ch/lcp/internal/apis/applemusic"
 	"go.mattglei.ch/lcp/internal/apis/github"
 	"go.mattglei.ch/lcp/internal/apis/steam"
@@ -26,6 +27,9 @@ func main() {
 			Addr:     secrets.ENV.RedisAddress,
 			Password: secrets.ENV.RedisPassword,
 			DB:       0,
+			MaintNotificationsConfig: &maintnotifications.Config{
+				Mode: maintnotifications.ModeDisabled,
+			},
 		})
 	)
 
