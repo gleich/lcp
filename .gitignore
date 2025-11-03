@@ -19,3 +19,6 @@
 
 # apple music key
 *.p8
+
+# lcp binary
+lcp
