@@ -55,6 +55,8 @@ func Request(logPrefix string, client *http.Client, request *http.Request) ([]by
 			request.URL.Path,
 		)
 		return []byte{}, ErrWarning
+	} else if resp.StatusCode == http.StatusNoContent {
+		return []byte{}, fmt.Errorf("%d status no content returned when content is expected", resp.StatusCode)
 	}
 
 	body, err := io.ReadAll(resp.Body)
