@@ -66,7 +66,7 @@ func FetchActivities(
 
 	var activities []lcp.Workout
 	for _, stravaActivity := range stravaActivities {
-		if stravaActivity.Private || !stravaActivity.HasHeartrate {
+		if stravaActivity.Private {
 			continue
 		}
 
