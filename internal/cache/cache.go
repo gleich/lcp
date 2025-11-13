@@ -66,7 +66,7 @@ func New[T lcp.CacheData](instance CacheInstance, data T, update bool) *Cache[T]
 		),
 		connections: make(map[chan string]struct{}),
 		MarshalResponse: func(c *Cache[T]) (string, error) {
-			data, err := json.Marshal(lcp.CacheResponse[any]{Data: c.Data, Updated: c.Updated})
+			data, err := json.Marshal(lcp.CacheResponse[T]{Data: c.Data, Updated: c.Updated})
 			if err != nil {
 				return "", fmt.Errorf("%w failed to encode json data", err)
 			}
