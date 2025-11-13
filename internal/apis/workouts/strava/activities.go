@@ -82,7 +82,7 @@ func FetchActivities(
 			AverageHeartrate:   stravaActivity.AverageHeartrate,
 			HasMap:             stravaActivity.Map.SummaryPolyline != "",
 			MapPolyline:        stravaActivity.Map.SummaryPolyline,
-			HasHeartrate:       true,
+			HasHeartrate:       stravaActivity.HasHeartrate,
 		}
 		activities = append(activities, a)
 	}
