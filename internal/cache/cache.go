@@ -146,7 +146,7 @@ func UpdatePeriodically[T lcp.CacheData, C any](
 		if err != nil {
 			if !errors.Is(err, apis.ErrWarning) && !errors.Is(err, ErrAppleMusicNoArtwork) &&
 				!errors.Is(err, ErrSteamOwnedGamesEmpty) {
-				timber.Error(err, "updating", cache.instance.LogPrefix(), "cache failed")
+				timber.Error(err, cache.instance.LogPrefix(), "updating cache failed")
 			}
 		} else {
 			cache.Update(data)
