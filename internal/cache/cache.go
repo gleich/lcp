@@ -5,11 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 	"time"
 
-	"go.mattglei.ch/lcp/internal/apis"
 	"go.mattglei.ch/lcp/internal/secrets"
 	"go.mattglei.ch/lcp/pkg/lcp"
 	"go.mattglei.ch/timber"
@@ -144,8 +144,10 @@ func UpdatePeriodically[T lcp.CacheData, C any](
 		time.Sleep(interval)
 		data, err := update(client)
 		if err != nil {
-			if !errors.Is(err, apis.ErrWarning) && !errors.Is(err, ErrAppleMusicNoArtwork) &&
-				!errors.Is(err, ErrSteamOwnedGamesEmpty) {
+			if !slices.ContainsFunc(
+				ExpectedErrors,
+				func(e error) bool { return errors.Is(err, e) },
+			) {
 				timber.Error(err, cache.instance.LogPrefix(), "updating cache failed")
 			}
 		} else {
