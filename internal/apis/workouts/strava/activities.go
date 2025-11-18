@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"time"
 
 	"github.com/minio/minio-go/v7"
@@ -78,7 +79,7 @@ func FetchActivities(
 			TotalElevationGain: stravaActivity.TotalElevationGain,
 			MovingTime:         stravaActivity.MovingTime,
 			Distance:           stravaActivity.Distance,
-			ID:                 fmt.Sprint(stravaActivity.ID),
+			ID:                 strconv.Itoa(int(stravaActivity.ID)),
 			AverageHeartrate:   stravaActivity.AverageHeartrate,
 			HasMap:             stravaActivity.Map.SummaryPolyline != "",
 			MapPolyline:        stravaActivity.Map.SummaryPolyline,
