@@ -15,6 +15,11 @@ import (
 
 var (
 	playlists = []lcp.AppleMusicSyncedPlaylist{
+		{
+			Name:         "friendsgiving",
+			AppleMusicID: "p.gek1krvFLa68Adp",
+			SpotifyID:    "7IbaiRMhet4tMO0zm7wcds",
+		},
 		{Name: "chill", AppleMusicID: "p.AWXoZoxHLrvpJlY", SpotifyID: "5SnoWhWIJRmJNkvdxCpMAe"},
 		{
 			Name:         "after hours",
@@ -37,7 +42,7 @@ var (
 		{Name: "funk", AppleMusicID: "p.O1kz7EoFVmvz704", SpotifyID: "1EDwymox6cXQlk7JGDMCbz"},
 		{Name: "old man", AppleMusicID: "p.V7VYVB0hZo53MQv", SpotifyID: "3fDlIqV43BvPvtPs9ASsgU"},
 		{Name: "quiet", AppleMusicID: "p.AWXoXbWfLrvpJlY", SpotifyID: "6ex8usE1U41m4wM6NwT9cg"},
-		{Name: "rock", AppleMusicID: "p.qQXLxpDuA75zg8e", SpotifyID: "1Yh42cCAPWPFy55hw8VaWJ"},
+		// {Name: "rock", AppleMusicID: "p.qQXLxpDuA75zg8e", SpotifyID: "1Yh42cCAPWPFy55hw8VaWJ"},
 		{Name: "country", AppleMusicID: "p.O1kz7zbsVmvz704", SpotifyID: "3jR0MH0NwzEdYuUY8nohmf"},
 	}
 )
