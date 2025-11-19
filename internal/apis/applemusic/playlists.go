@@ -19,6 +19,7 @@ var (
 			Name:         "friendsgiving",
 			AppleMusicID: "p.gek1krvFLa68Adp",
 			SpotifyID:    "7IbaiRMhet4tMO0zm7wcds",
+			NoSync:       true,
 		},
 		{Name: "chill", AppleMusicID: "p.AWXoZoxHLrvpJlY", SpotifyID: "5SnoWhWIJRmJNkvdxCpMAe"},
 		{
