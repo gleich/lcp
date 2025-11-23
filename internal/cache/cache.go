@@ -124,11 +124,12 @@ func (c *Cache[T]) Update(data T) {
 				}
 			}
 			c.connectionsMutex.Unlock()
+
+			connWord := "connection"
 			if len(c.connections) > 1 {
-				timber.Done(c.instance.LogPrefix(), "updated", len(c.connections), "connections")
-			} else {
-				timber.Done(c.instance.LogPrefix(), "updated", len(c.connections), "connection")
+				connWord = "connections"
 			}
+			timber.Done(c.instance.LogPrefix(), "updated", len(c.connections), connWord)
 		}
 	}
 
