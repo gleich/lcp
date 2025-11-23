@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 
 	"go.mattglei.ch/lcp/internal/apis"
 	"go.mattglei.ch/lcp/internal/secrets"
@@ -45,11 +46,15 @@ func fetchAchievementsPercentage(
 	params := url.Values{
 		"key":     {secrets.ENV.SteamKey},
 		"steamid": {secrets.ENV.SteamID},
-		"appid":   {fmt.Sprint(appID)},
+		"appid":   {strconv.Itoa(appID)},
 		"format":  {"json"},
 	}
 
-	req, err := http.NewRequest(http.MethodGet, "https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v0001?"+params.Encode(), nil)
+	req, err := http.NewRequest(
+		http.MethodGet,
+		"https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v0001?"+params.Encode(),
+		nil,
+	)
 	if err != nil {
 		return nil, fmt.Errorf("%w failed to create request for player achievements", err)
 	}
