@@ -15,12 +15,13 @@ import (
 
 var (
 	playlists = []lcp.AppleMusicSyncedPlaylist{
-		{
-			Name:         "friendsgiving",
-			AppleMusicID: "p.gek1krvFLa68Adp",
-			SpotifyID:    "7IbaiRMhet4tMO0zm7wcds",
-			NoSync:       true,
-		},
+		{Name: "christmas", AppleMusicID: "p.QvDQEebsVbAeokL", SpotifyID: "4sxPVSb9VcA4RQOY7lKQxI"},
+		// {
+		// 	Name:         "friendsgiving",
+		// 	AppleMusicID: "p.gek1krvFLa68Adp",
+		// 	SpotifyID:    "7IbaiRMhet4tMO0zm7wcds",
+		// 	NoSync:       true,
+		// },
 		{Name: "chill", AppleMusicID: "p.AWXoZoxHLrvpJlY", SpotifyID: "5SnoWhWIJRmJNkvdxCpMAe"},
 		{
 			Name:         "after hours",
