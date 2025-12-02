@@ -28,6 +28,9 @@ type Secrets struct {
 	HevyAccessToken   string  `env:"HEVY_ACCESS_TOKEN"`
 	HevyBodyWeightLBS float64 `env:"HEVY_BODY_WEIGHT_LBS"`
 
+	// opencagedata
+	OpenCageDataKey string `env:"OPEN_CAGE_DATA_KEY"`
+
 	// steam
 	SteamKey string `env:"STEAM_KEY"`
 	SteamID  string `env:"STEAM_ID"`

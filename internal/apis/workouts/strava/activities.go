@@ -12,7 +12,7 @@ import (
 	"go.mattglei.ch/lcp/pkg/lcp"
 )
 
-type StravaActivity struct {
+type activity struct {
 	Name      string    `json:"name"`
 	SportType string    `json:"sport_type"`
 	StartDate time.Time `json:"start_date"`
@@ -20,23 +20,24 @@ type StravaActivity struct {
 	Map       struct {
 		SummaryPolyline string `json:"summary_polyline"`
 	} `json:"map"`
-	Trainer            bool    `json:"trainer"`
-	Commute            bool    `json:"commute"`
-	Private            bool    `json:"private"`
-	AverageSpeed       float32 `json:"average_speed"`
-	MaxSpeed           float32 `json:"max_speed"`
-	AverageTemp        int32   `json:"average_temp,omitempty"`
-	AverageCadence     float32 `json:"average_cadence,omitempty"`
-	AverageWatts       float32 `json:"average_watts,omitempty"`
-	DeviceWatts        bool    `json:"device_watts,omitempty"`
-	AverageHeartrate   float32 `json:"average_heartrate,omitempty"`
-	TotalElevationGain float32 `json:"total_elevation_gain"`
-	MovingTime         uint32  `json:"moving_time"`
-	SufferScore        float32 `json:"suffer_score,omitempty"`
-	PrCount            uint32  `json:"pr_count"`
-	Distance           float32 `json:"distance"`
-	ID                 uint64  `json:"id"`
-	HasHeartrate       bool    `json:"has_heartrate"`
+	StartLatLong       [2]float32 `json:"start_latlng"`
+	Trainer            bool       `json:"trainer"`
+	Commute            bool       `json:"commute"`
+	Private            bool       `json:"private"`
+	AverageSpeed       float32    `json:"average_speed"`
+	MaxSpeed           float32    `json:"max_speed"`
+	AverageTemp        int32      `json:"average_temp,omitempty"`
+	AverageCadence     float32    `json:"average_cadence,omitempty"`
+	AverageWatts       float32    `json:"average_watts,omitempty"`
+	DeviceWatts        bool       `json:"device_watts,omitempty"`
+	AverageHeartrate   float32    `json:"average_heartrate,omitempty"`
+	TotalElevationGain float32    `json:"total_elevation_gain"`
+	MovingTime         uint32     `json:"moving_time"`
+	SufferScore        float32    `json:"suffer_score,omitempty"`
+	PrCount            uint32     `json:"pr_count"`
+	Distance           float32    `json:"distance"`
+	ID                 uint64     `json:"id"`
+	HasHeartrate       bool       `json:"has_heartrate"`
 }
 
 type activityStream struct {
@@ -56,7 +57,7 @@ func FetchActivities(
 	rdb *redis.Client,
 	tokens Tokens,
 ) ([]lcp.Workout, error) {
-	stravaActivities, err := sendStravaAPIRequest[[]StravaActivity](
+	stravaActivities, err := sendStravaAPIRequest[[]activity](
 		client,
 		"api/v3/athlete/activities",
 		tokens,
@@ -71,7 +72,16 @@ func FetchActivities(
 			continue
 		}
 
-		a := lcp.Workout{
+		location, err := fetchLocation(client, stravaActivity)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"%w failed to fetch location data for %s",
+				err,
+				stravaActivity.Name,
+			)
+		}
+
+		activities = append(activities, lcp.Workout{
 			Platform:           "strava",
 			Name:               stravaActivity.Name,
 			SportType:          stravaActivity.SportType,
@@ -82,10 +92,10 @@ func FetchActivities(
 			ID:                 strconv.Itoa(int(stravaActivity.ID)),
 			AverageHeartrate:   stravaActivity.AverageHeartrate,
 			HasMap:             stravaActivity.Map.SummaryPolyline != "",
+			Location:           location,
 			MapPolyline:        stravaActivity.Map.SummaryPolyline,
 			HasHeartrate:       stravaActivity.HasHeartrate,
-		}
-		activities = append(activities, a)
+		})
 	}
 
 	return activities, nil

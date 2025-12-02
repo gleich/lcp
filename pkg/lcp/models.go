@@ -89,6 +89,7 @@ type Workout struct {
 	MapImageURL        *string        `json:"map_image_url,omitempty"`
 	MapPolyline        string         `json:"-"` // not included in JSON response
 	HasMap             bool           `json:"has_map"`
+	Location           *string        `json:"location"`
 	TotalElevationGain float32        `json:"total_elevation_gain,omitempty"`
 	MovingTime         uint32         `json:"moving_time"`
 	Distance           float32        `json:"distance,omitempty"`
