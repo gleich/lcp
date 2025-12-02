@@ -54,7 +54,6 @@ func fetchLocation(client *http.Client, stravaActivity activity) (*string, error
 		return nil, fmt.Errorf("%w failed to send request for location data", err)
 	}
 
-	timber.Debug("activity:", stravaActivity.Name)
 	if len(resp.Results) == 0 {
 		return nil, fmt.Errorf("no location results returned for %s", stravaActivity.Name)
 	}
