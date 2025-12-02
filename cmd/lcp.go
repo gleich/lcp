@@ -6,6 +6,9 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"github.com/redis/go-redis/v9/maintnotifications"
+	"go.mattglei.ch/lcp/internal/apis/applemusic"
+	"go.mattglei.ch/lcp/internal/apis/github"
+	"go.mattglei.ch/lcp/internal/apis/steam"
 	"go.mattglei.ch/lcp/internal/apis/workouts"
 	"go.mattglei.ch/lcp/internal/secrets"
 	"go.mattglei.ch/timber"
@@ -31,10 +34,10 @@ func main() {
 	)
 
 	mux.HandleFunc("/", rootRedirect)
-	// github.Setup(mux)
+	github.Setup(mux)
 	workouts.Setup(mux, &client, rdb)
-	// steam.Setup(mux, &client, rdb)
-	// applemusic.Setup(mux, &client, rdb)
+	steam.Setup(mux, &client, rdb)
+	applemusic.Setup(mux, &client, rdb)
 
 	timber.Info("starting server")
 	server := &http.Server{
