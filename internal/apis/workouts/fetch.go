@@ -107,6 +107,16 @@ func fetch(
 			}
 			activity.MapBlurImage = &mapBlurHash
 			activity.MapImageURL = &imgURL
+
+			location, err := strava.FetchLocation(client, *activity)
+			if err != nil {
+				return nil, fmt.Errorf(
+					"%w failed to fetch location data for %s",
+					err,
+					activity.Name,
+				)
+			}
+			activity.Location = location
 		}
 	}
 

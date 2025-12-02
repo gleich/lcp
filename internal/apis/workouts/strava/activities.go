@@ -72,15 +72,6 @@ func FetchActivities(
 			continue
 		}
 
-		location, err := fetchLocation(client, stravaActivity)
-		if err != nil {
-			return nil, fmt.Errorf(
-				"%w failed to fetch location data for %s",
-				err,
-				stravaActivity.Name,
-			)
-		}
-
 		activities = append(activities, lcp.Workout{
 			Platform:           "strava",
 			Name:               stravaActivity.Name,
@@ -92,9 +83,10 @@ func FetchActivities(
 			ID:                 strconv.Itoa(int(stravaActivity.ID)),
 			AverageHeartrate:   stravaActivity.AverageHeartrate,
 			HasMap:             stravaActivity.Map.SummaryPolyline != "",
-			Location:           location,
 			MapPolyline:        stravaActivity.Map.SummaryPolyline,
 			HasHeartrate:       stravaActivity.HasHeartrate,
+			Latitude:           stravaActivity.StartLatLong[0],
+			Longitude:          stravaActivity.StartLatLong[1],
 		})
 	}
 

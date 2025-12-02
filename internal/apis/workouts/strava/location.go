@@ -8,6 +8,7 @@ import (
 
 	"go.mattglei.ch/lcp/internal/apis"
 	"go.mattglei.ch/lcp/internal/secrets"
+	"go.mattglei.ch/lcp/pkg/lcp"
 	"go.mattglei.ch/timber"
 )
 
@@ -25,11 +26,10 @@ type locationResponse struct {
 	} `json:"results"`
 }
 
-func fetchLocation(client *http.Client, stravaActivity activity) (*string, error) {
-	latitude := stravaActivity.StartLatLong[0]
-	longitude := stravaActivity.StartLatLong[1]
-	if (latitude == 0 && longitude == 0) ||
-		stravaActivity.Map.SummaryPolyline == "" {
+func FetchLocation(client *http.Client, workout lcp.Workout) (*string, error) {
+	latitude := workout.Latitude
+	longitude := workout.Longitude
+	if (latitude == 0 && longitude == 0) || !workout.HasMap {
 		return nil, nil
 	}
 
@@ -55,7 +55,7 @@ func fetchLocation(client *http.Client, stravaActivity activity) (*string, error
 	}
 
 	if len(resp.Results) == 0 {
-		return nil, fmt.Errorf("no location results returned for %s", stravaActivity.Name)
+		return nil, fmt.Errorf("no location results returned for %s", workout.Name)
 	}
 	components := resp.Results[0].Components
 
@@ -89,7 +89,7 @@ func fetchLocation(client *http.Client, stravaActivity activity) (*string, error
 	} else if components.Village != "" {
 		location = fmt.Sprintf("%s, %s", components.Village, components.State)
 	} else {
-		timber.Warning("unable to create location for", stravaActivity.Name, fmt.Sprintf("(%f, %f)", latitude, longitude))
+		timber.Warning("unable to create location for", workout.Name, fmt.Sprintf("(%f, %f)", latitude, longitude))
 		return nil, nil
 	}
 

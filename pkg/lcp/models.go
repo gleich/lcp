@@ -87,7 +87,6 @@ type Workout struct {
 	StartDate          time.Time      `json:"start_date"`
 	MapBlurImage       *string        `json:"map_blur_image,omitempty"`
 	MapImageURL        *string        `json:"map_image_url,omitempty"`
-	MapPolyline        string         `json:"-"` // not included in JSON response
 	HasMap             bool           `json:"has_map"`
 	Location           *string        `json:"location"`
 	TotalElevationGain float32        `json:"total_elevation_gain,omitempty"`
@@ -101,6 +100,13 @@ type Workout struct {
 	HevyVolumeKG       float64        `json:"hevy_volume_kg,omitempty"`
 	HevySetCount       int            `json:"hevy_set_count,omitempty"`
 	Calories           float32        `json:"calories,omitempty"`
+
+	// these fields are simply used for processing other fields and should not be included in the
+	// JSON response. that is why they have the tag "-", which makes them not a part of the
+	// response.
+	MapPolyline string  `json:"-"`
+	Latitude    float32 `json:"-"`
+	Longitude   float32 `json:"-"`
 }
 
 type HevyExercise struct {
