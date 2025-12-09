@@ -41,7 +41,12 @@ var playlists = []lcp.AppleMusicSyncedPlaylist{
 	{Name: "house", AppleMusicID: "p.gek1EWzCLa68Adp", SpotifyID: "3iMi8ew4XvYCCcS9P2iARw"},
 	{Name: "funk", AppleMusicID: "p.O1kz7EoFVmvz704", SpotifyID: "1EDwymox6cXQlk7JGDMCbz"},
 	{Name: "old man", AppleMusicID: "p.V7VYVB0hZo53MQv", SpotifyID: "3fDlIqV43BvPvtPs9ASsgU"},
-	{Name: "quiet", AppleMusicID: "p.AWXoXbWfLrvpJlY", SpotifyID: "6ex8usE1U41m4wM6NwT9cg"},
+	{
+		Name:         "sleep in my arms",
+		AppleMusicID: "p.AWXoXbWfLrvpJlY",
+		SpotifyID:    "6ex8usE1U41m4wM6NwT9cg",
+		Private:      true,
+	},
 	// {Name: "rock", AppleMusicID: "p.qQXLxpDuA75zg8e", SpotifyID: "1Yh42cCAPWPFy55hw8VaWJ"},
 	{Name: "country", AppleMusicID: "p.O1kz7zbsVmvz704", SpotifyID: "3jR0MH0NwzEdYuUY8nohmf"},
 }

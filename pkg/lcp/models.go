@@ -37,6 +37,7 @@ type AppleMusicSyncedPlaylist struct {
 	AppleMusicID string `json:"apple_music_id"`
 	SpotifyID    string `json:"spotify_id"`
 	NoSync       bool   `json:"no_sync"`
+	Private      bool   `json:"private"`
 }
 
 type AppleMusicPlaylist struct {
