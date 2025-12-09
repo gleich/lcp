@@ -24,8 +24,13 @@ func FetchMap(client *http.Client, polyline string) ([]byte, error) {
 		width     = 462
 		height    = 252
 		style     = "mattgleich/clxxsfdfm002401qj7jcxh47e"
-		params    = url.Values{"access_token": {secrets.ENV.MapboxAccessToken}}
-		url       = fmt.Sprintf(
+		params    = url.Values{
+			"access_token": {secrets.ENV.MapboxAccessToken},
+			"padding":      {"25"},
+			"attribution":  {"false"},
+			"logo":         {"false"},
+		}
+		url = fmt.Sprintf(
 			"https://api.mapbox.com/styles/v1/%s/static/path-%f+%s(%s)/auto/%dx%d@2x?%s",
 			style,
 			lineWidth,
