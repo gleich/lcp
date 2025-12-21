@@ -33,7 +33,9 @@ func main() {
 		})
 	)
 
-	mux.HandleFunc("/", rootRedirect)
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "https://mattglei.ch/writing/lcp", http.StatusPermanentRedirect)
+	})
 	github.Setup(mux)
 	workouts.Setup(mux, &client, rdb)
 	steam.Setup(mux, &client, rdb)
@@ -60,8 +62,4 @@ func setupLogger() {
 	}
 	timber.Timezone(ny)
 	timber.TimeFormat("01/02 03:04:05 PM MST")
-}
-
-func rootRedirect(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, "https://mattglei.ch/writing/lcp", http.StatusPermanentRedirect)
 }
