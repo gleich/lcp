@@ -24,9 +24,9 @@ type AppleMusicSong struct {
 	Track              string  `json:"track"`
 	Artist             string  `json:"artist"`
 	DurationInMillis   int     `json:"duration_in_millis"`
-	AlbumArtURL        string  `json:"album_art_url"`
-	AlbumArtPreviewURL string  `json:"album_art_preview_url"`
-	AlbumArtBlurhash   string  `json:"album_art_blurhash"`
+	AlbumArtURL        *string `json:"album_art_url"`
+	AlbumArtPreviewURL *string `json:"album_art_preview_url"`
+	AlbumArtBlurhash   *string `json:"album_art_blurhash"`
 	URL                string  `json:"url"`
 	ID                 string  `json:"id"`
 	PreviewAudioURL    *string `json:"preview_audio_url"`

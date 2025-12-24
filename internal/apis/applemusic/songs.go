@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/redis/go-redis/v9"
-	"go.mattglei.ch/lcp/internal/cache"
 	"go.mattglei.ch/lcp/internal/images"
 	"go.mattglei.ch/lcp/pkg/lcp"
 	"go.mattglei.ch/timber"
@@ -49,13 +48,6 @@ func songFromSongResponse(
 	rdb *redis.Client,
 	s songResponse,
 ) (lcp.AppleMusicSong, error) {
-	if s.Attributes.Artwork.URL == "" {
-		timber.Warning(cacheInstance.LogPrefix(), "empty artwork url error")
-		timber.Warning("song ID: ", s.ID)
-		timber.Warning("song Name: ", s.Attributes.Name)
-		return lcp.AppleMusicSong{}, cache.ErrAppleMusicNoArtwork
-	}
-
 	if s.Attributes.URL == "" {
 		// remove special characters
 		slugURL := regexp.MustCompile(`[^\w\s-]`).ReplaceAllString(s.Attributes.Name, "")
@@ -77,16 +69,23 @@ func songFromSongResponse(
 		s.Attributes.URL = u
 	}
 
-	artURL := albumArtURL(s, 600.0)
+	var (
+		artURL           *string
+		albumArtBlurhash *string
+	)
+	artURL = albumArtURL(s, 600.0)
 	id := s.ID
 	if s.Attributes.PlayParams.CatalogID != "" {
 		id = s.Attributes.PlayParams.CatalogID
 	}
-	blurhash, err := images.BlurHash(client, rdb, artURL, jpeg.Decode)
-	if err != nil && strings.Contains(err.Error(), "unexpected EOF") {
-		timber.Warning("failed to create blur hash for", albumArtURL)
-	} else if err != nil {
-		return lcp.AppleMusicSong{}, fmt.Errorf("%w failed to get blur hash for %s: \"%s\"", err, id, s.Attributes.Name)
+	if s.Attributes.Artwork.URL != "" {
+		blurhash, err := images.BlurHash(client, rdb, *artURL, jpeg.Decode)
+		if err != nil && strings.Contains(err.Error(), "unexpected EOF") {
+			timber.Warning("failed to create blur hash for", albumArtURL)
+		} else if err != nil {
+			return lcp.AppleMusicSong{}, fmt.Errorf("%w failed to get blur hash for %s: \"%s\"", err, id, s.Attributes.Name)
+		}
+		albumArtBlurhash = &blurhash
 	}
 
 	var previewAudioURL *string = nil
@@ -100,17 +99,21 @@ func songFromSongResponse(
 		DurationInMillis:   s.Attributes.DurationInMillis,
 		AlbumArtURL:        artURL,
 		AlbumArtPreviewURL: albumArtURL(s, 300.0),
-		AlbumArtBlurhash:   blurhash,
+		AlbumArtBlurhash:   albumArtBlurhash,
 		URL:                s.Attributes.URL,
 		ID:                 id,
 		PreviewAudioURL:    previewAudioURL,
 	}, nil
 }
 
-func albumArtURL(s songResponse, max float64) string {
-	return strings.ReplaceAll(strings.ReplaceAll(
+func albumArtURL(s songResponse, max float64) *string {
+	if s.Attributes.Artwork.URL == "" {
+		return nil
+	}
+	url := strings.ReplaceAll(strings.ReplaceAll(
 		s.Attributes.Artwork.URL,
 		"{w}",
 		strconv.Itoa(int(math.Min(float64(s.Attributes.Artwork.Width), max))),
 	), "{h}bb", strconv.Itoa(int(math.Min(float64(s.Attributes.Artwork.Height), max))))
+	return &url
 }
