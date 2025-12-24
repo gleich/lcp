@@ -89,7 +89,7 @@ func FetchLocation(client *http.Client, workout lcp.Workout) (*string, error) {
 	} else if components.Village != "" {
 		location = fmt.Sprintf("%s, %s", components.Village, components.State)
 	} else {
-		timber.Warning("unable to create location for", workout.Name, fmt.Sprintf("(%f, %f)", latitude, longitude))
+		timber.Warningf("unable to create location for %s (%f %f)", workout.Name, latitude, longitude)
 		return nil, nil
 	}
 

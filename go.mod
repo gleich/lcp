@@ -10,7 +10,7 @@ require (
 	github.com/minio/minio-go/v7 v7.0.97
 	github.com/redis/go-redis/v9 v9.17.2
 	github.com/shurcooL/githubv4 v0.0.0-20240727222349-48295856cce7
-	go.mattglei.ch/timber v1.4.0
+	go.mattglei.ch/timber v1.5.1
 	golang.org/x/oauth2 v0.34.0
 )
 
