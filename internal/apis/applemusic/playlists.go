@@ -14,7 +14,7 @@ import (
 )
 
 var playlists = []lcp.AppleMusicSyncedPlaylist{
-	{Name: "christmas", AppleMusicID: "p.QvDQEebsVbAeokL", SpotifyID: "4sxPVSb9VcA4RQOY7lKQxI"},
+	// {Name: "christmas", AppleMusicID: "p.QvDQEebsVbAeokL", SpotifyID: "4sxPVSb9VcA4RQOY7lKQxI"},
 	// {
 	// 	Name:         "friendsgiving",
 	// 	AppleMusicID: "p.gek1krvFLa68Adp",
