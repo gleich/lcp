@@ -1,11 +1,13 @@
 package cache
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
 
 	"go.mattglei.ch/lcp/internal/auth"
+	"go.mattglei.ch/lcp/internal/util"
 	"go.mattglei.ch/timber"
 )
 
@@ -25,15 +27,19 @@ func (c *Cache[T]) Serve(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	c.Mutex.RLock()
+	defer c.Mutex.RUnlock()
 	data, err := c.MarshalResponse(c)
 	if err != nil {
-		errorResponse(w, err, "failed to create endpoint data")
+		err = fmt.Errorf("creating endpoint data: %w", err)
+		util.InternalServerError(w, err)
+		return
 	}
 	_, err = w.Write([]byte(data))
 	if err != nil {
-		errorResponse(w, err, "failed to write data to request")
+		err = fmt.Errorf("writing data to request: %w", err)
+		util.InternalServerError(w, err)
+		return
 	}
-	c.Mutex.RUnlock()
 }
 
 func (c *Cache[T]) ServeStream(w http.ResponseWriter, r *http.Request) {
@@ -41,7 +47,8 @@ func (c *Cache[T]) ServeStream(w http.ResponseWriter, r *http.Request) {
 	if rc := http.NewResponseController(w); rc != nil {
 		err := rc.SetWriteDeadline(time.Time{})
 		if err != nil {
-			errorResponse(w, err, "failed to set write deadline to zero")
+			err = fmt.Errorf("setting writing deadline to zero: %w", err)
+			util.InternalServerError(w, err)
 			return
 		}
 	}
@@ -62,16 +69,16 @@ func (c *Cache[T]) ServeStream(w http.ResponseWriter, r *http.Request) {
 
 	flusher, ok := w.(http.Flusher)
 	if !ok {
-		msg := "failed to create flusher"
-		timber.ErrorMsg(msg)
-		http.Error(w, msg, http.StatusInternalServerError)
+		err := errors.New("creating flusher")
+		util.InternalServerError(w, err)
 		return
 	}
 
 	// telling client how long to wait before reconnecting
 	_, err := w.Write([]byte("retry: 5000\n\n"))
 	if err != nil {
-		errorResponse(w, err, "failed to write retry information")
+		err = fmt.Errorf("writing retry information: %w", err)
+		util.InternalServerError(w, err)
 		return
 	}
 	flusher.Flush()
@@ -99,7 +106,8 @@ func (c *Cache[T]) ServeStream(w http.ResponseWriter, r *http.Request) {
 		case <-ticker.C:
 			_, err := fmt.Fprintf(w, ": heartbeat\n\n")
 			if err != nil {
-				errorResponse(w, err, "failed to write heartbeat")
+				err = fmt.Errorf("writing retry information: %w", err)
+				util.InternalServerError(w, err)
 				return
 			}
 			flusher.Flush()
@@ -109,16 +117,11 @@ func (c *Cache[T]) ServeStream(w http.ResponseWriter, r *http.Request) {
 			}
 			_, err = fmt.Fprintf(w, "event: message\ndata: %s\n\n", frame)
 			if err != nil {
-				errorResponse(w, err, "failed to write data")
+				err = fmt.Errorf("writing data: %w", err)
+				util.InternalServerError(w, err)
 				return
 			}
 			flusher.Flush()
 		}
 	}
-}
-
-func errorResponse(w http.ResponseWriter, err error, msg string) {
-	err = fmt.Errorf("%w %s", err, msg)
-	timber.Error(err)
-	http.Error(w, err.Error(), http.StatusInternalServerError)
 }

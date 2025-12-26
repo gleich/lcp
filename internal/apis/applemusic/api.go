@@ -17,14 +17,14 @@ func sendAppleMusicAPIRequest[T any](client *http.Client, path string) (T, error
 		nil,
 	)
 	if err != nil {
-		return zeroValue, fmt.Errorf("%w failed to create request", err)
+		return zeroValue, fmt.Errorf("creating request: %w", err)
 	}
 	req.Header.Set("Authorization", "Bearer "+secrets.ENV.AppleMusicAppToken)
 	req.Header.Set("Music-User-Token", secrets.ENV.AppleMusicUserToken)
 
 	resp, err := apis.RequestJSON[T](cacheInstance.LogPrefix(), client, req)
 	if err != nil {
-		return zeroValue, fmt.Errorf("%w failed to make apple music API request", err)
+		return zeroValue, fmt.Errorf("making apple music API request: %w", err)
 	}
 	return resp, nil
 }

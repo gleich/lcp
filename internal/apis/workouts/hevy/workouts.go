@@ -25,7 +25,7 @@ type workoutsResponse struct {
 func FetchWorkouts(client *http.Client) ([]lcp.Workout, error) {
 	workouts, err := sendHevyAPIRequest[workoutsResponse](client, "/v1/workouts")
 	if err != nil {
-		return []lcp.Workout{}, fmt.Errorf("%w failed to fetch hevy workouts", err)
+		return []lcp.Workout{}, fmt.Errorf("fetch hevy workouts: %w", err)
 	}
 
 	bodyWeightExercises := []string{

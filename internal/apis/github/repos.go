@@ -52,7 +52,7 @@ func fetchPinnedRepos(client *githubv4.Client) ([]lcp.GitHubRepository, error) {
 		return []lcp.GitHubRepository{}, apis.ErrWarning
 	}
 	if err != nil {
-		return nil, fmt.Errorf("%w querying github's graphql API failed", err)
+		return nil, fmt.Errorf("querying github's graphql API: %w", err)
 	}
 
 	var repositories []lcp.GitHubRepository

@@ -2,6 +2,7 @@ package strava
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 
@@ -37,6 +38,7 @@ func EventRoute(
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
+			err = errors.Join(err, r.Body.Close())
 			timber.Error(err, "reading response body failed")
 			return
 		}
@@ -60,7 +62,7 @@ func EventRoute(
 
 		err = tokens.RefreshIfExpired(client)
 		if err != nil {
-			timber.Error(err)
+			timber.Error(err, "failed to refresh token")
 			return
 		}
 

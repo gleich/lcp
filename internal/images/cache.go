@@ -9,6 +9,7 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"go.mattglei.ch/lcp/internal/apis"
+	"go.mattglei.ch/timber"
 )
 
 type cacheEntry struct {
@@ -30,17 +31,18 @@ func BlurHash(
 	if err == redis.Nil {
 		blurhash, err := createCacheEntry(client, rdb, url, decoder, ctx)
 		if err != nil {
-			return "", fmt.Errorf("%w failed to generate blurhash for %s", err, url)
+			return "", fmt.Errorf("generating blurhash for %s: %w", url, err)
 		}
 		return blurhash, nil
 	} else if err != nil {
-		return "", fmt.Errorf("%w failed to get %s from redis cache", err, url)
+		return "", fmt.Errorf("getting %s from redis cache: %w", url, err)
 	}
 
 	var cachedBlurhash *cacheEntry
 	err = json.Unmarshal([]byte(result), &cachedBlurhash)
 	if err != nil {
-		return "", fmt.Errorf("%w failed to parse JSON for blurhash from \"%s\"", err, result)
+		timber.Debug(result)
+		return "", fmt.Errorf("parsing json for blurhash: %w", err)
 	}
 	return cachedBlurhash.BlurHash, nil
 }
@@ -56,7 +58,7 @@ func createCacheEntry(
 ) (string, error) {
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		return "", fmt.Errorf("%w failed to create request for %s", err, url)
+		return "", fmt.Errorf("creating request: %w", err)
 	}
 	req.Header.Set(
 		"User-Agent",
@@ -65,12 +67,12 @@ func createCacheEntry(
 
 	body, err := apis.Request("[image cache]", client, req)
 	if err != nil {
-		return "", fmt.Errorf("%w failed to read response body from request", err)
+		return "", fmt.Errorf("reading response body: %w", err)
 	}
 
 	blurhash, err := blur(body, decoder)
 	if err != nil {
-		return "", fmt.Errorf("%w failed to blur image", err)
+		return "", fmt.Errorf("blurring image: %w", err)
 	}
 
 	cacheData, err := json.Marshal(cacheEntry{
@@ -79,14 +81,14 @@ func createCacheEntry(
 		URL:      url,
 	})
 	if err != nil {
-		return "", fmt.Errorf("%v failed to marshal cache data", err)
+		return "", fmt.Errorf("marshaling cache json data: %w", err)
 	}
 
 	// approximately a 1 week long cache lifetime
 	err = rdb.Set(ctx, url, string(cacheData), 168*time.Hour).
 		Err()
 	if err != nil {
-		return "", fmt.Errorf("%v failed to set %s to %s", err, url, string(cacheData))
+		return "", fmt.Errorf("setting value for %s in redis: %w", url, err)
 	}
 	return blurhash, nil
 }

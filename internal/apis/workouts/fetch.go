@@ -71,9 +71,10 @@ func fetch(
 		details, err := strava.FetchActivityDetails(client, activity.ID, stravaTokens)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"%w failed to fetch activity details for activity with ID of %s",
-				err,
+				"fetching activity details (id: %s, name: %s): %w",
 				activity.ID,
+				activity.Name,
+				err,
 			)
 		}
 		activity.Calories = details.Calories
@@ -81,9 +82,10 @@ func fetch(
 		heartrateStream, err := strava.FetchHeartrate(client, activity.ID, stravaTokens)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"%w failed to fetch HR data for activity with ID of %s",
-				err,
+				"fetching HR data for activity (id: %s, name: %s): %w",
 				activity.ID,
+				activity.Name,
+				err,
 			)
 		}
 		activity.HeartrateData = heartrateStream
@@ -103,7 +105,7 @@ func fetch(
 			)
 			mapBlurHash, err := images.BlurHash(client, rdb, imgURL, png.Decode)
 			if err != nil {
-				return nil, fmt.Errorf("%w failed to create blur hash for image", err)
+				return nil, fmt.Errorf("creating blurhash for map: %w", err)
 			}
 			activity.MapBlurImage = &mapBlurHash
 			activity.MapImageURL = &imgURL
@@ -111,9 +113,10 @@ func fetch(
 			location, err := strava.FetchLocation(client, *activity)
 			if err != nil {
 				return nil, fmt.Errorf(
-					"%w failed to fetch location data for %s",
-					err,
+					"fetching location data (id: %s, name: %s): %w",
+					activity.ID,
 					activity.Name,
+					err,
 				)
 			}
 			activity.Location = location
@@ -122,7 +125,7 @@ func fetch(
 
 	err = strava.RemoveOldMaps(minioClient, activities)
 	if err != nil {
-		return nil, fmt.Errorf("%w failed to remove old maps", err)
+		return nil, fmt.Errorf("removing old map images: %w", err)
 	}
 
 	return activities, nil

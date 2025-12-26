@@ -12,7 +12,6 @@ import (
 	"go.mattglei.ch/lcp/internal/apis"
 	"go.mattglei.ch/lcp/internal/secrets"
 	"go.mattglei.ch/lcp/pkg/lcp"
-	"go.mattglei.ch/timber"
 )
 
 const bucketName = "mapbox-maps"
@@ -44,13 +43,12 @@ func FetchMap(client *http.Client, polyline string) ([]byte, error) {
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		return nil, fmt.Errorf("%w failed to create get request to %s", err, url)
+		return nil, fmt.Errorf("creating request (url: %s): %w", url, err)
 	}
 
 	b, err := apis.Request(logPrefix, client, req)
 	if err != nil {
-		timber.Error(err, "failed to send request to", url)
-		return nil, fmt.Errorf("%w failed to send request to %s", err, url)
+		return nil, fmt.Errorf("sending request: %w", err)
 	}
 
 	return b, nil
@@ -71,7 +69,7 @@ func UploadMap(minioClient *minio.Client, id string, data []byte) error {
 		minio.PutObjectOptions{ContentType: "image/png"},
 	)
 	if err != nil {
-		return fmt.Errorf("%w failed to upload to minio", err)
+		return fmt.Errorf("uploading to minio: %w", err)
 	}
 	return nil
 }
@@ -85,7 +83,7 @@ func RemoveOldMaps(minioClient *minio.Client, workouts []lcp.Workout) error {
 	objects := minioClient.ListObjects(context.Background(), bucketName, minio.ListObjectsOptions{})
 	for object := range objects {
 		if object.Err != nil {
-			return fmt.Errorf("%w failed to load object", object.Err)
+			return fmt.Errorf("loading minio objects: %w", object.Err)
 		}
 		if !slices.Contains(validKeys, object.Key) {
 			err := minioClient.RemoveObject(
@@ -95,7 +93,7 @@ func RemoveOldMaps(minioClient *minio.Client, workouts []lcp.Workout) error {
 				minio.RemoveObjectOptions{},
 			)
 			if err != nil {
-				return fmt.Errorf("%w failed to remove object", err)
+				return fmt.Errorf("removing minio object: %w", err)
 			}
 		}
 	}

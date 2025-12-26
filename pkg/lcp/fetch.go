@@ -29,34 +29,35 @@ func fetch[T any](client *Client, path string) (T, error) {
 
 	url, err := url.JoinPath("https://lcp.mattglei.ch", path)
 	if err != nil {
-		return zeroValue, fmt.Errorf("%w failed to join url", err)
+		return zeroValue, fmt.Errorf("joining url: %w", err)
 	}
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		return zeroValue, fmt.Errorf("%w failed to create request", err)
+		return zeroValue, fmt.Errorf("creating request: %w", err)
 	}
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", client.Token))
 
 	resp, err := client.httpClient.Do(req)
 	if err != nil {
-		return zeroValue, fmt.Errorf("%w failed to execute request", err)
+		return zeroValue, fmt.Errorf("making requet: %w", err)
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return zeroValue, fmt.Errorf("%w reading request body failed", err)
+		err = errors.Join(err, resp.Body.Close())
+		return zeroValue, fmt.Errorf("reading request body: %w", err)
 	}
 
 	err = resp.Body.Close()
 	if err != nil {
-		return zeroValue, fmt.Errorf("%w failed to close response body", err)
+		return zeroValue, fmt.Errorf("closing request body: %w", err)
 	}
 
 	var response T
 	err = json.Unmarshal(body, &response)
 	if err != nil {
-		return zeroValue, fmt.Errorf("%w failed to parse json", err)
+		return zeroValue, fmt.Errorf("parsing json: %w", err)
 	}
 
 	return response, nil

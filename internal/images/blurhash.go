@@ -17,25 +17,25 @@ func blur(data []byte, decoder ImageDecoder) (string, error) {
 	reader := bytes.NewReader(data)
 	parsedImage, err := decoder(reader)
 	if err != nil {
-		return "", fmt.Errorf("%w decoding image failed", err)
+		return "", fmt.Errorf("decoding image failed: %w", err)
 	}
 
 	width := parsedImage.Bounds().Dx()
 	height := parsedImage.Bounds().Dy()
 	blurData, err := blurhash.Encode(4, 3, parsedImage)
 	if err != nil {
-		return "", fmt.Errorf("%w encoding image into blurhash failed", err)
+		return "", fmt.Errorf("encoding image into blurhash: %w", err)
 	}
 
 	scaleDownFactor := 25
 	blurImage, err := blurhash.Decode(blurData, width/scaleDownFactor, height/scaleDownFactor, 1)
 	if err != nil {
-		return "", fmt.Errorf("%w decoding blurhash data into img failed", err)
+		return "", fmt.Errorf("decoding blurhash data into image: %w", err)
 	}
 	blurImageBuffer := new(bytes.Buffer)
 	err = png.Encode(blurImageBuffer, blurImage)
 	if err != nil {
-		return "", fmt.Errorf("%w creating png based off blurred image failed", err)
+		return "", fmt.Errorf("creating png based on blurred image: %w", err)
 	}
 	return fmt.Sprintf(
 		"data:image/png;base64,%s",

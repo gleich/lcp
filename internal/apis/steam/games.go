@@ -40,7 +40,7 @@ func fetchRecentlyPlayedGames(client *http.Client, rdb *redis.Client) ([]lcp.Ste
 		nil,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("%w failed to create request for steam API owned games", err)
+		return nil, fmt.Errorf("creating request for steam API owned games: %w", err)
 	}
 	ownedGames, err := apis.RequestJSON[ownedGamesResponse](
 		cacheInstance.LogPrefix(),
@@ -48,7 +48,7 @@ func fetchRecentlyPlayedGames(client *http.Client, rdb *redis.Client) ([]lcp.Ste
 		req,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("%w sending request for owned games failed", err)
+		return nil, fmt.Errorf("sending request for owned games: %w", err)
 	}
 
 	sort.Slice(ownedGames.Response.Games, func(i, j int) bool {
@@ -72,7 +72,7 @@ func fetchRecentlyPlayedGames(client *http.Client, rdb *redis.Client) ([]lcp.Ste
 		)
 		headerBlurHash, err := images.BlurHash(client, rdb, headerURL, jpeg.Decode)
 		if err != nil {
-			return nil, fmt.Errorf("%w failed to load blurhash image data for library hero", err)
+			return nil, fmt.Errorf("loading blurhash image data for library hero: %w", err)
 		}
 
 		games = append(games, lcp.SteamGame{

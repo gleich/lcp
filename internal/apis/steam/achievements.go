@@ -56,16 +56,12 @@ func fetchAchievementsPercentage(
 		nil,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("%w failed to create request for player achievements", err)
+		return nil, fmt.Errorf("creating request for player achievements: %w", err)
 	}
 
 	body, err := apis.Request(cacheInstance.LogPrefix(), client, req)
 	if err != nil {
-		return nil, fmt.Errorf(
-			"%v sending request for player achievements from %d failed",
-			err,
-			appID,
-		)
+		return nil, fmt.Errorf("sending request for player achievements from %d: %w", appID, err)
 	}
 
 	if string(body) == `{"playerstats":{"error":"Requested app has no stats","success":false}}` {
@@ -75,7 +71,7 @@ func fetchAchievementsPercentage(
 	var playerAchievements playerAchievementsResponse
 	err = json.Unmarshal(body, &playerAchievements)
 	if err != nil {
-		err = fmt.Errorf("%w failed to parse json for player achievements for %d", err, appID)
+		err = fmt.Errorf("parsing json for player achievements (id: %d): %w", appID, err)
 		timber.Debug("body:", string(body))
 		return nil, err
 	}
@@ -95,15 +91,11 @@ func fetchAchievementsPercentage(
 		nil,
 	)
 	if err != nil {
-		return nil, fmt.Errorf(
-			"%v creating request for owned games failed for app id: %d",
-			err,
-			appID,
-		)
+		return nil, fmt.Errorf("creating request for owned gamed (id: %d): %w", appID, err)
 	}
 	gameSchema, err := apis.RequestJSON[schemaGameResponse](cacheInstance.LogPrefix(), client, req)
 	if err != nil {
-		return nil, fmt.Errorf("%w failed to get game schema for app id: %d", err, appID)
+		return nil, fmt.Errorf("getting game schema (id: %d): %w", appID, err)
 	}
 
 	var achievements []achievement

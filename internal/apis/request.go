@@ -24,6 +24,7 @@ var ErrWarning = errors.New("non-critical error encountered during request")
 // unexpected EOFs, and TCP connection resets—by logging warnings and returning a non-critical
 // WarningError. Non-2xx HTTP responses are also treated as warnings.
 func Request(logPrefix string, client *http.Client, request *http.Request) ([]byte, error) {
+	url := request.URL.String()
 	path := request.URL.Path
 	resp, err := client.Do(request)
 	if err != nil {
@@ -43,7 +44,7 @@ func Request(logPrefix string, client *http.Client, request *http.Request) ([]by
 			timber.Warning(logPrefix, "tcp connection reset by peer from", path)
 			return []byte{}, ErrWarning
 		}
-		return []byte{}, fmt.Errorf("%w sending request to %s failed", err, path)
+		return []byte{}, fmt.Errorf("sending request to %s: %w", url, err)
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
@@ -56,21 +57,23 @@ func Request(logPrefix string, client *http.Client, request *http.Request) ([]by
 		)
 		return []byte{}, ErrWarning
 	} else if resp.StatusCode == http.StatusNoContent {
-		return []byte{}, fmt.Errorf("%d status no content returned when content is expected", resp.StatusCode)
+		return []byte{}, fmt.Errorf("%d status no content returned when content is expected from %s", resp.StatusCode, url)
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
+		// make sure to close the body before we return
+		err = errors.Join(err, resp.Body.Close())
 		if errors.Is(err, io.ErrUnexpectedEOF) {
 			timber.Warning(logPrefix, "unexpected EOF while reading body from", path)
 			return []byte{}, ErrWarning
 		}
-		return []byte{}, fmt.Errorf("%w reading response body failed", err)
+		return []byte{}, fmt.Errorf("reading response body for %s: %w", url, err)
 	}
 
 	err = resp.Body.Close()
 	if err != nil {
-		return []byte{}, fmt.Errorf("%w failed to close response body", err)
+		return []byte{}, fmt.Errorf("closing response body for %s: %w", url, err)
 	}
 
 	return body, nil
@@ -91,7 +94,7 @@ func RequestJSON[T any](logPrefix string, client *http.Client, request *http.Req
 	err = json.Unmarshal(body, &data)
 	if err != nil {
 		timber.Debug(string(body))
-		return data, fmt.Errorf("%w failed to parse json", err)
+		return data, fmt.Errorf("parsing json from %s: %w", request.URL.String(), err)
 	}
 
 	return data, nil

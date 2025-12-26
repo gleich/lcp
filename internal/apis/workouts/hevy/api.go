@@ -17,13 +17,13 @@ func sendHevyAPIRequest[T any](client *http.Client, path string) (T, error) {
 		nil,
 	)
 	if err != nil {
-		return zeroValue, fmt.Errorf("%w failed to create request", err)
+		return zeroValue, fmt.Errorf("creating request: %w", err)
 	}
 	req.Header.Set("api-key", secrets.ENV.HevyAccessToken)
 
 	resp, err := apis.RequestJSON[T]("[hevy]", client, req)
 	if err != nil {
-		return zeroValue, fmt.Errorf("%w failed to make hevy API request", err)
+		return zeroValue, fmt.Errorf("making hevy api request: %w", err)
 	}
 	return resp, nil
 }

@@ -46,12 +46,12 @@ func FetchLocation(client *http.Client, workout lcp.Workout) (*string, error) {
 		nil,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("%w failed to create request for location", err)
+		return nil, fmt.Errorf("creating request for location: %w", err)
 	}
 
 	resp, err := apis.RequestJSON[locationResponse](logPrefix, client, req)
 	if err != nil {
-		return nil, fmt.Errorf("%w failed to send request for location data", err)
+		return nil, fmt.Errorf("sending request for location: %w", err)
 	}
 
 	if len(resp.Results) == 0 {

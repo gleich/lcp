@@ -9,8 +9,8 @@ import (
 	"github.com/redis/go-redis/v9"
 	"go.mattglei.ch/lcp/internal/auth"
 	"go.mattglei.ch/lcp/internal/cache"
+	"go.mattglei.ch/lcp/internal/util"
 	"go.mattglei.ch/lcp/pkg/lcp"
-	"go.mattglei.ch/timber"
 )
 
 var playlists = []lcp.AppleMusicSyncedPlaylist{
@@ -41,7 +41,7 @@ var playlists = []lcp.AppleMusicSyncedPlaylist{
 	{Name: "house", AppleMusicID: "p.gek1EWzCLa68Adp", SpotifyID: "3iMi8ew4XvYCCcS9P2iARw"},
 	{Name: "funk", AppleMusicID: "p.O1kz7EoFVmvz704", SpotifyID: "1EDwymox6cXQlk7JGDMCbz"},
 	{Name: "old man", AppleMusicID: "p.V7VYVB0hZo53MQv", SpotifyID: "3fDlIqV43BvPvtPs9ASsgU"},
-{Name: "country", AppleMusicID: "p.O1kz7zbsVmvz704", SpotifyID: "3jR0MH0NwzEdYuUY8nohmf"},
+	{Name: "country", AppleMusicID: "p.O1kz7zbsVmvz704", SpotifyID: "3jR0MH0NwzEdYuUY8nohmf"},
 
 	// private playlists
 	{
@@ -87,9 +87,9 @@ func fetchPlaylist(
 	)
 	if err != nil {
 		return lcp.AppleMusicPlaylist{}, fmt.Errorf(
-			"%w failed to fetch playlist for %s",
-			err,
+			"fetching %s playlist: %w",
 			playlist.AppleMusicID,
+			err,
 		)
 	}
 
@@ -99,16 +99,16 @@ func fetchPlaylist(
 		trackData, err := sendAppleMusicAPIRequest[playlistTracksResponse](client, path)
 		if err != nil {
 			return lcp.AppleMusicPlaylist{}, fmt.Errorf(
-				"%w failed to fetch playlist data for %s",
-				err,
+				"fetching playlist data for %s: %w",
 				path,
+				err,
 			)
 		}
 		for _, track := range trackData.Data {
 			song, err := songFromSongResponse(client, rdb, track)
 			if err != nil {
 				return lcp.AppleMusicPlaylist{}, fmt.Errorf(
-					"%w failed create song from apple music song response",
+					"creating song from apple music song response: %w",
 					err,
 				)
 			}
@@ -142,9 +142,8 @@ func syncedPlaylistsEndpoint() http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json")
 		err := json.NewEncoder(w).Encode(playlists)
 		if err != nil {
-			err = fmt.Errorf("%w failed to write json data to request", err)
-			timber.Error(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			err = fmt.Errorf("writing json to request: %w", err)
+			util.InternalServerError(w, err)
 		}
 	})
 }
@@ -175,9 +174,8 @@ func playlistEndpoint(c *cache.Cache[lcp.AppleMusicCache]) http.HandlerFunc {
 		err := json.NewEncoder(w).Encode(p)
 		c.Mutex.RUnlock()
 		if err != nil {
-			err = fmt.Errorf("%w failed to write json data to request", err)
-			timber.Error(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			err = fmt.Errorf("writing json to request: %w", err)
+			util.InternalServerError(w, err)
 		}
 	})
 }

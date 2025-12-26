@@ -85,7 +85,7 @@ func MarshalResponse(
 
 	data, err := json.Marshal(response)
 	if err != nil {
-		return "", fmt.Errorf("%w failed to json encode data", err)
+		return "", fmt.Errorf("encoding json data: %w", err)
 	}
 	return string(data), nil
 }

@@ -44,12 +44,12 @@ func (t *Tokens) RefreshIfExpired(client *http.Client) error {
 		nil,
 	)
 	if err != nil {
-		return fmt.Errorf("%w creating request for new token failed", err)
+		return fmt.Errorf("creating request for new token: %w", err)
 	}
 
 	tokens, err := apis.RequestJSON[Tokens](logPrefix, client, req)
 	if err != nil {
-		return fmt.Errorf("%w failed to fetch refresh tokens", err)
+		return fmt.Errorf("making request for refresh tokens: %w", err)
 	}
 
 	*t = tokens

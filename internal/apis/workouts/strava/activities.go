@@ -63,7 +63,7 @@ func FetchActivities(
 		tokens,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("%w failed to send request to Strava API to get activities", err)
+		return nil, fmt.Errorf("sending request for activities: %w", err)
 	}
 
 	var activities []lcp.Workout
@@ -105,11 +105,7 @@ func FetchHeartrate(client *http.Client, id string, tokens Tokens) ([]int, error
 		tokens,
 	)
 	if err != nil {
-		return []int{}, fmt.Errorf(
-			"%v failed to send request for HR data from activity with ID of %s",
-			err,
-			id,
-		)
+		return []int{}, fmt.Errorf("sending request for HR data for activity (id: %s): %w", id, err)
 	}
 
 	return stream.Heartrate.Data, nil
@@ -127,9 +123,9 @@ func FetchActivityDetails(
 	)
 	if err != nil {
 		return detailedStravaActivity{}, fmt.Errorf(
-			"%v failed to request detailed activity data for %s",
-			err,
+			"requesting detailed activity data (id: %s): %w",
 			id,
+			err,
 		)
 	}
 

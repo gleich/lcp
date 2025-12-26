@@ -29,6 +29,12 @@ func (c *Cache[T]) persistToFile() {
 			return
 		}
 	}
+	defer func() {
+		err := file.Close()
+		if err != nil {
+			timber.Error(err, "failed to close file")
+		}
+	}()
 
 	c.Mutex.RLock()
 	bin, err := json.Marshal(Response[T]{
@@ -45,10 +51,6 @@ func (c *Cache[T]) persistToFile() {
 		timber.Error(err, "writing data to json failed")
 	}
 
-	err = file.Close()
-	if err != nil {
-		timber.Error(err, "failed to close file")
-	}
 }
 
 func (c *Cache[T]) loadFromFile() {

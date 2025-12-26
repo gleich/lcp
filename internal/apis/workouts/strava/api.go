@@ -17,13 +17,13 @@ func sendStravaAPIRequest[T any](client *http.Client, path string, tokens Tokens
 		nil,
 	)
 	if err != nil {
-		return zeroValue, fmt.Errorf("%w failed to create request", err)
+		return zeroValue, fmt.Errorf("creating request: %w", err)
 	}
 	req.Header.Set("Authorization", "Bearer "+tokens.Access)
 
 	resp, err := apis.RequestJSON[T](logPrefix, client, req)
 	if err != nil {
-		return zeroValue, fmt.Errorf("%w failed to make strava API request", err)
+		return zeroValue, fmt.Errorf("making strava api request: %w", err)
 	}
 	return resp, nil
 }
