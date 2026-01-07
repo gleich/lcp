@@ -51,6 +51,12 @@ var playlists = []lcp.AppleMusicSyncedPlaylist{
 		Private:      true,
 	},
 	{
+		Name:         "pb",
+		AppleMusicID: "p.PkxVxzYF2zv9xE8",
+		SpotifyID:    "6DZUHbgcvHDlpEVjYndrQ0",
+		Private:      true,
+	},
+	{
 		Name:         "x",
 		AppleMusicID: "p.PkxVx6ki2zv9xE8",
 		SpotifyID:    "66dbgoThL7wf2IYiLtyhCA",
