@@ -15,7 +15,13 @@ import (
 )
 
 func main() {
-	setupLogger()
+	ny, err := time.LoadLocation("America/New_York")
+	if err != nil {
+		timber.Fatal(err, "failed to load new york timezone")
+	}
+	timber.Timezone(ny)
+	timber.TimeFormat("01/02 03:04:05 PM MST")
+
 	timber.Info("booted")
 
 	secrets.Load()
@@ -49,17 +55,8 @@ func main() {
 		WriteTimeout: 20 * time.Second,
 		IdleTimeout:  60 * time.Second,
 	}
-	err := server.ListenAndServe()
+	server.ListenAndServe()
 	if err != nil {
 		timber.Fatal(err, "failed to start router")
 	}
-}
-
-func setupLogger() {
-	ny, err := time.LoadLocation("America/New_York")
-	if err != nil {
-		timber.Fatal(err, "failed to load new york timezone")
-	}
-	timber.Timezone(ny)
-	timber.TimeFormat("01/02 03:04:05 PM MST")
 }
