@@ -32,6 +32,7 @@ var playlists = []lcp.AppleMusicSyncedPlaylist{
 	{Name: "classics", AppleMusicID: "p.gek1E8efLa68Adp", SpotifyID: "2HYOAlwB570McLyD3nIJKG"},
 	{Name: "80s", AppleMusicID: "p.qQXLxPLtA75zg8e", SpotifyID: "1DB0cG12kphRKvNzKPGmpf"},
 	{Name: "alt", AppleMusicID: "p.AWXoXPYSLrvpJlY", SpotifyID: "7tN57nLbiiw4bliUyw2oYL"},
+	{Name: "dirty martini", AppleMusicID: "p.ZOAXxOXI4KMD6ob", SpotifyID: "0n3R3PVVN8uxEymeqk0xOm"},
 	{
 		Name:         "divorced dad",
 		AppleMusicID: "p.LV0PXNoCl0EpDLW",
