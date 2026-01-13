@@ -55,7 +55,7 @@ func main() {
 		WriteTimeout: 20 * time.Second,
 		IdleTimeout:  60 * time.Second,
 	}
-	server.ListenAndServe()
+	err = server.ListenAndServe()
 	if err != nil {
 		timber.Fatal(err, "failed to start router")
 	}
