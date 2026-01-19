@@ -43,10 +43,9 @@ type songResponse struct {
 	} `json:"attributes"`
 }
 
-func songFromSongResponse(
+func (s songResponse) ToAppleMusicSong(
 	client *http.Client,
 	rdb *redis.Client,
-	s songResponse,
 ) (lcp.AppleMusicSong, error) {
 	if s.Attributes.URL == "" {
 		// remove special characters

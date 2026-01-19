@@ -112,7 +112,7 @@ func fetchPlaylist(
 			)
 		}
 		for _, track := range trackData.Data {
-			song, err := songFromSongResponse(client, rdb, track)
+			song, err := track.ToAppleMusicSong(client, rdb)
 			if err != nil {
 				return lcp.AppleMusicPlaylist{}, fmt.Errorf(
 					"creating song from apple music song response: %w",

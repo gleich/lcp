@@ -26,7 +26,7 @@ func fetchRecentlyPlayed(
 
 	var songs []lcp.AppleMusicSong
 	for _, s := range response.Data {
-		so, err := songFromSongResponse(client, rdb, s)
+		so, err := s.ToAppleMusicSong(client, rdb)
 		if err != nil {
 			return []lcp.AppleMusicSong{}, fmt.Errorf(
 				"parsing song from song response: %w",
