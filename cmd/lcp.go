@@ -6,6 +6,7 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"github.com/redis/go-redis/v9/maintnotifications"
+	"go.mattglei.ch/lcp/internal/apis"
 	"go.mattglei.ch/lcp/internal/apis/applemusic"
 	"go.mattglei.ch/lcp/internal/apis/github"
 	"go.mattglei.ch/lcp/internal/apis/steam"
@@ -27,7 +28,7 @@ func main() {
 	secrets.Load()
 
 	var (
-		client = http.Client{Timeout: 20 * time.Second}
+		client = apis.IPV4OnlyClient()
 		mux    = http.NewServeMux()
 		rdb    = redis.NewClient(&redis.Options{
 			Addr:     secrets.ENV.RedisAddress,
@@ -43,9 +44,9 @@ func main() {
 		http.Redirect(w, r, "https://mattglei.ch/writing/lcp", http.StatusPermanentRedirect)
 	})
 	github.Setup(mux)
-	workouts.Setup(mux, &client, rdb)
-	steam.Setup(mux, &client, rdb)
-	applemusic.Setup(mux, &client, rdb)
+	workouts.Setup(mux, client, rdb)
+	steam.Setup(mux, client, rdb)
+	applemusic.Setup(mux, client, rdb)
 
 	timber.Info("starting server")
 	server := &http.Server{
