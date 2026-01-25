@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
-	"go.mattglei.ch/lcp/internal/apis"
+	"go.mattglei.ch/lcp/internal/api"
 	"go.mattglei.ch/lcp/internal/cache"
 	"go.mattglei.ch/lcp/internal/images"
 	"go.mattglei.ch/lcp/internal/secrets"
@@ -42,7 +42,7 @@ func fetchRecentlyPlayedGames(client *http.Client, rdb *redis.Client) ([]lcp.Ste
 	if err != nil {
 		return nil, fmt.Errorf("creating request for steam API owned games: %w", err)
 	}
-	ownedGames, err := apis.RequestJSON[ownedGamesResponse](
+	ownedGames, err := api.RequestJSON[ownedGamesResponse](
 		cacheInstance.LogPrefix(),
 		client,
 		req,

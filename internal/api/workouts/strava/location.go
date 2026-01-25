@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"strings"
 
-	"go.mattglei.ch/lcp/internal/apis"
+	"go.mattglei.ch/lcp/internal/api"
 	"go.mattglei.ch/lcp/internal/secrets"
 	"go.mattglei.ch/lcp/pkg/lcp"
 	"go.mattglei.ch/timber"
@@ -49,7 +49,7 @@ func FetchLocation(client *http.Client, workout lcp.Workout) (*string, error) {
 		return nil, fmt.Errorf("creating request for location: %w", err)
 	}
 
-	resp, err := apis.RequestJSON[locationResponse](logPrefix, client, req)
+	resp, err := api.RequestJSON[locationResponse](logPrefix, client, req)
 	if err != nil {
 		return nil, fmt.Errorf("sending request for location: %w", err)
 	}

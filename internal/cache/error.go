@@ -3,11 +3,11 @@ package cache
 import (
 	"errors"
 
-	"go.mattglei.ch/lcp/internal/apis"
+	"go.mattglei.ch/lcp/internal/api"
 )
 
 var ExpectedErrors = []error{
-	apis.ErrWarning,
+	api.ErrWarning,
 	ErrSteamOwnedGamesEmpty,
 }
 

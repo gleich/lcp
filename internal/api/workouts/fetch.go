@@ -9,8 +9,8 @@ import (
 
 	"github.com/minio/minio-go/v7"
 	"github.com/redis/go-redis/v9"
-	"go.mattglei.ch/lcp/internal/apis/workouts/hevy"
-	"go.mattglei.ch/lcp/internal/apis/workouts/strava"
+	"go.mattglei.ch/lcp/internal/api/workouts/hevy"
+	"go.mattglei.ch/lcp/internal/api/workouts/strava"
 	"go.mattglei.ch/lcp/internal/images"
 	"go.mattglei.ch/lcp/pkg/lcp"
 )

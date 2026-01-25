@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"strconv"
 
-	"go.mattglei.ch/lcp/internal/apis"
+	"go.mattglei.ch/lcp/internal/api"
 	"go.mattglei.ch/lcp/internal/secrets"
 	"go.mattglei.ch/timber"
 )
@@ -59,7 +59,7 @@ func fetchAchievementsPercentage(
 		return nil, fmt.Errorf("creating request for player achievements: %w", err)
 	}
 
-	body, err := apis.Request(cacheInstance.LogPrefix(), client, req)
+	body, err := api.Request(cacheInstance.LogPrefix(), client, req)
 	if err != nil {
 		return nil, fmt.Errorf("sending request for player achievements from %d: %w", appID, err)
 	}
@@ -93,7 +93,7 @@ func fetchAchievementsPercentage(
 	if err != nil {
 		return nil, fmt.Errorf("creating request for owned gamed (id: %d): %w", appID, err)
 	}
-	gameSchema, err := apis.RequestJSON[schemaGameResponse](cacheInstance.LogPrefix(), client, req)
+	gameSchema, err := api.RequestJSON[schemaGameResponse](cacheInstance.LogPrefix(), client, req)
 	if err != nil {
 		return nil, fmt.Errorf("getting game schema (id: %d): %w", appID, err)
 	}

@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"time"
 
-	"go.mattglei.ch/lcp/internal/apis"
+	"go.mattglei.ch/lcp/internal/api"
 	"go.mattglei.ch/lcp/internal/secrets"
 	"go.mattglei.ch/timber"
 )
@@ -47,7 +47,7 @@ func (t *Tokens) RefreshIfExpired(client *http.Client) error {
 		return fmt.Errorf("creating request for new token: %w", err)
 	}
 
-	tokens, err := apis.RequestJSON[Tokens](logPrefix, client, req)
+	tokens, err := api.RequestJSON[Tokens](logPrefix, client, req)
 	if err != nil {
 		return fmt.Errorf("making request for refresh tokens: %w", err)
 	}

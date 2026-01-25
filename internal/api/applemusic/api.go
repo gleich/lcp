@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"go.mattglei.ch/lcp/internal/apis"
+	"go.mattglei.ch/lcp/internal/api"
 	"go.mattglei.ch/lcp/internal/secrets"
 )
 
@@ -22,7 +22,7 @@ func sendAppleMusicAPIRequest[T any](client *http.Client, path string) (T, error
 	req.Header.Set("Authorization", "Bearer "+secrets.ENV.AppleMusicAppToken)
 	req.Header.Set("Music-User-Token", secrets.ENV.AppleMusicUserToken)
 
-	resp, err := apis.RequestJSON[T](cacheInstance.LogPrefix(), client, req)
+	resp, err := api.RequestJSON[T](cacheInstance.LogPrefix(), client, req)
 	if err != nil {
 		return zeroValue, fmt.Errorf("making apple music API request: %w", err)
 	}

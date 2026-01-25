@@ -6,11 +6,11 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"github.com/redis/go-redis/v9/maintnotifications"
-	"go.mattglei.ch/lcp/internal/apis"
-	"go.mattglei.ch/lcp/internal/apis/applemusic"
-	"go.mattglei.ch/lcp/internal/apis/github"
-	"go.mattglei.ch/lcp/internal/apis/steam"
-	"go.mattglei.ch/lcp/internal/apis/workouts"
+	"go.mattglei.ch/lcp/internal/api"
+	"go.mattglei.ch/lcp/internal/api/applemusic"
+	"go.mattglei.ch/lcp/internal/api/github"
+	"go.mattglei.ch/lcp/internal/api/steam"
+	"go.mattglei.ch/lcp/internal/api/workouts"
 	"go.mattglei.ch/lcp/internal/secrets"
 	"go.mattglei.ch/timber"
 )
@@ -28,7 +28,7 @@ func main() {
 	secrets.Load()
 
 	var (
-		client = apis.IPV4OnlyClient()
+		client = api.IPV4OnlyClient()
 		mux    = http.NewServeMux()
 		rdb    = redis.NewClient(&redis.Options{
 			Addr:     secrets.ENV.RedisAddress,

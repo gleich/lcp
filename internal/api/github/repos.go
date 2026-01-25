@@ -9,7 +9,7 @@ import (
 	"syscall"
 
 	"github.com/shurcooL/githubv4"
-	"go.mattglei.ch/lcp/internal/apis"
+	"go.mattglei.ch/lcp/internal/api"
 	"go.mattglei.ch/lcp/pkg/lcp"
 	"go.mattglei.ch/timber"
 )
@@ -43,13 +43,13 @@ func fetchPinnedRepos(client *githubv4.Client) ([]lcp.GitHubRepository, error) {
 	err := client.Query(context.Background(), &query, nil)
 	if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
 		timber.Warning(cacheInstance.LogPrefix(), "connection timed out for getting pinned repos")
-		return []lcp.GitHubRepository{}, apis.ErrWarning
+		return []lcp.GitHubRepository{}, api.ErrWarning
 	}
 	if err != nil && (errors.Is(err, syscall.ECONNRESET) ||
 		strings.Contains(err.Error(), "connection reset by peer")) {
 		timber.Warning(cacheInstance.LogPrefix(),
 			"connection reset by peer while getting pinned repos")
-		return []lcp.GitHubRepository{}, apis.ErrWarning
+		return []lcp.GitHubRepository{}, api.ErrWarning
 	}
 	if err != nil {
 		return nil, fmt.Errorf("querying github's graphql API: %w", err)

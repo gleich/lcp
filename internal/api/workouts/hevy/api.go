@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"go.mattglei.ch/lcp/internal/apis"
+	"go.mattglei.ch/lcp/internal/api"
 	"go.mattglei.ch/lcp/internal/secrets"
 )
 
@@ -21,7 +21,7 @@ func sendHevyAPIRequest[T any](client *http.Client, path string) (T, error) {
 	}
 	req.Header.Set("api-key", secrets.ENV.HevyAccessToken)
 
-	resp, err := apis.RequestJSON[T]("[hevy]", client, req)
+	resp, err := api.RequestJSON[T]("[hevy]", client, req)
 	if err != nil {
 		return zeroValue, fmt.Errorf("making hevy api request: %w", err)
 	}
