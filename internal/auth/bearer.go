@@ -21,7 +21,7 @@ func IsAuthorized(w http.ResponseWriter, r *http.Request) bool {
 	}
 
 	if !authorized {
-		http.Error(w, "Invalid bearer auth token", http.StatusUnauthorized)
+		http.Error(w, "invalid bearer auth token", http.StatusUnauthorized)
 	}
 	return authorized
 }

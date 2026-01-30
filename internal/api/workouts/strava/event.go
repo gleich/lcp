@@ -2,7 +2,6 @@ package strava
 
 import (
 	"encoding/json"
-	"errors"
 	"io"
 	"net/http"
 
@@ -36,15 +35,11 @@ func EventRoute(
 	tokens Tokens,
 ) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() { _ = r.Body.Close() }()
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
-			err = errors.Join(err, r.Body.Close())
 			timber.Error(err, "reading response body failed")
 			return
-		}
-		err = r.Body.Close()
-		if err != nil {
-			timber.Error(err, "closing response body failed")
 		}
 
 		var eventData event

@@ -10,6 +10,7 @@ import (
 
 func (c *Cache[T]) persistToFile() {
 	var file *os.File
+	defer func() { _ = file.Close() }()
 	if _, err := os.Stat(c.filePath); os.IsNotExist(err) {
 		folder := filepath.Dir(c.filePath)
 		err := os.MkdirAll(folder, 0700)
@@ -29,12 +30,6 @@ func (c *Cache[T]) persistToFile() {
 			return
 		}
 	}
-	defer func() {
-		err := file.Close()
-		if err != nil {
-			timber.Error(err, "failed to close file")
-		}
-	}()
 
 	c.Mutex.RLock()
 	bin, err := json.Marshal(Response[T]{

@@ -24,9 +24,12 @@ var ErrWarning = errors.New("non-critical error encountered during request")
 // unexpected EOFs, and TCP connection resets—by logging warnings and returning a non-critical
 // WarningError. Non-2xx HTTP responses are also treated as warnings.
 func Request(logPrefix string, client *http.Client, request *http.Request) ([]byte, error) {
-	url := request.URL.String()
-	path := request.URL.Path
-	resp, err := client.Do(request)
+	var (
+		url       = request.URL.String()
+		path      = request.URL.Path
+		resp, err = client.Do(request)
+	)
+	defer func() { _ = resp.Body.Close() }()
 	if err != nil {
 		if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
 			timber.Warning(logPrefix, "connection timed out for", path)
@@ -62,18 +65,11 @@ func Request(logPrefix string, client *http.Client, request *http.Request) ([]by
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		// make sure to close the body before we return
-		err = errors.Join(err, resp.Body.Close())
 		if errors.Is(err, io.ErrUnexpectedEOF) {
 			timber.Warning(logPrefix, "unexpected EOF while reading body from", path)
 			return []byte{}, ErrWarning
 		}
 		return []byte{}, fmt.Errorf("reading response body for %s: %w", url, err)
-	}
-
-	err = resp.Body.Close()
-	if err != nil {
-		return []byte{}, fmt.Errorf("closing response body for %s: %w", url, err)
 	}
 
 	return body, nil

@@ -44,8 +44,8 @@ func fetch[T any](client *Client, path string) (T, error) {
 	}
 
 	body, err := io.ReadAll(resp.Body)
+	defer func() { _ = resp.Body.Close() }()
 	if err != nil {
-		err = errors.Join(err, resp.Body.Close())
 		return zeroValue, fmt.Errorf("reading request body: %w", err)
 	}
 
