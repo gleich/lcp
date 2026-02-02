@@ -1,4 +1,4 @@
-# [lcp](https://mattglei.ch/lcp)
+# [lcp](https://mattglei.ch/writing/lcp)
 
 [![build](https://github.com/gleich/lcp/actions/workflows/build.yml/badge.svg)](https://github.com/gleich/lcp/actions/workflows/build.yml)
 [![deploy](https://github.com/gleich/lcp/actions/workflows/deploy.yml/badge.svg)](https://github.com/gleich/lcp/actions/workflows/deploy.yml)
