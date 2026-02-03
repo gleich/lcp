@@ -7,21 +7,26 @@ import (
 
 	"go.mattglei.ch/lcp/internal/util"
 	"go.mattglei.ch/lcp/pkg/lcp"
+	"go.mattglei.ch/timber"
 )
 
-var upSince = time.Now()
+var response []byte
 
-func Endpoint(w http.ResponseWriter, r *http.Request) {
+func init() {
 	data, err := json.Marshal(lcp.HealthStatus{
 		Ok:      true,
-		UpSince: upSince,
+		UpSince: time.Now(),
 	})
 	if err != nil {
-		util.InternalServerError(w, err)
+		timber.Fatal(err, "failed to set health check response")
 		return
 	}
+	response = data
+}
+
+func Endpoint(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	_, err = w.Write(data)
+	_, err := w.Write(response)
 	if err != nil {
 		util.InternalServerError(w, err)
 		return
