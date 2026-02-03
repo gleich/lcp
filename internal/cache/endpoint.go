@@ -11,11 +11,6 @@ import (
 	"go.mattglei.ch/timber"
 )
 
-type Response[T any] struct {
-	Data    T         `json:"data"`
-	Updated time.Time `json:"updated"`
-}
-
 func (c *Cache[T]) Endpoints(mux *http.ServeMux) {
 	mux.HandleFunc(fmt.Sprintf("GET /%s", c.instance), c.Serve)
 	mux.HandleFunc(fmt.Sprintf("POST /%s/stream", c.instance), c.ServeStream)

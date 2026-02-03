@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"go.mattglei.ch/lcp/pkg/lcp"
 	"go.mattglei.ch/timber"
 )
 
@@ -32,7 +33,7 @@ func (c *Cache[T]) persistToFile() {
 	}
 
 	c.Mutex.RLock()
-	bin, err := json.Marshal(Response[T]{
+	bin, err := json.Marshal(lcp.CacheResponse[T]{
 		Data:    c.Data,
 		Updated: c.Updated,
 	})
@@ -55,7 +56,7 @@ func (c *Cache[T]) loadFromFile() {
 			timber.Fatal(err, "reading from cache file from", c.filePath, "failed")
 		}
 
-		var data Response[T]
+		var data lcp.CacheResponse[T]
 		err = json.Unmarshal(b, &data)
 		if err != nil {
 			timber.Fatal(err, "unmarshaling json data from", c.filePath, "failed:", string(b))

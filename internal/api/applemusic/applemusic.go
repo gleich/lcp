@@ -62,7 +62,7 @@ func Setup(mux *http.ServeMux, client *http.Client, rdb *redis.Client) {
 
 func MarshalResponse(
 	c *cache.Cache[lcp.AppleMusicCache],
-) (string, error) {
+) ([]byte, error) {
 	response := lcp.CacheResponse[lcp.AppleMusicCacheResponse]{Updated: c.Updated}
 	response.Data.RecentlyPlayed = c.Data.RecentlyPlayed
 	for _, p := range c.Data.Playlists {
@@ -85,7 +85,7 @@ func MarshalResponse(
 
 	data, err := json.Marshal(response)
 	if err != nil {
-		return "", fmt.Errorf("encoding json data: %w", err)
+		return []byte{}, fmt.Errorf("encoding json data: %w", err)
 	}
-	return string(data), nil
+	return data, nil
 }

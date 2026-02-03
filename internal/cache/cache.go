@@ -50,7 +50,7 @@ type Cache[T lcp.CacheData] struct {
 	Data    T
 	Updated time.Time
 
-	MarshalResponse func(c *Cache[T]) (string, error)
+	MarshalResponse func(c *Cache[T]) ([]byte, error)
 
 	connections      map[chan string]struct{}
 	connectionsMutex sync.Mutex
@@ -65,12 +65,12 @@ func New[T lcp.CacheData](instance CacheInstance, data T, update bool) *Cache[T]
 			fmt.Sprintf("%s.json", instance.String()),
 		),
 		connections: make(map[chan string]struct{}),
-		MarshalResponse: func(c *Cache[T]) (string, error) {
+		MarshalResponse: func(c *Cache[T]) ([]byte, error) {
 			data, err := json.Marshal(lcp.CacheResponse[T]{Data: c.Data, Updated: c.Updated})
 			if err != nil {
-				return "", fmt.Errorf("encoding json data: %w", err)
+				return []byte{}, fmt.Errorf("encoding json data: %w", err)
 			}
-			return string(data), nil
+			return data, nil
 		},
 	}
 	cache.loadFromFile()
@@ -117,7 +117,7 @@ func (c *Cache[T]) Update(data T) {
 			c.connectionsMutex.Lock()
 			for connection := range c.connections {
 				select {
-				case connection <- frame:
+				case connection <- string(frame):
 				default:
 					delete(c.connections, connection)
 					close(connection)
