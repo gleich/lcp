@@ -22,13 +22,13 @@ func (c *Cache[T]) Serve(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	c.Mutex.RLock()
-	defer c.Mutex.RUnlock()
 	data, err := c.MarshalResponse(c)
 	if err != nil {
 		err = fmt.Errorf("creating endpoint data: %w", err)
 		util.InternalServerError(w, err)
 		return
 	}
+	c.Mutex.RUnlock()
 	_, err = w.Write([]byte(data))
 	if err != nil {
 		err = fmt.Errorf("writing data to request: %w", err)

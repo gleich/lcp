@@ -29,11 +29,6 @@ func Request(logPrefix string, client *http.Client, request *http.Request) ([]by
 		path      = request.URL.Path
 		resp, err = client.Do(request)
 	)
-	defer func() {
-		if resp != nil && resp.Body != nil {
-			_ = resp.Body.Close()
-		}
-	}()
 	if err != nil {
 		if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
 			timber.Warning(logPrefix, "connection timed out for", path)
@@ -53,6 +48,11 @@ func Request(logPrefix string, client *http.Client, request *http.Request) ([]by
 		}
 		return []byte{}, fmt.Errorf("sending request to %s: %w", url, err)
 	}
+	defer func() {
+		if resp != nil && resp.Body != nil {
+			_ = resp.Body.Close()
+		}
+	}()
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		timber.Warning(
