@@ -21,4 +21,4 @@
 *.p8
 
 # lcp binary
-lcp
+/lcp
