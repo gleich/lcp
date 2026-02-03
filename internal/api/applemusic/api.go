@@ -10,21 +10,21 @@ import (
 )
 
 func sendAppleMusicAPIRequest[T any](client *http.Client, path string) (T, error) {
-	var zeroValue T
+	var zero T
 	req, err := http.NewRequest(
 		http.MethodGet,
 		fmt.Sprintf("https://api.music.apple.com/%s", strings.TrimLeft(path, "/")),
 		nil,
 	)
 	if err != nil {
-		return zeroValue, fmt.Errorf("creating request: %w", err)
+		return zero, fmt.Errorf("creating request: %w", err)
 	}
 	req.Header.Set("Authorization", "Bearer "+secrets.ENV.AppleMusicAppToken)
 	req.Header.Set("Music-User-Token", secrets.ENV.AppleMusicUserToken)
 
 	resp, err := api.RequestJSON[T](cacheInstance.LogPrefix(), client, req)
 	if err != nil {
-		return zeroValue, fmt.Errorf("making apple music API request: %w", err)
+		return zero, fmt.Errorf("making apple music API request: %w", err)
 	}
 	return resp, nil
 }

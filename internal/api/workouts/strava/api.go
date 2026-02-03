@@ -9,7 +9,7 @@ import (
 )
 
 func sendStravaAPIRequest[T any](client *http.Client, path string, tokens Tokens) (T, error) {
-	var zeroValue T
+	var zero T
 
 	req, err := http.NewRequest(
 		http.MethodGet,
@@ -17,13 +17,13 @@ func sendStravaAPIRequest[T any](client *http.Client, path string, tokens Tokens
 		nil,
 	)
 	if err != nil {
-		return zeroValue, fmt.Errorf("creating request: %w", err)
+		return zero, fmt.Errorf("creating request: %w", err)
 	}
 	req.Header.Set("Authorization", "Bearer "+tokens.Access)
 
 	resp, err := api.RequestJSON[T](logPrefix, client, req)
 	if err != nil {
-		return zeroValue, fmt.Errorf("making strava api request: %w", err)
+		return zero, fmt.Errorf("making strava api request: %w", err)
 	}
 	return resp, nil
 }
