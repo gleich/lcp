@@ -29,7 +29,11 @@ func Request(logPrefix string, client *http.Client, request *http.Request) ([]by
 		path      = request.URL.Path
 		resp, err = client.Do(request)
 	)
-	defer func() { _ = resp.Body.Close() }()
+	defer func() {
+		if resp != nil && resp.Body != nil {
+			_ = resp.Body.Close()
+		}
+	}()
 	if err != nil {
 		if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
 			timber.Warning(logPrefix, "connection timed out for", path)
