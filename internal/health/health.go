@@ -3,7 +3,6 @@ package health
 import (
 	"encoding/json"
 	"net/http"
-	"time"
 
 	"go.mattglei.ch/lcp/internal/util"
 	"go.mattglei.ch/lcp/pkg/lcp"
@@ -14,8 +13,7 @@ var response []byte
 
 func init() {
 	data, err := json.Marshal(lcp.HealthStatus{
-		Ok:      true,
-		UpSince: time.Now(),
+		Ok: true,
 	})
 	if err != nil {
 		timber.Fatal(err, "failed to set health check response")
