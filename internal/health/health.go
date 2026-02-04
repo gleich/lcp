@@ -12,9 +12,7 @@ import (
 var response []byte
 
 func init() {
-	data, err := json.Marshal(lcp.HealthStatus{
-		Ok: true,
-	})
+	data, err := json.Marshal(lcp.HealthStatus{Ok: true})
 	if err != nil {
 		timber.Fatal(err, "failed to set health check response")
 		return
