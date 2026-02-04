@@ -19,7 +19,6 @@ var playlists = []lcp.AppleMusicSyncedPlaylist{
 	// 	Name:         "friendsgiving",
 	// 	AppleMusicID: "p.gek1krvFLa68Adp",
 	// 	SpotifyID:    "7IbaiRMhet4tMO0zm7wcds",
-	// 	NoSync:       true,
 	// },
 	{Name: "chill", AppleMusicID: "p.AWXoZoxHLrvpJlY", SpotifyID: "5SnoWhWIJRmJNkvdxCpMAe"},
 	{
@@ -43,26 +42,6 @@ var playlists = []lcp.AppleMusicSyncedPlaylist{
 	{Name: "funk", AppleMusicID: "p.O1kz7EoFVmvz704", SpotifyID: "1EDwymox6cXQlk7JGDMCbz"},
 	{Name: "old man", AppleMusicID: "p.V7VYVB0hZo53MQv", SpotifyID: "3fDlIqV43BvPvtPs9ASsgU"},
 	{Name: "country", AppleMusicID: "p.O1kz7zbsVmvz704", SpotifyID: "3jR0MH0NwzEdYuUY8nohmf"},
-
-	// private playlists
-	{
-		Name:         "drifting off",
-		AppleMusicID: "p.AWXoXbWfLrvpJlY",
-		SpotifyID:    "6ex8usE1U41m4wM6NwT9cg",
-		Private:      true,
-	},
-	{
-		Name:         "pb",
-		AppleMusicID: "p.PkxVxzYF2zv9xE8",
-		SpotifyID:    "6DZUHbgcvHDlpEVjYndrQ0",
-		Private:      true,
-	},
-	{
-		Name:         "x",
-		AppleMusicID: "p.PkxVx6ki2zv9xE8",
-		SpotifyID:    "66dbgoThL7wf2IYiLtyhCA",
-		Private:      true,
-	},
 }
 
 type playlistTracksResponse struct {
@@ -139,20 +118,6 @@ func fetchPlaylist(
 		),
 		SpotifyID: playlist.SpotifyID,
 	}, nil
-}
-
-func syncedPlaylistsEndpoint() http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !auth.IsAuthorized(w, r) {
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		err := json.NewEncoder(w).Encode(playlists)
-		if err != nil {
-			err = fmt.Errorf("writing json to request: %w", err)
-			util.InternalServerError(w, err)
-		}
-	})
 }
 
 func playlistEndpoint(c *cache.Cache[lcp.AppleMusicCache]) http.HandlerFunc {

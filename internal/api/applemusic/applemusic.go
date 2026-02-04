@@ -22,9 +22,6 @@ func cacheUpdate(client *http.Client, rdb *redis.Client) (lcp.AppleMusicCache, e
 
 	appleMusicPlaylists := []lcp.AppleMusicPlaylist{}
 	for _, playlist := range playlists {
-		if playlist.Private {
-			continue
-		}
 		playlistData, err := fetchPlaylist(client, rdb, playlist)
 		if err != nil {
 			return lcp.AppleMusicCache{}, err
@@ -47,7 +44,6 @@ func Setup(mux *http.ServeMux, client *http.Client, rdb *redis.Client) {
 	applemusicCache := cache.New(cacheInstance, data, err == nil)
 	applemusicCache.MarshalResponse = MarshalResponse
 	applemusicCache.Endpoints(mux)
-	mux.HandleFunc("GET /applemusic/playlists", syncedPlaylistsEndpoint())
 	mux.HandleFunc("GET /applemusic/playlists/{id}", playlistEndpoint(applemusicCache))
 	go cache.UpdatePeriodically(
 		applemusicCache,
