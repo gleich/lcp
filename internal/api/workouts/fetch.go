@@ -79,16 +79,18 @@ func fetch(
 		}
 		activity.Calories = details.Calories
 
-		heartrateStream, err := strava.FetchHeartrate(client, activity.ID, stravaTokens)
-		if err != nil {
-			return nil, fmt.Errorf(
-				"fetching HR data for activity (id: %s, name: %s): %w",
-				activity.ID,
-				activity.Name,
-				err,
-			)
+		if activity.HasHeartrate {
+			heartrateStream, err := strava.FetchHeartrate(client, activity.ID, stravaTokens)
+			if err != nil {
+				return nil, fmt.Errorf(
+					"fetching HR data for activity (id: %s, name: %s): %w",
+					activity.ID,
+					activity.Name,
+					err,
+				)
+			}
+			activity.HeartrateData = heartrateStream
 		}
-		activity.HeartrateData = heartrateStream
 
 		if activity.HasMap {
 			mapData, err := strava.FetchMap(client, activity.MapPolyline)
