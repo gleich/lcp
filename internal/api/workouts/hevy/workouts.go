@@ -3,6 +3,8 @@ package hevy
 import (
 	"fmt"
 	"net/http"
+	"net/url"
+	"strconv"
 	"time"
 
 	"slices"
@@ -23,48 +25,58 @@ type workoutsResponse struct {
 }
 
 func FetchWorkouts(client *http.Client) ([]lcp.Workout, error) {
-	workouts, err := sendHevyAPIRequest[workoutsResponse](client, "/v1/workouts")
-	if err != nil {
-		return []lcp.Workout{}, fmt.Errorf("fetch hevy workouts: %w", err)
-	}
-
-	bodyWeightExercises := []string{
-		"Chest Dip (Assisted)",
-		"Chest Dip",
-		"Pull Up (Assisted)",
-	}
-
-	var activities []lcp.Workout
-	for _, workout := range workouts.Workouts {
-		totalVolume := 0.0
-		sets := 0
-		for _, exercise := range workout.Exercises {
-			for i, set := range exercise.Sets {
-				// account for bodyweight exercises which are (body weight - weight)
-				if slices.Contains(bodyWeightExercises, exercise.Title) {
-					totalVolume += (secrets.ENV.HevyBodyWeightLBS*0.45359237 - set.WeightKg) * float64(
-						set.Reps,
-					)
-					exercise.Sets[i].WeightKg = -set.WeightKg
-				} else {
-					totalVolume += set.WeightKg * float64(set.Reps)
-				}
-				sets++
-			}
+	var (
+		page       = 0
+		activities []lcp.Workout
+	)
+	for page < 3 {
+		page++
+		params := url.Values{"page": {strconv.Itoa(page)}}
+		workouts, err := sendHevyAPIRequest[workoutsResponse](
+			client,
+			"/v1/workouts?"+params.Encode(),
+		)
+		if err != nil {
+			return []lcp.Workout{}, fmt.Errorf("fetch hevy workouts: %w", err)
 		}
-		activities = append(activities, lcp.Workout{
-			Platform:      "hevy",
-			Name:          workout.Title,
-			StartDate:     workout.StartTime.UTC(),
-			MovingTime:    uint32(workout.EndTime.Sub(workout.StartTime).Seconds()),
-			SportType:     "WeightTraining",
-			HasMap:        false,
-			ID:            workout.ID,
-			HasHeartrate:  false,
-			HevyExercises: workout.Exercises,
-			HevyVolumeKG:  totalVolume,
-			HevySetCount:  sets,
-		})
+
+		bodyWeightExercises := []string{
+			"Chest Dip (Assisted)",
+			"Chest Dip",
+			"Pull Up (Assisted)",
+		}
+
+		for _, workout := range workouts.Workouts {
+			totalVolume := 0.0
+			sets := 0
+			for _, exercise := range workout.Exercises {
+				for i, set := range exercise.Sets {
+					// account for bodyweight exercises which are (body weight - weight)
+					if slices.Contains(bodyWeightExercises, exercise.Title) {
+						totalVolume += (secrets.ENV.HevyBodyWeightLBS*0.45359237 - set.WeightKg) * float64(
+							set.Reps,
+						)
+						exercise.Sets[i].WeightKg = -set.WeightKg
+					} else {
+						totalVolume += set.WeightKg * float64(set.Reps)
+					}
+					sets++
+				}
+			}
+			activities = append(activities, lcp.Workout{
+				Platform:      "hevy",
+				Name:          workout.Title,
+				StartDate:     workout.StartTime.UTC(),
+				MovingTime:    uint32(workout.EndTime.Sub(workout.StartTime).Seconds()),
+				SportType:     "WeightTraining",
+				HasMap:        false,
+				ID:            workout.ID,
+				HasHeartrate:  false,
+				HevyExercises: workout.Exercises,
+				HevyVolumeKG:  totalVolume,
+				HevySetCount:  sets,
+			})
+		}
 	}
 
 	return activities, nil
