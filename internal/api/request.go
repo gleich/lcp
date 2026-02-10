@@ -69,6 +69,10 @@ func Request(logPrefix string, client *http.Client, request *http.Request) ([]by
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			timber.Warning(logPrefix, "reading body timed out for", path)
+			return []byte{}, ErrWarning
+		}
 		if errors.Is(err, io.ErrUnexpectedEOF) {
 			timber.Warning(logPrefix, "unexpected EOF while reading body from", path)
 			return []byte{}, ErrWarning
