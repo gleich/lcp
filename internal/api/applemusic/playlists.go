@@ -130,9 +130,9 @@ func playlistEndpoint(c *cache.Cache[lcp.AppleMusicCache]) http.HandlerFunc {
 
 		c.Mutex.RLock()
 		var p *lcp.AppleMusicPlaylist
-		for _, plist := range c.Data.Playlists {
-			if plist.ID == id {
-				p = &plist
+		for _, playlist := range c.Data.Playlists {
+			if playlist.ID == id {
+				p = &playlist
 				break
 			}
 		}
