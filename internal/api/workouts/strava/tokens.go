@@ -30,6 +30,7 @@ func (t *Tokens) RefreshIfExpired(client *http.Client) error {
 	if t.ExpiresAt-60 >= time.Now().Unix() {
 		return nil
 	}
+	start := time.Now()
 
 	params := url.Values{
 		"client_id":     {secrets.ENV.StravaClientID},
@@ -53,6 +54,6 @@ func (t *Tokens) RefreshIfExpired(client *http.Client) error {
 	}
 
 	*t = tokens
-	timber.Done(logPrefix, "new access token", t.Access)
+	timber.DoneSince(start, logPrefix, "new access token", t.Access)
 	return nil
 }

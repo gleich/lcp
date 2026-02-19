@@ -13,6 +13,7 @@ import (
 const cacheInstance = cache.Steam
 
 func Setup(mux *http.ServeMux, client *http.Client, rdb *redis.Client) {
+	start := time.Now()
 	games, err := fetchRecentlyPlayedGames(client, rdb)
 	if err != nil {
 		timber.Error(err, "initial fetch of steam games failed")
@@ -28,5 +29,5 @@ func Setup(mux *http.ServeMux, client *http.Client, rdb *redis.Client) {
 		},
 		10*time.Minute,
 	)
-	timber.Done(cacheInstance.LogPrefix(), "setup cache and endpoint")
+	timber.DoneSince(start, cacheInstance.LogPrefix(), "setup cache and endpoint")
 }

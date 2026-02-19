@@ -15,6 +15,7 @@ import (
 const cacheInstance = cache.GitHub
 
 func Setup(mux *http.ServeMux) {
+	start := time.Now()
 	githubTokenSource := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: secrets.ENV.GitHubAccessToken},
 	)
@@ -30,5 +31,5 @@ func Setup(mux *http.ServeMux) {
 	githubCache.Endpoints(mux)
 	go cache.UpdatePeriodically(githubCache, githubClient, fetchPinnedRepos, 5*time.Second)
 
-	timber.Done(cacheInstance.LogPrefix(), "setup cache and endpoint")
+	timber.DoneSince(start, cacheInstance.LogPrefix(), "setup cache and endpoint")
 }

@@ -57,6 +57,7 @@ type Cache[T lcp.CacheData] struct {
 }
 
 func New[T lcp.CacheData](instance CacheInstance, data T, update bool) *Cache[T] {
+	start := time.Now()
 	cache := Cache[T]{
 		instance: instance,
 		Updated:  time.Now().UTC(),
@@ -75,12 +76,12 @@ func New[T lcp.CacheData](instance CacheInstance, data T, update bool) *Cache[T]
 	}
 	cache.loadFromFile()
 	if update {
-		cache.Update(data)
+		cache.Update(start, data)
 	}
 	return &cache
 }
 
-func (c *Cache[T]) Update(data T) {
+func (c *Cache[T]) Update(start time.Time, data T) {
 	c.Mutex.RLock()
 	oldBin, err := json.Marshal(c.Data)
 	if err != nil {
@@ -102,9 +103,10 @@ func (c *Cache[T]) Update(data T) {
 		c.Mutex.Unlock()
 
 		c.persistToFile()
-		timber.Done(c.instance.LogPrefix(), "cache updated")
+		timber.DoneSince(start, c.instance.LogPrefix(), "cache updated")
 
 		if len(c.connections) != 0 {
+			start = time.Now()
 			// broadcast update to connections
 			c.Mutex.RLock()
 			frame, err := c.MarshalResponse(c)
@@ -129,7 +131,7 @@ func (c *Cache[T]) Update(data T) {
 			if len(c.connections) > 1 {
 				connWord = "connections"
 			}
-			timber.Done(c.instance.LogPrefix(), "updated", len(c.connections), connWord)
+			timber.DoneSince(start, c.instance.LogPrefix(), "updated", len(c.connections), connWord)
 		}
 	}
 
@@ -143,6 +145,7 @@ func UpdatePeriodically[T lcp.CacheData, C any](
 ) {
 	for {
 		time.Sleep(interval)
+		start := time.Now()
 		data, err := update(client)
 		if err != nil {
 			if !slices.ContainsFunc(
@@ -152,7 +155,7 @@ func UpdatePeriodically[T lcp.CacheData, C any](
 				timber.Error(err, cache.instance.LogPrefix(), "updating cache failed")
 			}
 		} else {
-			cache.Update(data)
+			cache.Update(start, data)
 		}
 	}
 }

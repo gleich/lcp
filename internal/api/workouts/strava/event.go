@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/redis/go-redis/v9"
@@ -35,6 +36,7 @@ func EventRoute(
 	tokens Tokens,
 ) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
 		defer func() { _ = r.Body.Close() }()
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
@@ -66,11 +68,12 @@ func EventRoute(
 			timber.ErrorMsg("failed to update strava cache")
 			return
 		}
-		workoutsCache.Update(activities)
+		workoutsCache.Update(start, activities)
 	})
 }
 
 func ChallengeRoute(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
 	verifyToken := r.URL.Query().Get("hub.verify_token")
 	if verifyToken != secrets.ENV.StravaVerifyToken {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -85,5 +88,5 @@ func ChallengeRoute(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		timber.Error(err, "failed to write json")
 	}
-	timber.Done(logPrefix, "handled challenge successfully")
+	timber.DoneSince(start, logPrefix, "handled challenge successfully")
 }

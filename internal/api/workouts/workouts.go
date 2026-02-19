@@ -2,6 +2,7 @@ package workouts
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
@@ -15,6 +16,7 @@ import (
 const cacheInstance = cache.Workouts
 
 func Setup(mux *http.ServeMux, client *http.Client, rdb *redis.Client) {
+	start := time.Now()
 	stravaTokens := strava.LoadTokens()
 	err := stravaTokens.RefreshIfExpired(client)
 	if err != nil {
@@ -44,5 +46,5 @@ func Setup(mux *http.ServeMux, client *http.Client, rdb *redis.Client) {
 	)
 	mux.HandleFunc("GET /strava/event", strava.ChallengeRoute)
 
-	timber.Done(cacheInstance.LogPrefix(), "setup cache and endpoints")
+	timber.DoneSince(start, cacheInstance.LogPrefix(), "setup cache and endpoints")
 }

@@ -17,6 +17,7 @@ import (
 )
 
 func main() {
+	start := time.Now()
 	ny, err := time.LoadLocation("America/New_York")
 	if err != nil {
 		timber.Fatal(err, "failed to load new york timezone")
@@ -24,7 +25,7 @@ func main() {
 	timber.Timezone(ny)
 	timber.TimeFormat("01/02 03:04:05 PM MST")
 
-	timber.Info("booted")
+	timber.InfoSince(start, "booted")
 
 	secrets.Load()
 
@@ -50,7 +51,7 @@ func main() {
 	steam.Setup(mux, client, rdb)
 	applemusic.Setup(mux, client, rdb)
 
-	timber.Info("starting server")
+	timber.InfoSince(start, "starting server")
 	server := &http.Server{
 		Addr:         ":8000",
 		Handler:      mux,
