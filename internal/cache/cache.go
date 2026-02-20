@@ -50,6 +50,7 @@ type Cache[T lcp.CacheData] struct {
 	Data    T
 	Updated time.Time
 
+	DiffCheck       func(c *Cache[T], old T, new T) (bool, error)
 	MarshalResponse func(c *Cache[T]) ([]byte, error)
 
 	connections      map[chan string]struct{}
@@ -73,6 +74,24 @@ func New[T lcp.CacheData](instance CacheInstance, data T, update bool) *Cache[T]
 			}
 			return data, nil
 		},
+		DiffCheck: func(c *Cache[T], new, old T) (bool, error) {
+			c.Mutex.RLock()
+			oldBin, err := json.Marshal(c.Data)
+			if err != nil {
+				return false, fmt.Errorf("marshal old json: %w", err)
+			}
+			c.Mutex.RUnlock()
+			newBin, err := json.Marshal(data)
+			if err != nil {
+				return false, fmt.Errorf("marshal new json: %w", err)
+			}
+			var (
+				newJSON = string(newBin)
+				oldJSON = string(oldBin)
+			)
+
+			return oldJSON != newJSON && newJSON != "null" && strings.Trim(newJSON, " ") != "", nil
+		},
 	}
 	cache.loadFromFile()
 	if update {
@@ -82,35 +101,11 @@ func New[T lcp.CacheData](instance CacheInstance, data T, update bool) *Cache[T]
 }
 
 func (c *Cache[T]) Update(start time.Time, data T) {
-	c.Mutex.RLock()
-	oldBin, err := json.Marshal(c.Data)
+	changed, err := c.DiffCheck(c, c.Data, data)
 	if err != nil {
-		timber.Error(err, "failed to json marshal old data")
-		return
+		timber.Error(err, "checking for diff between old and new elements")
 	}
-	c.Mutex.RUnlock()
-	newBin, err := json.Marshal(data)
-	if err != nil {
-		timber.Error(err, "failed to json marshal new data")
-		return
-	}
-
-	new := string(newBin)
-	old := string(oldBin)
-	if old != new && new != "null" && strings.Trim(new, " ") != "" {
-		// oldFmt, err := json.MarshalIndent(c.Data, "", "  ")
-		// if err != nil {
-		// 	timber.Error(err, "failed to format old json data")
-		// 	return
-		// }
-		// newFmt, err := json.MarshalIndent(data, "", "  ")
-		// if err != nil {
-		// 	timber.Error(err, "failed to format new json data")
-		// 	return
-		// }
-		// os.WriteFile(fmt.Sprintf("%s-old.json", c.instance.LogPrefix()), oldFmt, 0655)
-		// os.WriteFile(fmt.Sprintf("%s-new.json", c.instance.LogPrefix()), newFmt, 0655)
-
+	if changed {
 		c.Mutex.Lock()
 		c.Data = data
 		c.Updated = time.Now().UTC()

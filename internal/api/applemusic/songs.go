@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/redis/go-redis/v9"
 	"go.mattglei.ch/lcp/internal/images"
@@ -69,10 +70,11 @@ func (s songResponse) ToAppleMusicSong(
 	}
 
 	var (
-		artURL           *string
+		artURL           *string = albumArtURL(s, 600.0)
 		albumArtBlurhash *string
+
+		albumArtPermissionsExpiration *time.Time
 	)
-	artURL = albumArtURL(s, 600.0)
 	id := s.ID
 	if s.Attributes.PlayParams.CatalogID != "" {
 		id = s.Attributes.PlayParams.CatalogID
@@ -80,11 +82,27 @@ func (s songResponse) ToAppleMusicSong(
 	if s.Attributes.Artwork.URL != "" {
 		blurhash, err := images.BlurHash(client, rdb, *artURL, jpeg.Decode)
 		if err != nil && strings.Contains(err.Error(), "unexpected EOF") {
-			timber.Warning("failed to create blur hash for", albumArtURL)
+			timber.Warning("failed to create blur hash for", albumArtURL, "unexpected EOF occurred")
 		} else if err != nil {
-			return lcp.AppleMusicSong{}, fmt.Errorf("failed to get blur hash for \"%s\" (%s): %w", s.Attributes.Name, id, err)
+			return lcp.AppleMusicSong{}, fmt.Errorf("getting blur hash for \"%s\" (%s): %w", s.Attributes.Name, id, err)
 		}
 		albumArtBlurhash = &blurhash
+
+		artworkURL, err := url.Parse(*artURL)
+		if err != nil {
+			return lcp.AppleMusicSong{}, fmt.Errorf("parsing artwork url: %w", err)
+		}
+		const expirationKey = "X-Amz-Expires"
+		query := artworkURL.Query()
+		if query.Has(expirationKey) {
+			expirationValue := query.Get(expirationKey)
+			secs, err := strconv.Atoi(expirationValue)
+			if err != nil {
+				return lcp.AppleMusicSong{}, fmt.Errorf("parsing %s: %w", expirationValue, err)
+			}
+			expiration := time.Now().Add(time.Duration(secs) * time.Second)
+			albumArtPermissionsExpiration = &expiration
+		}
 	}
 
 	var previewAudioURL *string = nil
@@ -93,15 +111,16 @@ func (s songResponse) ToAppleMusicSong(
 	}
 
 	return lcp.AppleMusicSong{
-		Track:              s.Attributes.Name,
-		Artist:             s.Attributes.ArtistName,
-		DurationInMillis:   s.Attributes.DurationInMillis,
-		AlbumArtURL:        artURL,
-		AlbumArtPreviewURL: albumArtURL(s, 300.0),
-		AlbumArtBlurhash:   albumArtBlurhash,
-		URL:                s.Attributes.URL,
-		ID:                 id,
-		PreviewAudioURL:    previewAudioURL,
+		Track:            s.Attributes.Name,
+		Artist:           s.Attributes.ArtistName,
+		DurationInMillis: s.Attributes.DurationInMillis,
+		AlbumArtURL:      artURL,
+		AlbumArtBlurhash: albumArtBlurhash,
+		URL:              s.Attributes.URL,
+		ID:               id,
+		PreviewAudioURL:  previewAudioURL,
+
+		AlbumArtPermissionsExpiration: albumArtPermissionsExpiration,
 	}, nil
 }
 

@@ -84,11 +84,3 @@ func FetchCache[T CacheResponseData](client *Client) (CacheResponse[T], error) {
 	}
 	return resp, nil
 }
-
-func FetchAppleMusicSyncedPlaylists(client *Client) ([]AppleMusicSyncedPlaylist, error) {
-	resp, err := fetch[[]AppleMusicSyncedPlaylist](client, "applemusic/playlists")
-	if err != nil {
-		return []AppleMusicSyncedPlaylist{}, fmt.Errorf("%w failed to fetch data", err)
-	}
-	return resp, nil
-}
