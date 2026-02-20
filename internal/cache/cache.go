@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/sergi/go-diff/diffmatchpatch"
 	"go.mattglei.ch/lcp/internal/secrets"
 	"go.mattglei.ch/lcp/pkg/lcp"
 	"go.mattglei.ch/timber"
@@ -96,7 +97,12 @@ func (c *Cache[T]) Update(start time.Time, data T) {
 	}
 
 	new := string(newBin)
-	if string(oldBin) != new && new != "null" && strings.Trim(new, " ") != "" {
+	old := string(oldBin)
+	if old != new && new != "null" && strings.Trim(new, " ") != "" {
+		dmp := diffmatchpatch.New()
+		diffs := dmp.DiffMain(new, old, false)
+		fmt.Println(dmp.DiffPrettyText(diffs))
+
 		c.Mutex.Lock()
 		c.Data = data
 		c.Updated = time.Now().UTC()
