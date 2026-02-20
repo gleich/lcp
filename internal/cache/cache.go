@@ -10,7 +10,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/sergi/go-diff/diffmatchpatch"
 	"go.mattglei.ch/lcp/internal/secrets"
 	"go.mattglei.ch/lcp/pkg/lcp"
 	"go.mattglei.ch/timber"
@@ -99,11 +98,18 @@ func (c *Cache[T]) Update(start time.Time, data T) {
 	new := string(newBin)
 	old := string(oldBin)
 	if old != new && new != "null" && strings.Trim(new, " ") != "" {
-		oldFmt, _ := json.MarshalIndent(c.Data, "", "  ")
-		newFmt, _ := json.MarshalIndent(data, "", "  ")
-		dmp := diffmatchpatch.New()
-		diffs := dmp.DiffMain(string(newFmt), string(oldFmt), false)
-		fmt.Println(dmp.DiffPrettyText(diffs))
+		// oldFmt, err := json.MarshalIndent(c.Data, "", "  ")
+		// if err != nil {
+		// 	timber.Error(err, "failed to format old json data")
+		// 	return
+		// }
+		// newFmt, err := json.MarshalIndent(data, "", "  ")
+		// if err != nil {
+		// 	timber.Error(err, "failed to format new json data")
+		// 	return
+		// }
+		// os.WriteFile(fmt.Sprintf("%s-old.json", c.instance.LogPrefix()), oldFmt, 0655)
+		// os.WriteFile(fmt.Sprintf("%s-new.json", c.instance.LogPrefix()), newFmt, 0655)
 
 		c.Mutex.Lock()
 		c.Data = data
