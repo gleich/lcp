@@ -99,8 +99,10 @@ func (c *Cache[T]) Update(start time.Time, data T) {
 	new := string(newBin)
 	old := string(oldBin)
 	if old != new && new != "null" && strings.Trim(new, " ") != "" {
+		oldFmt, _ := json.MarshalIndent(c.Data, "", "  ")
+		newFmt, _ := json.MarshalIndent(data, "", "  ")
 		dmp := diffmatchpatch.New()
-		diffs := dmp.DiffMain(new, old, false)
+		diffs := dmp.DiffMain(string(newFmt), string(oldFmt), false)
 		fmt.Println(dmp.DiffPrettyText(diffs))
 
 		c.Mutex.Lock()
