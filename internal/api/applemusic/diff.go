@@ -10,9 +10,9 @@ import (
 	"go.mattglei.ch/timber"
 )
 
-// We need a custom diff check function due to the fact that apple music image service returns
-// images with the permissions attached as url params. These change every time we make a request for
-// the playlist. This was causing false updates, so this will check for differences in everything,
+// We need a custom diff check function due to the fact that the apple music image service returns
+// images with the permissions attached as url params. These change every time we make a request.
+// This was causing false updates, so this will check for differences in everything,
 // normalize the album art URL for the url without the permissions, and check to see if the
 // permissions are expired.
 func diffCheck(c *cache.Cache[lcp.AppleMusicCache], old, new lcp.AppleMusicCache) (bool, error) {
