@@ -50,7 +50,7 @@ type Cache[T lcp.CacheData] struct {
 	Data    T
 	Updated time.Time
 
-	DiffCheck       func(c *Cache[T], old T, new T) (bool, error)
+	DiffCheck       func(c *Cache[T], new, old T) (bool, error)
 	MarshalResponse func(c *Cache[T]) ([]byte, error)
 
 	connections      map[chan string]struct{}
@@ -75,11 +75,11 @@ func New[T lcp.CacheData](instance CacheInstance, data T, update bool) *Cache[T]
 			return data, nil
 		},
 		DiffCheck: func(c *Cache[T], new, old T) (bool, error) {
-			oldBin, err := json.Marshal(c.Data)
+			oldBin, err := json.Marshal(old)
 			if err != nil {
 				return false, fmt.Errorf("marshal old json: %w", err)
 			}
-			newBin, err := json.Marshal(data)
+			newBin, err := json.Marshal(new)
 			if err != nil {
 				return false, fmt.Errorf("marshal new json: %w", err)
 			}
