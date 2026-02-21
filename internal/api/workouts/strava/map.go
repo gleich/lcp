@@ -25,7 +25,7 @@ func FetchMap(client *http.Client, polyline string) ([]byte, error) {
 		style     = "mattgleich/clxxsfdfm002401qj7jcxh47e"
 		params    = url.Values{
 			"access_token": {secrets.ENV.MapboxAccessToken},
-			"padding":      {"28"},
+			"padding":      {"0,0,30,0"},
 			"attribution":  {"false"},
 			"logo":         {"false"},
 		}
