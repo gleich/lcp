@@ -44,7 +44,7 @@ func Setup(mux *http.ServeMux, client *http.Client, rdb *redis.Client) {
 
 	applemusicCache := cache.New(cacheInstance, data, err == nil)
 	applemusicCache.MarshalResponse = marshalResponse
-	applemusicCache.DiffCheck = diffCheck
+	applemusicCache.Diff = diff
 	applemusicCache.Endpoints(mux)
 	mux.HandleFunc("GET /applemusic/playlists/{id}", playlistEndpoint(applemusicCache))
 	go cache.UpdatePeriodically(

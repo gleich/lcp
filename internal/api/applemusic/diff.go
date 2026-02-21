@@ -15,7 +15,7 @@ import (
 // This was causing false updates, so this will check for differences in everything,
 // normalize the album art URL for the url without the permissions, and check to see if the
 // permissions are expired.
-func diffCheck(c *cache.Cache[lcp.AppleMusicCache], old, new lcp.AppleMusicCache) (bool, error) {
+func diff(c *cache.Cache[lcp.AppleMusicCache], old, new lcp.AppleMusicCache) (bool, error) {
 	different, err := diffSongList(old.RecentlyPlayed, new.RecentlyPlayed)
 	if err != nil {
 		return false, fmt.Errorf("recently played diff check: %w", err)

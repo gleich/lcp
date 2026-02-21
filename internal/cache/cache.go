@@ -50,7 +50,11 @@ type Cache[T lcp.CacheData] struct {
 	Data    T
 	Updated time.Time
 
-	DiffCheck       func(c *Cache[T], new, old T) (bool, error)
+	// Diff function to to check to see if the cache should be updated because the data has changed
+	Diff func(c *Cache[T], new, old T) (bool, error)
+
+	// Custom JSON marshalling for the endpoint. Used to control what content actually gets returned
+	// from the cache via the endpoint.
 	MarshalResponse func(c *Cache[T]) ([]byte, error)
 
 	connections      map[chan string]struct{}
@@ -74,7 +78,7 @@ func New[T lcp.CacheData](instance CacheInstance, data T, update bool) *Cache[T]
 			}
 			return data, nil
 		},
-		DiffCheck: func(c *Cache[T], new, old T) (bool, error) {
+		Diff: func(c *Cache[T], new, old T) (bool, error) {
 			oldBin, err := json.Marshal(old)
 			if err != nil {
 				return false, fmt.Errorf("marshal old json: %w", err)
@@ -100,7 +104,7 @@ func New[T lcp.CacheData](instance CacheInstance, data T, update bool) *Cache[T]
 
 func (c *Cache[T]) Update(start time.Time, data T) {
 	c.Mutex.RLock()
-	changed, err := c.DiffCheck(c, data, c.Data)
+	changed, err := c.Diff(c, data, c.Data)
 	if err != nil {
 		timber.Error(err, "checking for diff between old and new elements")
 	}
