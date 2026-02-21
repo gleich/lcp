@@ -75,12 +75,10 @@ func New[T lcp.CacheData](instance CacheInstance, data T, update bool) *Cache[T]
 			return data, nil
 		},
 		DiffCheck: func(c *Cache[T], new, old T) (bool, error) {
-			c.Mutex.RLock()
 			oldBin, err := json.Marshal(c.Data)
 			if err != nil {
 				return false, fmt.Errorf("marshal old json: %w", err)
 			}
-			c.Mutex.RUnlock()
 			newBin, err := json.Marshal(data)
 			if err != nil {
 				return false, fmt.Errorf("marshal new json: %w", err)
@@ -101,10 +99,12 @@ func New[T lcp.CacheData](instance CacheInstance, data T, update bool) *Cache[T]
 }
 
 func (c *Cache[T]) Update(start time.Time, data T) {
-	changed, err := c.DiffCheck(c, c.Data, data)
+	c.Mutex.RLock()
+	changed, err := c.DiffCheck(c, data, c.Data)
 	if err != nil {
 		timber.Error(err, "checking for diff between old and new elements")
 	}
+	c.Mutex.RUnlock()
 	if changed {
 		c.Mutex.Lock()
 		c.Data = data

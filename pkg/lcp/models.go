@@ -33,14 +33,9 @@ type AppleMusicSong struct {
 	AlbumArtPermissionsExpiration *time.Time `json:"-"`
 }
 
-type AppleMusicSyncedPlaylist struct {
-	Name         string `json:"name"`
-	AppleMusicID string `json:"apple_music_id"`
-	SpotifyID    string `json:"spotify_id"`
-}
-
 type AppleMusicPlaylist struct {
 	Name         string           `json:"name"`
+	TrackCount   int              `json:"track_count"`
 	Tracks       []AppleMusicSong `json:"tracks"`
 	LastModified time.Time        `json:"last_modified"`
 	URL          string           `json:"url"`
@@ -53,6 +48,11 @@ type AppleMusicPlaylistSummary struct {
 	TrackCount      int              `json:"track_count"`
 	FirstFourTracks []AppleMusicSong `json:"first_four_tracks"`
 	ID              string           `json:"id"`
+}
+
+type AppleMusicPlaylistResponse struct {
+	Playlist   AppleMusicPlaylist `json:"playlist"`
+	Pagination Pagination         `json:"pagination"`
 }
 
 type GitHubRepository struct {
@@ -121,4 +121,10 @@ type HevySet struct {
 	Reps            int     `json:"reps"`
 	Type            string  `json:"type"`
 	DurationSeconds *int    `json:"duration_seconds"`
+}
+
+type Pagination struct {
+	Current int  `json:"current"`
+	Total   int  `json:"total"`
+	Next    *int `json:"next"`
 }
