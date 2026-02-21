@@ -3,7 +3,9 @@ package applemusic
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -13,7 +15,13 @@ import (
 	"go.mattglei.ch/lcp/pkg/lcp"
 )
 
-var playlists = []lcp.AppleMusicSyncedPlaylist{
+type syncedPlaylist struct {
+	Name         string
+	AppleMusicID string
+	SpotifyID    string
+}
+
+var playlists = []syncedPlaylist{
 	// {Name: "christmas", AppleMusicID: "p.QvDQEebsVbAeokL", SpotifyID: "4sxPVSb9VcA4RQOY7lKQxI"},
 	// {
 	// 	Name:         "friendsgiving",
@@ -65,7 +73,7 @@ type playlistResponse struct {
 func fetchPlaylist(
 	client *http.Client,
 	rdb *redis.Client,
-	playlist lcp.AppleMusicSyncedPlaylist,
+	playlist syncedPlaylist,
 ) (lcp.AppleMusicPlaylist, error) {
 	playlistData, err := sendAppleMusicAPIRequest[playlistResponse](
 		client,
@@ -110,6 +118,7 @@ func fetchPlaylist(
 	return lcp.AppleMusicPlaylist{
 		Name:         playlistData.Data[0].Attributes.Name,
 		LastModified: playlistData.Data[0].Attributes.LastModifiedDate,
+		TrackCount:   len(tracks),
 		Tracks:       tracks,
 		ID:           playlistData.Data[0].ID,
 		URL: fmt.Sprintf(
@@ -129,6 +138,7 @@ func playlistEndpoint(c *cache.Cache[lcp.AppleMusicCache]) http.HandlerFunc {
 		id := r.PathValue("id")
 
 		c.Mutex.RLock()
+		defer c.Mutex.RUnlock()
 		var p *lcp.AppleMusicPlaylist
 		for _, playlist := range c.Data.Playlists {
 			if playlist.ID == id {
@@ -138,13 +148,49 @@ func playlistEndpoint(c *cache.Cache[lcp.AppleMusicCache]) http.HandlerFunc {
 		}
 
 		if p == nil {
-			c.Mutex.RUnlock()
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
+
+		var (
+			page  = 1
+			limit = 100
+			total = int(math.Ceil(float64(len(p.Tracks)) / float64(limit)))
+			next  *int
+		)
+		rawPage := r.URL.Query().Get("page")
+		if rawPage != "" {
+			n, err := strconv.Atoi(rawPage)
+			if err != nil {
+				http.Error(w, "invalid page", http.StatusBadRequest)
+				return
+			}
+			page = n
+		}
+		if page > total {
+			http.Error(w, "page doesn't exist", http.StatusBadRequest)
+			return
+		}
+		start := min((page-1)*limit, len(p.Tracks))
+		end := min(start+limit, len(p.Tracks))
+		p.Tracks = p.Tracks[start:end]
+		if page == total {
+			next = nil
+		} else {
+			next = new(page + 1)
+		}
+
+		resp := lcp.AppleMusicPlaylistResponse{
+			Pagination: lcp.Pagination{
+				Current: page,
+				Total:   total,
+				Next:    next,
+			},
+			Playlist: *p,
+		}
+
 		w.Header().Set("Content-Type", "application/json")
-		err := json.NewEncoder(w).Encode(p)
-		c.Mutex.RUnlock()
+		err := json.NewEncoder(w).Encode(resp)
 		if err != nil {
 			err = fmt.Errorf("writing json to request: %w", err)
 			util.InternalServerError(w, err)
