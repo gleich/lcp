@@ -34,13 +34,14 @@ type AppleMusicSong struct {
 }
 
 type AppleMusicPlaylist struct {
-	Name         string           `json:"name"`
-	TrackCount   int              `json:"track_count"`
-	Tracks       []AppleMusicSong `json:"tracks"`
-	LastModified time.Time        `json:"last_modified"`
-	URL          string           `json:"url"`
-	SpotifyID    string           `json:"spotify_id"`
-	ID           string           `json:"id"`
+	Name             string           `json:"name"`
+	TrackCount       int              `json:"track_count"`
+	Tracks           []AppleMusicSong `json:"tracks"`
+	LastModified     time.Time        `json:"last_modified"`
+	DurationInMillis int              `json:"duration_in_millis"`
+	URL              string           `json:"url"`
+	SpotifyID        string           `json:"spotify_id"`
+	ID               string           `json:"id"`
 }
 
 type AppleMusicPlaylistSummary struct {

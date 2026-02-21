@@ -8,9 +8,6 @@ import (
 	"github.com/redis/go-redis/v9/maintnotifications"
 	"go.mattglei.ch/lcp/internal/api"
 	"go.mattglei.ch/lcp/internal/api/applemusic"
-	"go.mattglei.ch/lcp/internal/api/github"
-	"go.mattglei.ch/lcp/internal/api/steam"
-	"go.mattglei.ch/lcp/internal/api/workouts"
 	"go.mattglei.ch/lcp/internal/health"
 	"go.mattglei.ch/lcp/internal/secrets"
 	"go.mattglei.ch/timber"
@@ -46,9 +43,9 @@ func main() {
 		http.Redirect(w, r, "https://mattglei.ch/writing/lcp", http.StatusPermanentRedirect)
 	})
 	mux.HandleFunc("/health", health.Endpoint)
-	github.Setup(mux)
-	workouts.Setup(mux, client, rdb)
-	steam.Setup(mux, client, rdb)
+	// github.Setup(mux)
+	// workouts.Setup(mux, client, rdb)
+	// steam.Setup(mux, client, rdb)
 	applemusic.Setup(mux, client, rdb)
 
 	timber.InfoSince(start, "starting server")

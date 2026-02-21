@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
-	"go.mattglei.ch/lcp/internal/auth"
 	"go.mattglei.ch/lcp/internal/cache"
 	"go.mattglei.ch/lcp/internal/util"
 	"go.mattglei.ch/lcp/pkg/lcp"
@@ -115,12 +114,18 @@ func fetchPlaylist(
 		path = trackData.Next
 	}
 
+	duration := 0
+	for _, track := range tracks {
+		duration += track.DurationInMillis
+	}
+
 	return lcp.AppleMusicPlaylist{
-		Name:         playlistData.Data[0].Attributes.Name,
-		LastModified: playlistData.Data[0].Attributes.LastModifiedDate,
-		TrackCount:   len(tracks),
-		Tracks:       tracks,
-		ID:           playlistData.Data[0].ID,
+		Name:             playlistData.Data[0].Attributes.Name,
+		LastModified:     playlistData.Data[0].Attributes.LastModifiedDate,
+		TrackCount:       len(tracks),
+		DurationInMillis: duration,
+		Tracks:           tracks,
+		ID:               playlistData.Data[0].ID,
 		URL: fmt.Sprintf(
 			"https://music.apple.com/us/playlist/alt/%s",
 			playlistData.Data[0].Attributes.PlayParams.GlobalID,
@@ -131,9 +136,7 @@ func fetchPlaylist(
 
 func playlistEndpoint(c *cache.Cache[lcp.AppleMusicCache]) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !auth.IsAuthorized(w, r) {
-			return
-		}
+		util.SetCorsPolicy(w, r)
 
 		id := r.PathValue("id")
 
