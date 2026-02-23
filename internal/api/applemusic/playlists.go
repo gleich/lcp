@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
+	"go.mattglei.ch/lcp/internal/auth"
 	"go.mattglei.ch/lcp/internal/cache"
 	"go.mattglei.ch/lcp/internal/util"
 	"go.mattglei.ch/lcp/pkg/lcp"
@@ -136,7 +137,7 @@ func fetchPlaylist(
 
 func playlistEndpoint(c *cache.Cache[lcp.AppleMusicCache]) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		util.SetCorsPolicy(w, r)
+		auth.SetCorsPolicy(w, r)
 
 		id := r.PathValue("id")
 

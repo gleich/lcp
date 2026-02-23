@@ -48,7 +48,7 @@ func (c *Cache[T]) ServeStream(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	util.SetCorsPolicy(w, r)
+	auth.SetCorsPolicy(w, r)
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")

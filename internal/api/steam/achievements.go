@@ -18,7 +18,7 @@ type playerAchievementsResponse struct {
 			ApiName    string `json:"apiname"`
 			Achieved   int    `json:"achieved"`
 			UnlockTime *int64 `json:"unlocktime"`
-		}
+		} `json:"achievements"`
 	} `json:"playerStats"`
 }
 
