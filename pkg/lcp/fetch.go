@@ -68,7 +68,7 @@ func FetchCache[T CacheResponseData](client *Client) (CacheResponse[T], error) {
 
 	var cacheName string
 	switch any(zero.Data).(type) {
-	case AppleMusicCache:
+	case AppleMusicCacheResponse:
 		cacheName = "applemusic"
 	case []GitHubRepository:
 		cacheName = "github"
