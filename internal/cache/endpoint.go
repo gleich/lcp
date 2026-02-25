@@ -12,11 +12,11 @@ import (
 )
 
 func (c *Cache[T]) Endpoints(mux *http.ServeMux) {
-	mux.HandleFunc(fmt.Sprintf("GET /%s", c.instance), c.Serve)
+	mux.Handle(fmt.Sprintf("GET /%s", c.instance), c)
 	mux.HandleFunc(fmt.Sprintf("POST /%s/stream", c.instance), c.ServeStream)
 }
 
-func (c *Cache[T]) Serve(w http.ResponseWriter, r *http.Request) {
+func (c *Cache[T]) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if !auth.IsAuthorized(w, r) {
 		return
 	}

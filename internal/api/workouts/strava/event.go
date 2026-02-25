@@ -37,6 +37,7 @@ func EventRoute(
 ) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
+		r.Body = http.MaxBytesReader(w, r.Body, 5<<20) // 5 MiB
 		defer func() { _ = r.Body.Close() }()
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
