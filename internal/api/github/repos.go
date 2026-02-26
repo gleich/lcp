@@ -62,6 +62,10 @@ func fetchPinnedRepos(client *githubv4.Client) ([]lcp.GitHubRepository, error) {
 				timber.Warning(cacheInstance.LogPrefix(), "502 bad gateway")
 				return []lcp.GitHubRepository{}, api.ErrWarning
 			}
+			if strings.Contains(errMsg, "503 Service Unavailable body") {
+				timber.Warning(cacheInstance.LogPrefix(), "503 service unavailable")
+				return []lcp.GitHubRepository{}, api.ErrWarning
+			}
 		}
 		return nil, fmt.Errorf("querying github's graphql API: %w", err)
 	}
