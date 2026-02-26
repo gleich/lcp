@@ -13,6 +13,12 @@ import (
 	"go.mattglei.ch/lcp/pkg/lcp"
 )
 
+var bodyWeightExercises = []string{
+	"Chest Dip (Assisted)",
+	"Chest Dip",
+	"Pull Up (Assisted)",
+}
+
 type workoutsResponse struct {
 	Workouts []struct {
 		ID        string             `json:"id"`
@@ -38,12 +44,6 @@ func FetchWorkouts(client *http.Client) ([]lcp.Workout, error) {
 		)
 		if err != nil {
 			return []lcp.Workout{}, fmt.Errorf("fetch hevy workouts: %w", err)
-		}
-
-		bodyWeightExercises := []string{
-			"Chest Dip (Assisted)",
-			"Chest Dip",
-			"Pull Up (Assisted)",
 		}
 
 		for _, workout := range workouts.Workouts {
