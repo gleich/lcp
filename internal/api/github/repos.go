@@ -80,7 +80,7 @@ func fetchPinnedRepos(client *githubv4.Client) ([]lcp.GitHubRepository, error) {
 			Description:   string(node.Repository.Description),
 			UpdatedAt:     node.Repository.UpdatedAt.Time,
 			ID:            fmt.Sprint(node.Repository.ID),
-			URL:           fmt.Sprint(node.Repository.URL.URL),
+			URL:           node.Repository.URL.String(),
 		})
 	}
 	return repositories, nil
