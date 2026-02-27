@@ -40,7 +40,7 @@ func fetch[T any](client *Client, path string) (T, error) {
 
 	resp, err := client.httpClient.Do(req)
 	if err != nil {
-		return zero, fmt.Errorf("making requet: %w", err)
+		return zero, fmt.Errorf("making request: %w", err)
 	}
 
 	body, err := io.ReadAll(resp.Body)
