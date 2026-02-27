@@ -14,7 +14,6 @@ import (
 
 type cacheEntry struct {
 	BlurHash string
-	Created  time.Time
 	URL      string
 }
 
@@ -77,7 +76,6 @@ func createCacheEntry(
 
 	cacheData, err := json.Marshal(cacheEntry{
 		BlurHash: blurhash,
-		Created:  time.Now(),
 		URL:      url,
 	})
 	if err != nil {
