@@ -24,11 +24,11 @@ type AppleMusicSong struct {
 	Track            string  `json:"track"`
 	Artist           string  `json:"artist"`
 	DurationInMillis int     `json:"duration_in_millis"`
-	AlbumArtURL      *string `json:"album_art_url"`
-	AlbumArtBlurhash *string `json:"album_art_blurhash"`
+	AlbumArtURL      *string `json:"album_art_url,omitempty"`
+	AlbumArtBlurhash *string `json:"album_art_blurhash,omitempty"`
 	URL              string  `json:"url"`
 	ID               string  `json:"id"`
-	PreviewAudioURL  *string `json:"preview_audio_url"`
+	PreviewAudioURL  *string `json:"preview_audio_url,omitempty"`
 
 	AlbumArtPermissionsExpiration *time.Time `json:"-"`
 }
