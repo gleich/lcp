@@ -11,7 +11,11 @@ import (
 
 func (c *Cache[T]) persistToFile() {
 	var file *os.File
-	defer func() { _ = file.Close() }()
+	defer func() {
+		if file != nil {
+			_ = file.Close()
+		}
+	}()
 	if _, err := os.Stat(c.filePath); os.IsNotExist(err) {
 		folder := filepath.Dir(c.filePath)
 		err := os.MkdirAll(folder, 0700)
