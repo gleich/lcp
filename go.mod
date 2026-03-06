@@ -1,6 +1,6 @@
 module go.mattglei.ch/lcp
 
-go 1.26.0
+go 1.26.1
 
 require (
 	github.com/buckket/go-blurhash v1.1.0
@@ -9,6 +9,7 @@ require (
 	github.com/minio/minio-go/v7 v7.0.98
 	github.com/redis/go-redis/v9 v9.18.0
 	github.com/shurcooL/githubv4 v0.0.0-20260209031235-2402fdf4a9ed
+	go.mattglei.ch/oplog v0.0.5
 	go.mattglei.ch/timber v1.7.1
 	golang.org/x/oauth2 v0.35.0
 )
