@@ -34,7 +34,12 @@ var (
 			}
 		}
 		Workouts struct {
-			Setup  tlog.Task
+			Setup tlog.Task
+			Hevy  struct {
+				Fetch struct {
+					Workouts tlog.Task
+				}
+			}
 			Strava struct {
 				Fetch struct {
 					RefreshTokens   tlog.Task

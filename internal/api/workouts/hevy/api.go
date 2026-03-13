@@ -7,9 +7,10 @@ import (
 
 	"go.mattglei.ch/lcp/internal/api"
 	"go.mattglei.ch/lcp/internal/secrets"
+	"go.mattglei.ch/tlog"
 )
 
-func sendHevyAPIRequest[T any](client *http.Client, path string) (T, error) {
+func sendHevyAPIRequest[T any](task tlog.Task, client *http.Client, path string) (T, error) {
 	var zero T
 	req, err := http.NewRequest(
 		http.MethodGet,
@@ -21,7 +22,7 @@ func sendHevyAPIRequest[T any](client *http.Client, path string) (T, error) {
 	}
 	req.Header.Set("api-key", secrets.ENV.HevyAccessToken)
 
-	resp, err := api.RequestJSON[T]("[hevy]", client, req)
+	resp, err := api.RequestJSON[T](task, client, req)
 	if err != nil {
 		return zero, fmt.Errorf("making hevy api request: %w", err)
 	}

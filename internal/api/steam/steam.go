@@ -12,8 +12,6 @@ import (
 
 const cacheInstance = cache.Steam
 
-var logCtx = []any{"cache"}
-
 func Setup(mux *http.ServeMux, client *http.Client, rdb *redis.Client) {
 	task, start := tasks.Cache.Steam.Setup.Start()
 	games, err := fetchRecentlyPlayedGames(client, rdb)
