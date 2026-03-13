@@ -10,8 +10,9 @@ import (
 	"github.com/redis/go-redis/v9"
 	"go.mattglei.ch/lcp/internal/cache"
 	"go.mattglei.ch/lcp/internal/secrets"
+	"go.mattglei.ch/lcp/internal/tasks"
+	"go.mattglei.ch/lcp/internal/util"
 	"go.mattglei.ch/lcp/pkg/lcp"
-	"go.mattglei.ch/timber"
 )
 
 type event struct {
@@ -35,21 +36,22 @@ func EventRoute(
 		stravaTokens Tokens) ([]lcp.Workout, error),
 	tokens Tokens,
 ) http.HandlerFunc {
+	task := tasks.Endpoint
+	logCtx := []any{"cache", "workouts"}
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		r.Body = http.MaxBytesReader(w, r.Body, 5<<20) // 5 MiB
 		defer func() { _ = r.Body.Close() }()
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
-			timber.Error(err, "reading response body failed")
+			task.Error(err, "reading response body failed", logCtx...)
 			return
 		}
 
 		var eventData event
 		err = json.Unmarshal(body, &eventData)
 		if err != nil {
-			timber.Error(err, "failed to parse json")
-			timber.Debug(string(body))
+			task.Error(err, "failed to parse json", append([]any{"body", string(body)}, logCtx...))
 			return
 		}
 
@@ -60,13 +62,13 @@ func EventRoute(
 
 		err = tokens.RefreshIfExpired(client)
 		if err != nil {
-			timber.Error(err, "failed to refresh token")
+			task.Error(err, "failed to refresh token")
 			return
 		}
 
 		activities, err := fetch(client, minioClient, rdb, tokens)
 		if err != nil {
-			timber.ErrorMsg("failed to update strava cache")
+			task.Error(err, "failed to fetch new data for workouts cache")
 			return
 		}
 		workoutsCache.Update(start, activities)
@@ -74,7 +76,6 @@ func EventRoute(
 }
 
 func ChallengeRoute(w http.ResponseWriter, r *http.Request) {
-	start := time.Now()
 	verifyToken := r.URL.Query().Get("hub.verify_token")
 	if verifyToken != secrets.ENV.StravaVerifyToken {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -87,7 +88,6 @@ func ChallengeRoute(w http.ResponseWriter, r *http.Request) {
 		Challenge string `json:"hub.challenge"`
 	}{Challenge: challenge})
 	if err != nil {
-		timber.Error(err, "failed to write json")
+		util.InternalServerError(w, err)
 	}
-	timber.DoneSince(start, logPrefix, "handled challenge successfully")
 }

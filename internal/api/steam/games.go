@@ -13,6 +13,7 @@ import (
 	"go.mattglei.ch/lcp/internal/cache"
 	"go.mattglei.ch/lcp/internal/images"
 	"go.mattglei.ch/lcp/internal/secrets"
+	"go.mattglei.ch/lcp/internal/tasks"
 	"go.mattglei.ch/lcp/pkg/lcp"
 )
 
@@ -43,7 +44,7 @@ func fetchRecentlyPlayedGames(client *http.Client, rdb *redis.Client) ([]lcp.Ste
 		return nil, fmt.Errorf("creating request for steam API owned games: %w", err)
 	}
 	ownedGames, err := api.RequestJSON[ownedGamesResponse](
-		cacheInstance.LogPrefix(),
+		tasks.Cache.Steam.Fetch.RecentlyPlayed,
 		client,
 		req,
 	)

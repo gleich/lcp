@@ -8,8 +8,8 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"go.mattglei.ch/lcp/internal/cache"
+	"go.mattglei.ch/lcp/internal/tasks"
 	"go.mattglei.ch/lcp/pkg/lcp"
-	"go.mattglei.ch/timber"
 )
 
 const cacheInstance = cache.AppleMusic
@@ -36,10 +36,10 @@ func cacheUpdate(client *http.Client, rdb *redis.Client) (lcp.AppleMusicCache, e
 }
 
 func Setup(mux *http.ServeMux, client *http.Client, rdb *redis.Client) {
-	start := time.Now()
+	task, start := tasks.Cache.AppleMusic.Setup.Start()
 	data, err := cacheUpdate(client, rdb)
 	if err != nil {
-		timber.Error(err, "initial fetch of applemusic cache data failed")
+		task.Error(err, "initial fetch of apple music data failed")
 	}
 
 	applemusicCache := cache.New(cacheInstance, data, err == nil)
@@ -55,7 +55,7 @@ func Setup(mux *http.ServeMux, client *http.Client, rdb *redis.Client) {
 		},
 		10*time.Second,
 	)
-	timber.DoneSince(start, cacheInstance.LogPrefix(), "setup cache and endpoints")
+	task.InfoSince("setup cache and endpoints", start)
 }
 
 func marshalResponse(

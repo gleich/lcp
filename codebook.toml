@@ -1,0 +1,8 @@
+words = [
+    "apiname",
+    "ipv",
+    "latlng",
+    "rdb",
+    "steamid",
+    "unlocktime",
+]

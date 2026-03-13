@@ -11,6 +11,7 @@ import (
 	"github.com/minio/minio-go/v7"
 	"go.mattglei.ch/lcp/internal/api"
 	"go.mattglei.ch/lcp/internal/secrets"
+	"go.mattglei.ch/lcp/internal/tasks"
 	"go.mattglei.ch/lcp/pkg/lcp"
 )
 
@@ -46,7 +47,7 @@ func FetchMap(client *http.Client, polyline string) ([]byte, error) {
 		return nil, fmt.Errorf("creating request (url: %s): %w", url, err)
 	}
 
-	b, err := api.Request(logPrefix, client, req)
+	b, err := api.Request(tasks.Cache.Workouts.Strava.Fetch.Map, client, req)
 	if err != nil {
 		return nil, fmt.Errorf("sending request: %w", err)
 	}

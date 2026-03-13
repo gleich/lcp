@@ -9,6 +9,7 @@ import (
 
 	"github.com/minio/minio-go/v7"
 	"github.com/redis/go-redis/v9"
+	"go.mattglei.ch/lcp/internal/tasks"
 	"go.mattglei.ch/lcp/pkg/lcp"
 )
 
@@ -58,6 +59,7 @@ func FetchActivities(
 	tokens Tokens,
 ) ([]lcp.Workout, error) {
 	stravaActivities, err := sendStravaAPIRequest[[]activity](
+		tasks.Cache.Workouts.Strava.Fetch.Activities,
 		client,
 		"api/v3/athlete/activities",
 		tokens,
@@ -100,6 +102,7 @@ func FetchHeartrate(client *http.Client, id string, tokens Tokens) ([]int, error
 		"resolution":  {"low"},
 	}
 	stream, err := sendStravaAPIRequest[struct{ Heartrate activityStream }](
+		tasks.Cache.Workouts.Strava.Fetch.Heartrate,
 		client,
 		fmt.Sprintf("api/v3/activities/%s/streams?%s", id, params.Encode()),
 		tokens,
@@ -117,6 +120,7 @@ func FetchActivityDetails(
 	tokens Tokens,
 ) (detailedStravaActivity, error) {
 	details, err := sendStravaAPIRequest[detailedStravaActivity](
+		tasks.Cache.Workouts.Strava.Fetch.ActivityDetails,
 		client,
 		fmt.Sprintf("api/v3/activities/%s", id),
 		tokens,
