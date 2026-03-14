@@ -10,7 +10,6 @@ import (
 	"slices"
 
 	"go.mattglei.ch/lcp/internal/secrets"
-	"go.mattglei.ch/lcp/internal/tasks"
 	"go.mattglei.ch/lcp/pkg/lcp"
 )
 
@@ -40,7 +39,6 @@ func FetchWorkouts(client *http.Client) ([]lcp.Workout, error) {
 		page++
 		params := url.Values{"page": {strconv.Itoa(page)}}
 		workouts, err := sendHevyAPIRequest[workoutsResponse](
-			tasks.Cache.Workouts.Hevy.Fetch.Workouts,
 			client,
 			"/v1/workouts?"+params.Encode(),
 		)
@@ -53,7 +51,7 @@ func FetchWorkouts(client *http.Client) ([]lcp.Workout, error) {
 			sets := 0
 			for _, exercise := range workout.Exercises {
 				for i, set := range exercise.Sets {
-					// account for body weight exercises which are (body weight - weight)
+					// account for bodyweight exercises which are (body weight - weight)
 					if slices.Contains(bodyWeightExercises, exercise.Title) {
 						totalVolume += (secrets.ENV.HevyBodyWeightLBS*0.45359237 - set.WeightKg) * float64(
 							set.Reps,
