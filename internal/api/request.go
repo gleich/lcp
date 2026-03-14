@@ -24,13 +24,13 @@ var ErrWarning = errors.New("non-critical error encountered during request")
 // unexpected EOFs, and TCP connection resets—by logging warnings and returning a non-critical
 // WarningError. Non-2xx HTTP responses are also treated as warnings.
 func Request(task tlog.Task, client *http.Client, request *http.Request) ([]byte, error) {
+	task, start := task.Extend("request").Start()
 	var (
 		url       = request.URL.String()
 		path      = request.URL.Path
 		resp, err = client.Do(request)
 		logCtx    = []any{"path", path}
 	)
-	task, start := task.Extend("request").Start()
 	if err != nil {
 		if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
 			task.Warn("connection timed out", logCtx...)
