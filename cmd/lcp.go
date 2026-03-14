@@ -12,13 +12,21 @@ import (
 	"go.mattglei.ch/lcp/internal/api/steam"
 	"go.mattglei.ch/lcp/internal/api/workouts"
 	"go.mattglei.ch/lcp/internal/health"
-	"go.mattglei.ch/lcp/internal/middleware"
 	"go.mattglei.ch/lcp/internal/secrets"
-	"go.mattglei.ch/lcp/internal/tasks"
+	"go.mattglei.ch/timber"
 )
 
 func main() {
-	task, start := tasks.StartServer.Start()
+	start := time.Now()
+	ny, err := time.LoadLocation("America/New_York")
+	if err != nil {
+		timber.Fatal(err, "failed to load new york timezone")
+	}
+	timber.Timezone(ny)
+	timber.TimeFormat("01/02 03:04:05 PM MST")
+
+	timber.InfoSince(start, "booted")
+
 	secrets.Load()
 
 	var (
@@ -43,16 +51,16 @@ func main() {
 	steam.Setup(mux, client, rdb)
 	applemusic.Setup(mux, client, rdb)
 
-	task.InfoSince("starting server", start)
+	timber.InfoSince(start, "starting server")
 	server := &http.Server{
 		Addr:         ":8000",
-		Handler:      middleware.LogRequest(mux),
+		Handler:      mux,
 		ReadTimeout:  20 * time.Second,
 		WriteTimeout: 20 * time.Second,
 		IdleTimeout:  60 * time.Second,
 	}
-	err := server.ListenAndServe()
+	err = server.ListenAndServe()
 	if err != nil {
-		task.ErrorSince(err, "failed to start server", start)
+		timber.Fatal(err, "failed to start router")
 	}
 }

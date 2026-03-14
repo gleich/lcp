@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"go.mattglei.ch/lcp/internal/cache"
-	"go.mattglei.ch/lcp/internal/tasks"
 	"go.mattglei.ch/lcp/internal/util"
 	"go.mattglei.ch/lcp/pkg/lcp"
+	"go.mattglei.ch/timber"
 )
 
 // We need a custom diff check function due to the fact that the apple music image service returns
@@ -49,7 +49,6 @@ func diff(c *cache.Cache[lcp.AppleMusicCache], old, new lcp.AppleMusicCache) (bo
 }
 
 func diffSongList(oldSongs, newSongs []lcp.AppleMusicSong) (bool, error) {
-	task := tasks.Cache.AppleMusic.Songs.DiffList
 	if len(oldSongs) != len(newSongs) {
 		return true, nil
 	}
@@ -72,13 +71,9 @@ func diffSongList(oldSongs, newSongs []lcp.AppleMusicSong) (bool, error) {
 					newURL = new.AlbumArtURL
 				)
 				if *oldURL == *newURL {
-					task.Warn(
-						"album art did not update even though it expired",
-						"old-url",
-						*oldURL,
-						"new-url",
-						*newURL,
-					)
+					timber.Warning("album art did not update even though it expired")
+					timber.Warning("old url:", *oldURL)
+					timber.Warning("new url:", *newURL)
 				} else {
 					return true, nil
 				}

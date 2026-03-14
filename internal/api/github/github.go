@@ -8,14 +8,14 @@ import (
 	"github.com/shurcooL/githubv4"
 	"go.mattglei.ch/lcp/internal/cache"
 	"go.mattglei.ch/lcp/internal/secrets"
-	"go.mattglei.ch/lcp/internal/tasks"
+	"go.mattglei.ch/timber"
 	"golang.org/x/oauth2"
 )
 
 const cacheInstance = cache.GitHub
 
 func Setup(mux *http.ServeMux) {
-	task, start := tasks.Cache.GitHub.Setup.Start()
+	start := time.Now()
 	githubTokenSource := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: secrets.ENV.GitHubAccessToken},
 	)
@@ -24,13 +24,12 @@ func Setup(mux *http.ServeMux) {
 
 	pinnedRepos, err := fetchPinnedRepos(githubClient)
 	if err != nil {
-		task.Error(err, "fetching initial pinned repos failed")
+		timber.Error(err, "fetching initial pinned repos failed")
 	}
 
 	githubCache := cache.New(cacheInstance, pinnedRepos, err == nil)
 	githubCache.Endpoints(mux)
-
 	go cache.UpdatePeriodically(githubCache, githubClient, fetchPinnedRepos, 5*time.Second)
 
-	task.InfoSince("setup cache and endpoint", start)
+	timber.DoneSince(start, cacheInstance.LogPrefix(), "setup cache and endpoint")
 }

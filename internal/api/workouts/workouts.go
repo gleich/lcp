@@ -2,6 +2,7 @@ package workouts
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
@@ -9,17 +10,17 @@ import (
 	"go.mattglei.ch/lcp/internal/api/workouts/strava"
 	"go.mattglei.ch/lcp/internal/cache"
 	"go.mattglei.ch/lcp/internal/secrets"
-	"go.mattglei.ch/lcp/internal/tasks"
+	"go.mattglei.ch/timber"
 )
 
 const cacheInstance = cache.Workouts
 
 func Setup(mux *http.ServeMux, client *http.Client, rdb *redis.Client) {
-	task, start := tasks.Cache.Workouts.Setup.Start()
+	start := time.Now()
 	stravaTokens := strava.LoadTokens()
 	err := stravaTokens.RefreshIfExpired(client)
 	if err != nil {
-		task.Error(err, "failed to refresh strava token data on boot")
+		timber.Error(err, "failed to refresh strava token data on boot")
 	}
 	minioClient, err := minio.New(secrets.ENV.MinioEndpoint, &minio.Options{
 		Creds: credentials.NewStaticV4(
@@ -30,11 +31,11 @@ func Setup(mux *http.ServeMux, client *http.Client, rdb *redis.Client) {
 		Secure: true,
 	})
 	if err != nil {
-		task.Error(err, "failed to create minio client")
+		timber.Fatal(err, "failed to create minio client")
 	}
 	activities, err := fetch(client, minioClient, rdb, stravaTokens)
 	if err != nil {
-		task.Error(err, "failed to load initial data for workouts cache; not updating")
+		timber.Error(err, "failed to load initial data for workouts cache; not updating")
 	}
 	workoutsCache := cache.New(cacheInstance, activities, err == nil)
 
@@ -45,5 +46,5 @@ func Setup(mux *http.ServeMux, client *http.Client, rdb *redis.Client) {
 	)
 	mux.HandleFunc("GET /strava/event", strava.ChallengeRoute)
 
-	task.InfoSince("setup cache and endpoints", start)
+	timber.DoneSince(start, cacheInstance.LogPrefix(), "setup cache and endpoints")
 }

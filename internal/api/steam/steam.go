@@ -6,19 +6,17 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"go.mattglei.ch/lcp/internal/cache"
-	"go.mattglei.ch/lcp/internal/tasks"
 	"go.mattglei.ch/lcp/pkg/lcp"
+	"go.mattglei.ch/timber"
 )
 
 const cacheInstance = cache.Steam
 
-var logCtx = []any{"cache"}
-
 func Setup(mux *http.ServeMux, client *http.Client, rdb *redis.Client) {
-	task, start := tasks.Cache.Steam.Setup.Start()
+	start := time.Now()
 	games, err := fetchRecentlyPlayedGames(client, rdb)
 	if err != nil {
-		task.Error(err, "initial fetch of steam games failed")
+		timber.Error(err, "initial fetch of steam games failed")
 	}
 
 	steamCache := cache.New(cacheInstance, games, err == nil)
@@ -31,5 +29,5 @@ func Setup(mux *http.ServeMux, client *http.Client, rdb *redis.Client) {
 		},
 		10*time.Minute,
 	)
-	task.InfoSince("setup cache and endpoint", start)
+	timber.DoneSince(start, cacheInstance.LogPrefix(), "setup cache and endpoint")
 }

@@ -8,6 +8,7 @@ import (
 
 	"go.mattglei.ch/lcp/internal/auth"
 	"go.mattglei.ch/lcp/internal/util"
+	"go.mattglei.ch/timber"
 )
 
 func (c *Cache[T]) Endpoints(mux *http.ServeMux) {
@@ -99,10 +100,7 @@ func (c *Cache[T]) ServeStream(w http.ResponseWriter, r *http.Request) {
 			flusher.Flush()
 		case frame, ok := <-channel:
 			if !ok {
-				util.InternalServerError(
-					w,
-					errors.New("failed to get data from channel for update"),
-				)
+				timber.ErrorMsg("failed to get data from channel for update")
 			}
 			_, err = fmt.Fprintf(w, "event: message\ndata: %s\n\n", frame)
 			if err != nil {

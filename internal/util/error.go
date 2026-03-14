@@ -3,10 +3,10 @@ package util
 import (
 	"net/http"
 
-	"go.mattglei.ch/lcp/internal/tasks"
+	"go.mattglei.ch/timber"
 )
 
 func InternalServerError(w http.ResponseWriter, err error) {
-	tasks.Endpoint.Error(err, err.Error())
+	timber.Error(err)
 	http.Error(w, err.Error(), http.StatusInternalServerError)
 }

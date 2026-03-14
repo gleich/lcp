@@ -11,7 +11,6 @@ import (
 	"github.com/redis/go-redis/v9"
 	"go.mattglei.ch/lcp/internal/auth"
 	"go.mattglei.ch/lcp/internal/cache"
-	"go.mattglei.ch/lcp/internal/tasks"
 	"go.mattglei.ch/lcp/internal/util"
 	"go.mattglei.ch/lcp/pkg/lcp"
 )
@@ -76,9 +75,7 @@ func fetchPlaylist(
 	rdb *redis.Client,
 	playlist syncedPlaylist,
 ) (lcp.AppleMusicPlaylist, error) {
-	task := tasks.Cache.AppleMusic.FetchPlaylist
 	playlistData, err := sendAppleMusicAPIRequest[playlistResponse](
-		task,
 		client,
 		fmt.Sprintf("/v1/me/library/playlists/%s", playlist.AppleMusicID),
 	)
@@ -93,7 +90,7 @@ func fetchPlaylist(
 	var tracks []lcp.AppleMusicSong
 	path := fmt.Sprintf("/v1/me/library/playlists/%s/tracks", playlist.AppleMusicID)
 	for {
-		trackData, err := sendAppleMusicAPIRequest[playlistTracksResponse](task, client, path)
+		trackData, err := sendAppleMusicAPIRequest[playlistTracksResponse](client, path)
 		if err != nil {
 			return lcp.AppleMusicPlaylist{}, fmt.Errorf(
 				"fetching playlist data for %s: %w",

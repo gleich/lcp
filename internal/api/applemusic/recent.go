@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/redis/go-redis/v9"
-	"go.mattglei.ch/lcp/internal/tasks"
 	"go.mattglei.ch/lcp/pkg/lcp"
 )
 
@@ -18,7 +17,6 @@ func fetchRecentlyPlayed(
 	rdb *redis.Client,
 ) ([]lcp.AppleMusicSong, error) {
 	response, err := sendAppleMusicAPIRequest[recentlyPlayedResponse](
-		tasks.Cache.AppleMusic.FetchRecentlyPlayed,
 		client,
 		"/v1/me/recent/played/tracks",
 	)
