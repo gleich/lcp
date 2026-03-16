@@ -40,7 +40,7 @@ func (c *Cache[T]) ServeStream(w http.ResponseWriter, r *http.Request) {
 	if rc := http.NewResponseController(w); rc != nil {
 		err := rc.SetWriteDeadline(time.Time{})
 		if err != nil {
-			util.InternalServerError(w, err, c.LogAttr, "failed to set writing deadline to zero")
+			timber.Warning("failed to set writing deadline to zero", c.LogAttr)
 			return
 		}
 	}
