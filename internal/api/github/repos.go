@@ -7,6 +7,7 @@ import (
 	"net"
 	"strings"
 	"syscall"
+	"time"
 
 	"github.com/shurcooL/githubv4"
 	"go.mattglei.ch/lcp/internal/api"
@@ -40,6 +41,7 @@ type pinnedItemsQuery struct {
 
 func fetchPinnedRepos(client *githubv4.Client) ([]lcp.GitHubRepository, error) {
 	var query pinnedItemsQuery
+	start := time.Now()
 	err := client.Query(context.Background(), &query, nil)
 	if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
 		timber.Warning("connection timed out for getting pinned repos")
@@ -69,6 +71,7 @@ func fetchPinnedRepos(client *githubv4.Client) ([]lcp.GitHubRepository, error) {
 		}
 		return nil, fmt.Errorf("querying github's graphql API: %w", err)
 	}
+	timber.DoneSince(start, "made request", logAttr)
 
 	var repositories []lcp.GitHubRepository
 	for _, node := range query.Viewer.PinnedItems.Nodes {
