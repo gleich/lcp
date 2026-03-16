@@ -59,7 +59,7 @@ func fetchAchievementsPercentage(
 		return nil, fmt.Errorf("creating request for player achievements: %w", err)
 	}
 
-	body, err := api.Request(cacheInstance.LogPrefix(), client, req)
+	body, err := api.Request(client, req, logAttr)
 	if err != nil {
 		return nil, fmt.Errorf("sending request for player achievements from %d: %w", appID, err)
 	}
@@ -72,7 +72,7 @@ func fetchAchievementsPercentage(
 	err = json.Unmarshal(body, &playerAchievements)
 	if err != nil {
 		err = fmt.Errorf("parsing json for player achievements (id: %d): %w", appID, err)
-		timber.Debug("body:", string(body))
+		timber.Debug("body:", timber.A("body", string(body)), logAttr)
 		return nil, err
 	}
 
@@ -93,7 +93,7 @@ func fetchAchievementsPercentage(
 	if err != nil {
 		return nil, fmt.Errorf("creating request for owned gamed (id: %d): %w", appID, err)
 	}
-	gameSchema, err := api.RequestJSON[schemaGameResponse](cacheInstance.LogPrefix(), client, req)
+	gameSchema, err := api.RequestJSON[schemaGameResponse](client, req, logAttr)
 	if err != nil {
 		return nil, fmt.Errorf("getting game schema (id: %d): %w", appID, err)
 	}

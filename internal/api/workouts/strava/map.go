@@ -46,7 +46,7 @@ func FetchMap(client *http.Client, polyline string) ([]byte, error) {
 		return nil, fmt.Errorf("creating request (url: %s): %w", url, err)
 	}
 
-	b, err := api.Request(logPrefix, client, req)
+	b, err := api.Request(client, req, logAttr)
 	if err != nil {
 		return nil, fmt.Errorf("sending request: %w", err)
 	}

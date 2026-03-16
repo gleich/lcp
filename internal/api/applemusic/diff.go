@@ -71,9 +71,11 @@ func diffSongList(oldSongs, newSongs []lcp.AppleMusicSong) (bool, error) {
 					newURL = new.AlbumArtURL
 				)
 				if *oldURL == *newURL {
-					timber.Warning("album art did not update even though it expired")
-					timber.Warning("old url:", *oldURL)
-					timber.Warning("new url:", *newURL)
+					timber.Warning(
+						"album art did not update even though it expired",
+						timber.A("old-url", *oldURL),
+						timber.A("new-url", *newURL),
+					)
 				} else {
 					return true, nil
 				}

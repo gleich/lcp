@@ -24,15 +24,13 @@ func (c *Cache[T]) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	c.Mutex.RLock()
 	data, err := c.MarshalResponse(c)
 	if err != nil {
-		err = fmt.Errorf("creating endpoint data: %w", err)
-		util.InternalServerError(w, err)
+		util.InternalServerError(w, err, c.LogAttr, "failed to marshal endpoint data")
 		return
 	}
 	c.Mutex.RUnlock()
 	_, err = w.Write([]byte(data))
 	if err != nil {
-		err = fmt.Errorf("writing data to request: %w", err)
-		util.InternalServerError(w, err)
+		util.InternalServerError(w, err, c.LogAttr, "failed to write data to request")
 		return
 	}
 }
@@ -42,8 +40,7 @@ func (c *Cache[T]) ServeStream(w http.ResponseWriter, r *http.Request) {
 	if rc := http.NewResponseController(w); rc != nil {
 		err := rc.SetWriteDeadline(time.Time{})
 		if err != nil {
-			err = fmt.Errorf("setting writing deadline to zero: %w", err)
-			util.InternalServerError(w, err)
+			util.InternalServerError(w, err, c.LogAttr, "failed to set writing deadline to zero")
 			return
 		}
 	}
@@ -56,16 +53,19 @@ func (c *Cache[T]) ServeStream(w http.ResponseWriter, r *http.Request) {
 
 	flusher, ok := w.(http.Flusher)
 	if !ok {
-		err := errors.New("creating flusher")
-		util.InternalServerError(w, err)
+		util.InternalServerError(
+			w,
+			errors.New("creating flusher"),
+			c.LogAttr,
+			"failed to create flusher",
+		)
 		return
 	}
 
 	// telling client how long to wait before reconnecting
 	_, err := w.Write([]byte("retry: 5000\n\n"))
 	if err != nil {
-		err = fmt.Errorf("writing retry information: %w", err)
-		util.InternalServerError(w, err)
+		util.InternalServerError(w, err, c.LogAttr, "failed to write reconnection time")
 		return
 	}
 	flusher.Flush()
@@ -93,8 +93,7 @@ func (c *Cache[T]) ServeStream(w http.ResponseWriter, r *http.Request) {
 		case <-ticker.C:
 			_, err := fmt.Fprintf(w, ": heartbeat\n\n")
 			if err != nil {
-				err = fmt.Errorf("writing retry information: %w", err)
-				util.InternalServerError(w, err)
+				util.InternalServerError(w, err, c.LogAttr, "failed to write heartbeat")
 				return
 			}
 			flusher.Flush()
@@ -104,8 +103,7 @@ func (c *Cache[T]) ServeStream(w http.ResponseWriter, r *http.Request) {
 			}
 			_, err = fmt.Fprintf(w, "event: message\ndata: %s\n\n", frame)
 			if err != nil {
-				err = fmt.Errorf("writing data: %w", err)
-				util.InternalServerError(w, err)
+				util.InternalServerError(w, err, c.LogAttr, "writing data")
 				return
 			}
 			flusher.Flush()

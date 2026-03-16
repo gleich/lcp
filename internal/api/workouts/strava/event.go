@@ -10,6 +10,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"go.mattglei.ch/lcp/internal/cache"
 	"go.mattglei.ch/lcp/internal/secrets"
+	"go.mattglei.ch/lcp/internal/util"
 	"go.mattglei.ch/lcp/pkg/lcp"
 	"go.mattglei.ch/timber"
 )
@@ -41,15 +42,16 @@ func EventRoute(
 		defer func() { _ = r.Body.Close() }()
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
-			timber.Error(err, "reading response body failed")
+			util.InternalServerError(w, err, logAttr, "reading response body failed")
+			timber.Error(err, "reading response body failed", logAttr)
 			return
 		}
 
 		var eventData event
 		err = json.Unmarshal(body, &eventData)
 		if err != nil {
-			timber.Error(err, "failed to parse json")
-			timber.Debug(string(body))
+			timber.Debug(string(body), logAttr)
+			util.InternalServerError(w, err, logAttr, "failed to parse json")
 			return
 		}
 
@@ -60,13 +62,13 @@ func EventRoute(
 
 		err = tokens.RefreshIfExpired(client)
 		if err != nil {
-			timber.Error(err, "failed to refresh token")
+			util.InternalServerError(w, err, logAttr, "failed to refresh token")
 			return
 		}
 
 		activities, err := fetch(client, minioClient, rdb, tokens)
 		if err != nil {
-			timber.ErrorMsg("failed to update strava cache")
+			util.InternalServerError(w, err, logAttr, "failed to update strava cache")
 			return
 		}
 		workoutsCache.Update(start, activities)
@@ -89,5 +91,5 @@ func ChallengeRoute(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		timber.Error(err, "failed to write json")
 	}
-	timber.DoneSince(start, logPrefix, "handled challenge successfully")
+	timber.DoneSince(start, "handled challenge successfully", logAttr)
 }

@@ -42,28 +42,28 @@ func fetchPinnedRepos(client *githubv4.Client) ([]lcp.GitHubRepository, error) {
 	var query pinnedItemsQuery
 	err := client.Query(context.Background(), &query, nil)
 	if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
-		timber.Warning(cacheInstance.LogPrefix(), "connection timed out for getting pinned repos")
+		timber.Warning("connection timed out for getting pinned repos")
 		return []lcp.GitHubRepository{}, api.ErrWarning
 	}
 	if err != nil && (errors.Is(err, syscall.ECONNRESET) ||
 		strings.Contains(err.Error(), "connection reset by peer")) {
-		timber.Warning(cacheInstance.LogPrefix(),
-			"connection reset by peer while getting pinned repos")
+		timber.Warning(
+			"connection reset by peer while getting pinned repos", logAttr)
 		return []lcp.GitHubRepository{}, api.ErrWarning
 	}
 	if err != nil {
 		errMsg := err.Error()
 		if strings.Contains(errMsg, "non-200 OK status code") {
 			if strings.Contains(errMsg, "500 Internal Server Error body") {
-				timber.Warning(cacheInstance.LogPrefix(), "500 internal server error")
+				timber.Warning("500 internal server error", logAttr)
 				return []lcp.GitHubRepository{}, api.ErrWarning
 			}
 			if strings.Contains(errMsg, "502 Bad Gateway body") {
-				timber.Warning(cacheInstance.LogPrefix(), "502 bad gateway")
+				timber.Warning("502 bad gateway", logAttr)
 				return []lcp.GitHubRepository{}, api.ErrWarning
 			}
 			if strings.Contains(errMsg, "503 Service Unavailable body") {
-				timber.Warning(cacheInstance.LogPrefix(), "503 service unavailable")
+				timber.Warning("503 service unavailable", logAttr)
 				return []lcp.GitHubRepository{}, api.ErrWarning
 			}
 		}

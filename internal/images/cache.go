@@ -24,11 +24,12 @@ func BlurHash(
 	rdb *redis.Client,
 	url string,
 	decoder ImageDecoder,
+	cacheLogAttr timber.Attr,
 ) (string, error) {
 	ctx := context.Background()
 	result, err := rdb.Get(ctx, url).Result()
 	if err == redis.Nil {
-		blurhash, err := createCacheEntry(client, rdb, url, decoder, ctx)
+		blurhash, err := createCacheEntry(client, rdb, url, decoder, ctx, cacheLogAttr)
 		if err != nil {
 			return "", fmt.Errorf("generating blurhash for %s: %w", url, err)
 		}
@@ -54,6 +55,7 @@ func createCacheEntry(
 	url string,
 	decoder ImageDecoder,
 	ctx context.Context,
+	cacheLogAttr timber.Attr,
 ) (string, error) {
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
@@ -64,7 +66,7 @@ func createCacheEntry(
 		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36",
 	)
 
-	body, err := api.Request("[image cache]", client, req)
+	body, err := api.Request(client, req, cacheLogAttr)
 	if err != nil {
 		return "", fmt.Errorf("reading response body: %w", err)
 	}

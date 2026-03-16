@@ -14,6 +14,8 @@ import (
 
 const cacheInstance = cache.AppleMusic
 
+var logAttr = cacheInstance.LogAttr()
+
 func cacheUpdate(client *http.Client, rdb *redis.Client) (lcp.AppleMusicCache, error) {
 	recentlyPlayed, err := fetchRecentlyPlayed(client, rdb)
 	if err != nil {
@@ -36,7 +38,6 @@ func cacheUpdate(client *http.Client, rdb *redis.Client) (lcp.AppleMusicCache, e
 }
 
 func Setup(mux *http.ServeMux, client *http.Client, rdb *redis.Client) {
-	start := time.Now()
 	data, err := cacheUpdate(client, rdb)
 	if err != nil {
 		timber.Error(err, "initial fetch of applemusic cache data failed")
@@ -55,7 +56,6 @@ func Setup(mux *http.ServeMux, client *http.Client, rdb *redis.Client) {
 		},
 		10*time.Second,
 	)
-	timber.DoneSince(start, cacheInstance.LogPrefix(), "setup cache and endpoints")
 }
 
 func marshalResponse(

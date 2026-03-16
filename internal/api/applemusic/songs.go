@@ -80,11 +80,19 @@ func (s songResponse) ToAppleMusicSong(
 		id = s.Attributes.PlayParams.CatalogID
 	}
 	if s.Attributes.Artwork.URL != "" {
-		blurhash, err := images.BlurHash(client, rdb, *artURL, jpeg.Decode)
+		blurhash, err := images.BlurHash(client, rdb, *artURL, jpeg.Decode, logAttr)
 		if err != nil && strings.Contains(err.Error(), "unexpected EOF") {
-			timber.Warning("failed to create blur hash for", albumArtURL, "unexpected EOF occurred")
+			timber.Warning(
+				"unexpected EOF occurred while trying to create blur hash",
+				timber.A("url", albumArtURL),
+			)
 		} else if err != nil {
-			return lcp.AppleMusicSong{}, fmt.Errorf("getting blur hash for \"%s\" (%s): %w", s.Attributes.Name, id, err)
+			return lcp.AppleMusicSong{}, fmt.Errorf(
+				"getting blur hash for \"%s\" (%s): %w",
+				s.Attributes.Name,
+				id,
+				err,
+			)
 		}
 		albumArtBlurhash = &blurhash
 

@@ -3,7 +3,6 @@ package secrets
 import (
 	"errors"
 	"io/fs"
-	"time"
 
 	"github.com/caarlos0/env/v11"
 	"github.com/joho/godotenv"
@@ -13,8 +12,9 @@ import (
 var ENV Secrets
 
 type Secrets struct {
-	ValidTokens string `env:"VALID_TOKENS"`
-	CacheFolder string `env:"CACHE_FOLDER"`
+	StructuredLogging bool   `env:"STRUCTURED_LOGGING"`
+	ValidTokens       string `env:"VALID_TOKENS"`
+	CacheFolder       string `env:"CACHE_FOLDER"`
 
 	// strava
 	StravaClientID       string `env:"STRAVA_CLIENT_ID"`
@@ -54,7 +54,6 @@ type Secrets struct {
 }
 
 func Load() {
-	start := time.Now()
 	err := godotenv.Load()
 	if err != nil && !errors.Is(err, fs.ErrNotExist) {
 		timber.Fatal(err, "loading .env file failed")
@@ -65,5 +64,4 @@ func Load() {
 		timber.Fatal(err, "parsing required env vars failed")
 	}
 	ENV = secrets
-	timber.DoneSince(start, "loaded secrets")
 }

@@ -48,12 +48,12 @@ func (t *Tokens) RefreshIfExpired(client *http.Client) error {
 		return fmt.Errorf("creating request for new token: %w", err)
 	}
 
-	tokens, err := api.RequestJSON[Tokens](logPrefix, client, req)
+	tokens, err := api.RequestJSON[Tokens](client, req, logAttr)
 	if err != nil {
 		return fmt.Errorf("making request for refresh tokens: %w", err)
 	}
 
 	*t = tokens
-	timber.DoneSince(start, logPrefix, "new access token", t.Access)
+	timber.DoneSince(start, "new access token", timber.A("token", t.Access))
 	return nil
 }

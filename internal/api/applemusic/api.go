@@ -22,7 +22,7 @@ func sendAppleMusicAPIRequest[T any](client *http.Client, path string) (T, error
 	req.Header.Set("Authorization", "Bearer "+secrets.ENV.AppleMusicAppToken)
 	req.Header.Set("Music-User-Token", secrets.ENV.AppleMusicUserToken)
 
-	resp, err := api.RequestJSON[T](cacheInstance.LogPrefix(), client, req)
+	resp, err := api.RequestJSON[T](client, req, logAttr)
 	if err != nil {
 		return zero, fmt.Errorf("making apple music API request: %w", err)
 	}

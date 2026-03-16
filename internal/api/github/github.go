@@ -14,8 +14,9 @@ import (
 
 const cacheInstance = cache.GitHub
 
+var logAttr = cacheInstance.LogAttr()
+
 func Setup(mux *http.ServeMux) {
-	start := time.Now()
 	githubTokenSource := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: secrets.ENV.GitHubAccessToken},
 	)
@@ -24,12 +25,10 @@ func Setup(mux *http.ServeMux) {
 
 	pinnedRepos, err := fetchPinnedRepos(githubClient)
 	if err != nil {
-		timber.Error(err, "fetching initial pinned repos failed")
+		timber.Error(err, "fetching initial pinned repos failed", logAttr)
 	}
 
 	githubCache := cache.New(cacheInstance, pinnedRepos, err == nil)
 	githubCache.Endpoints(mux)
 	go cache.UpdatePeriodically(githubCache, githubClient, fetchPinnedRepos, 5*time.Second)
-
-	timber.DoneSince(start, cacheInstance.LogPrefix(), "setup cache and endpoint")
 }

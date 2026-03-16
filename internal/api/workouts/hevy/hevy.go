@@ -1,4 +1,4 @@
-package strava
+package hevy
 
 import "go.mattglei.ch/lcp/internal/cache"
 

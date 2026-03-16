@@ -49,7 +49,7 @@ func FetchLocation(client *http.Client, workout lcp.Workout) (*string, error) {
 		return nil, fmt.Errorf("creating request for location: %w", err)
 	}
 
-	resp, err := api.RequestJSON[locationResponse](logPrefix, client, req)
+	resp, err := api.RequestJSON[locationResponse](client, req, logAttr)
 	if err != nil {
 		return nil, fmt.Errorf("sending request for location: %w", err)
 	}
@@ -89,7 +89,12 @@ func FetchLocation(client *http.Client, workout lcp.Workout) (*string, error) {
 	} else if components.Village != "" {
 		location = fmt.Sprintf("%s, %s", components.Village, components.State)
 	} else {
-		timber.Warningf("unable to create location for %s (%f %f)", workout.Name, latitude, longitude)
+		timber.Warning(
+			"unable to create location",
+			timber.A("workout-name", workout.Name),
+			timber.A("latitude", latitude),
+			timber.A("longitude", longitude),
+		)
 		return nil, nil
 	}
 

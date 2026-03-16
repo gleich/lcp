@@ -24,8 +24,8 @@ const (
 	Steam
 )
 
-func (c CacheInstance) String() string {
-	switch c {
+func (i CacheInstance) String() string {
+	switch i {
 	case AppleMusic:
 		return "applemusic"
 	case Workouts:
@@ -38,13 +38,14 @@ func (c CacheInstance) String() string {
 	return "unknown"
 }
 
-func (c CacheInstance) LogPrefix() string {
-	return fmt.Sprintf("[%s]", c.String())
+func (i CacheInstance) LogAttr() timber.Attr {
+	return timber.A("cache", i.String())
 }
 
 type Cache[T lcp.CacheData] struct {
 	instance CacheInstance
 	filePath string
+	LogAttr  timber.Attr
 
 	Mutex   sync.RWMutex
 	Data    T
@@ -70,6 +71,7 @@ func New[T lcp.CacheData](instance CacheInstance, data T, update bool) *Cache[T]
 			secrets.ENV.CacheFolder,
 			fmt.Sprintf("%s.json", instance.String()),
 		),
+		LogAttr:     instance.LogAttr(),
 		connections: make(map[chan string]struct{}),
 		MarshalResponse: func(c *Cache[T]) ([]byte, error) {
 			data, err := json.Marshal(lcp.CacheResponse[T]{Data: c.Data, Updated: c.Updated})
@@ -106,7 +108,7 @@ func (c *Cache[T]) Update(start time.Time, data T) {
 	c.Mutex.RLock()
 	changed, err := c.Diff(c, data, c.Data)
 	if err != nil {
-		timber.Error(err, "checking for diff between old and new elements")
+		timber.Error(err, "checking for diff between old and new elements", c.LogAttr)
 	}
 	c.Mutex.RUnlock()
 	if changed {
@@ -116,7 +118,7 @@ func (c *Cache[T]) Update(start time.Time, data T) {
 		c.Mutex.Unlock()
 
 		c.persistToFile()
-		timber.DoneSince(start, c.instance.LogPrefix(), "cache updated")
+		timber.DoneSince(start, "updated", c.LogAttr)
 
 		if len(c.connections) != 0 {
 			start = time.Now()
@@ -140,11 +142,12 @@ func (c *Cache[T]) Update(start time.Time, data T) {
 			}
 			c.connectionsMutex.Unlock()
 
-			connWord := "connection"
-			if len(c.connections) > 1 {
-				connWord = "connections"
-			}
-			timber.DoneSince(start, c.instance.LogPrefix(), "updated", len(c.connections), connWord)
+			timber.DoneSince(
+				start,
+				"updated streams",
+				timber.A("connections", len(c.connections)),
+				c.LogAttr,
+			)
 		}
 	}
 
@@ -165,7 +168,7 @@ func UpdatePeriodically[T lcp.CacheData, C any](
 				ExpectedErrors,
 				func(e error) bool { return errors.Is(err, e) },
 			) {
-				timber.Error(err, cache.instance.LogPrefix(), "updating cache failed")
+				timber.Error(err, "updating failed", cache.LogAttr)
 			}
 		} else {
 			cache.Update(start, data)
