@@ -8,7 +8,6 @@ import (
 
 	"go.mattglei.ch/lcp/internal/auth"
 	"go.mattglei.ch/lcp/internal/util"
-	"go.mattglei.ch/timber"
 )
 
 func (c *Cache[T]) Endpoints(mux *http.ServeMux) {
