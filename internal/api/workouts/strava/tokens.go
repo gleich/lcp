@@ -54,6 +54,6 @@ func (t *Tokens) RefreshIfExpired(client *http.Client) error {
 	}
 
 	*t = tokens
-	timber.DoneSince(start, "new access token", timber.A("token", t.Access))
+	timber.InfoSince(start, "new access token", timber.A("token", t.Access))
 	return nil
 }

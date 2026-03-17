@@ -71,7 +71,7 @@ func fetchPinnedRepos(client *githubv4.Client) ([]lcp.GitHubRepository, error) {
 		}
 		return nil, fmt.Errorf("querying github's graphql API: %w", err)
 	}
-	timber.DoneSince(start, "made request", logAttr)
+	timber.InfoSince(start, "made request", logAttr)
 
 	var repositories []lcp.GitHubRepository
 	for _, node := range query.Viewer.PinnedItems.Nodes {

@@ -86,7 +86,7 @@ func Request(client *http.Client, request *http.Request, cacheLogAttr timber.Att
 		return []byte{}, fmt.Errorf("reading response body for %s: %w", url, err)
 	}
 
-	timber.DoneSince(start, "made request", logAttributes...)
+	timber.InfoSince(start, "made request", logAttributes...)
 	return body, nil
 }
 

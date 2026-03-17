@@ -61,7 +61,7 @@ func main() {
 		logAttr := cacheInstance.LogAttr()
 		timber.Info("setting up", logAttr)
 		setup()
-		timber.DoneSince(start, "setup", logAttr)
+		timber.InfoSince(start, "setup", logAttr)
 	}
 
 	timber.InfoSince(start, "starting server")

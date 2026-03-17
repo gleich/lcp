@@ -29,7 +29,7 @@ func Log(next http.Handler) http.Handler {
 		}
 
 		next.ServeHTTP(wrapped, r)
-		timber.DoneSince(
+		timber.InfoSince(
 			start,
 			"handled request",
 			timber.A("code", wrapped.statusCode),

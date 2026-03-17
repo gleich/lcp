@@ -118,7 +118,7 @@ func (c *Cache[T]) Update(start time.Time, data T) {
 		c.Mutex.Unlock()
 
 		c.persistToFile()
-		timber.DoneSince(start, "updated", c.LogAttr)
+		timber.InfoSince(start, "updated", c.LogAttr)
 
 		if len(c.connections) != 0 {
 			start = time.Now()
@@ -142,7 +142,7 @@ func (c *Cache[T]) Update(start time.Time, data T) {
 			}
 			c.connectionsMutex.Unlock()
 
-			timber.DoneSince(
+			timber.InfoSince(
 				start,
 				"updated streams",
 				timber.A("connections", len(c.connections)),
