@@ -8,6 +8,7 @@ import (
 
 	"go.mattglei.ch/lcp/internal/auth"
 	"go.mattglei.ch/lcp/internal/util"
+	"go.mattglei.ch/timber"
 )
 
 func (c *Cache[T]) Endpoints(mux *http.ServeMux) {
@@ -35,6 +36,14 @@ func (c *Cache[T]) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *Cache[T]) ServeStream(w http.ResponseWriter, r *http.Request) {
+	// we globally set the write timeout to 20 seconds, but for SSE we want to disable this
+	if rc := http.NewResponseController(w); rc != nil {
+		err := rc.SetWriteDeadline(time.Now().Add(time.Hour * 24))
+		if err != nil {
+			return
+		}
+	}
+	
 	auth.SetCorsPolicy(w, r)
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
