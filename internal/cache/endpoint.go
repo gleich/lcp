@@ -99,7 +99,7 @@ func (c *Cache[T]) ServeStream(w http.ResponseWriter, r *http.Request) {
 			flusher.Flush()
 		case frame, ok := <-channel:
 			if !ok {
-				timber.ErrorMsg("failed to get data from channel for update")
+				return
 			}
 			_, err = fmt.Fprintf(w, "event: message\ndata: %s\n\n", frame)
 			if err != nil {
