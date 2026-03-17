@@ -38,7 +38,7 @@ func (c *Cache[T]) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (c *Cache[T]) ServeStream(w http.ResponseWriter, r *http.Request) {
 	// we globally set the write timeout to 20 seconds, but for SSE we want to disable this
 	if rc := http.NewResponseController(w); rc != nil {
-		err := rc.SetWriteDeadline(time.Time{})
+		err := rc.SetWriteDeadline(time.Now().Add(time.Hour * 24))
 		if err != nil {
 			timber.Warning("failed to set writing deadline to zero", c.LogAttr)
 			return
