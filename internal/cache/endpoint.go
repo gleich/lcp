@@ -12,7 +12,7 @@ import (
 
 func (c *Cache[T]) Endpoints(mux *http.ServeMux) {
 	mux.Handle(fmt.Sprintf("GET /%s", c.instance), c)
-	mux.HandleFunc(fmt.Sprintf("POST /%s/stream", c.instance), c.ServeStream)
+	mux.HandleFunc(fmt.Sprintf("/%s/stream", c.instance), c.ServeStream)
 }
 
 func (c *Cache[T]) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -35,6 +35,10 @@ func (c *Cache[T]) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *Cache[T]) ServeStream(w http.ResponseWriter, r *http.Request) {
+	if auth.HandlePreflight(w, r) {
+		return
+	}
+
 	// we globally set the write timeout to 20 seconds, but for SSE we want to disable this
 	if rc := http.NewResponseController(w); rc != nil {
 		err := rc.SetWriteDeadline(time.Now().Add(time.Hour * 24))
