@@ -9,6 +9,7 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"go.mattglei.ch/lcp/internal/api"
+	"go.mattglei.ch/lcp/internal/util"
 	"go.mattglei.ch/timber"
 )
 
@@ -27,9 +28,13 @@ func BlurHash(
 	cacheLogAttr timber.Attr,
 ) (string, error) {
 	ctx := context.Background()
-	result, err := rdb.Get(ctx, url).Result()
+	cacheKey, err := util.NormalizeURL(url)
+	if err != nil {
+		return "", fmt.Errorf("normalizing url %s: %w", url, err)
+	}
+	result, err := rdb.Get(ctx, cacheKey.String()).Result()
 	if err == redis.Nil {
-		blurhash, err := createCacheEntry(client, rdb, url, decoder, ctx, cacheLogAttr)
+		blurhash, err := createCacheEntry(client, rdb, url, cacheKey.String(), decoder, ctx, cacheLogAttr)
 		if err != nil {
 			return "", fmt.Errorf("generating blurhash for %s: %w", url, err)
 		}
@@ -53,6 +58,7 @@ func createCacheEntry(
 	client *http.Client,
 	rdb *redis.Client,
 	url string,
+	cacheKey string,
 	decoder ImageDecoder,
 	ctx context.Context,
 	cacheLogAttr timber.Attr,
@@ -85,7 +91,7 @@ func createCacheEntry(
 	}
 
 	// approximately a 1 week long cache lifetime
-	err = rdb.Set(ctx, url, string(cacheData), 168*time.Hour).
+	err = rdb.Set(ctx, cacheKey, string(cacheData), 168*time.Hour).
 		Err()
 	if err != nil {
 		return "", fmt.Errorf("setting value for %s in redis: %w", url, err)
