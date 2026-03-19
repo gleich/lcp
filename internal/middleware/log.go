@@ -19,6 +19,10 @@ func (w *wrappedWriter) WriteHeader(code int) {
 	w.statusCode = code
 }
 
+func (w *wrappedWriter) Unwrap() http.ResponseWriter {
+	return w.ResponseWriter
+}
+
 func Log(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
