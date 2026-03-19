@@ -12,7 +12,7 @@ import (
 
 func (c *Cache[T]) Endpoints(mux *http.ServeMux) {
 	mux.Handle(fmt.Sprintf("GET /%s", c.instance), c)
-	mux.HandleFunc(fmt.Sprintf("GET /%s/stream", c.instance), c.ServeStream)
+	mux.HandleFunc(fmt.Sprintf("/%s/stream", c.instance), c.ServeStream)
 }
 
 func (c *Cache[T]) ServeHTTP(w http.ResponseWriter, r *http.Request) {
