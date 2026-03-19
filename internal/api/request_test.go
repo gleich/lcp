@@ -36,9 +36,11 @@ func TestRequest_Non2xxReturnsErrWarning(t *testing.T) {
 
 	for _, code := range codes {
 		t.Run(http.StatusText(code), func(t *testing.T) {
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				w.WriteHeader(code)
-			}))
+			server := httptest.NewServer(
+				http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					w.WriteHeader(code)
+				}),
+			)
 			defer server.Close()
 
 			req, _ := http.NewRequest(http.MethodGet, server.URL, nil)
@@ -93,7 +95,11 @@ func TestRequest_UnexpectedEOFIsErrWarning(t *testing.T) {
 		// Hijack and close to force unexpected EOF
 		if hj, ok := w.(http.Hijacker); ok {
 			conn, _, _ := hj.Hijack()
-			conn.Close()
+			err := conn.Close()
+			if err != nil {
+				t.Error(err)
+				return
+			}
 		}
 	}))
 	defer server.Close()
