@@ -23,6 +23,12 @@ func (w *wrappedWriter) Unwrap() http.ResponseWriter {
 	return w.ResponseWriter
 }
 
+func (w *wrappedWriter) Flush() {
+	if f, ok := w.ResponseWriter.(http.Flusher); ok {
+		f.Flush()
+	}
+}
+
 func Log(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
