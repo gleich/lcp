@@ -17,7 +17,6 @@ type locationResponse struct {
 		Components struct {
 			Borough      string `json:"borough"`
 			City         string `json:"city"`
-			State        string `json:"state"`
 			StateCode    string `json:"state_code"`
 			Municipality string `json:"municipality"`
 			Town         string `json:"town"`
@@ -81,13 +80,13 @@ func FetchLocation(client *http.Client, workout lcp.Workout) (*string, error) {
 			components.StateCode,
 		)
 	} else if components.Town != "" {
-		location = fmt.Sprintf("%s, %s", components.Town, components.State)
+		location = fmt.Sprintf("%s, %s", components.Town, components.StateCode)
 	} else if components.Municipality != "" {
-		location = fmt.Sprintf("%s, %s", components.Municipality, components.State)
+		location = fmt.Sprintf("%s, %s", components.Municipality, components.StateCode)
 	} else if components.City != "" {
-		location = fmt.Sprintf("%s, %s", components.City, components.State)
+		location = fmt.Sprintf("%s, %s", components.City, components.StateCode)
 	} else if components.Village != "" {
-		location = fmt.Sprintf("%s, %s", components.Village, components.State)
+		location = fmt.Sprintf("%s, %s", components.Village, components.StateCode)
 	} else {
 		timber.Warning(
 			"unable to create location",
