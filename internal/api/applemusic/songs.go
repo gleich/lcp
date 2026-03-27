@@ -70,7 +70,7 @@ func (s songResponse) ToAppleMusicSong(
 	}
 
 	var (
-		artURL           = albumArtURL(s, 600.0)
+		artURL           = albumArtURL(s, 400.0)
 		albumArtBlurhash *string
 
 		albumArtPermissionsExpiration *time.Time
