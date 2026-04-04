@@ -156,6 +156,30 @@ func playlistEndpoint(c *cache.Cache[lcp.AppleMusicCache]) http.HandlerFunc {
 			return
 		}
 
+		rawLast := r.URL.Query().Get("last")
+		if rawLast != "" {
+			n, err := strconv.Atoi(rawLast)
+			if err != nil {
+				http.Error(w, "invalid last", http.StatusBadRequest)
+				return
+			}
+			n = min(n, 100)
+			start := max(0, len(p.Tracks)-n)
+			p.Tracks = p.Tracks[start:]
+
+			resp := lcp.AppleMusicPlaylistResponse{
+				Pagination: lcp.Pagination{Current: 1, Total: 1},
+				Playlist:   *p,
+			}
+			w.Header().Set("Content-Type", "application/json")
+			err = json.NewEncoder(w).Encode(resp)
+			if err != nil {
+				err = fmt.Errorf("writing json to request: %w", err)
+				util.InternalServerError(w, err, logAttr, "failed to encode json data")
+			}
+			return
+		}
+
 		var (
 			page  = 1
 			limit = 100
@@ -178,10 +202,9 @@ func playlistEndpoint(c *cache.Cache[lcp.AppleMusicCache]) http.HandlerFunc {
 		start := min((page-1)*limit, len(p.Tracks))
 		end := min(start+limit, len(p.Tracks))
 		p.Tracks = p.Tracks[start:end]
-		if page == total {
-			next = nil
-		} else {
-			next = new(page + 1)
+		if page < total {
+			nextPage := page + 1
+			next = &nextPage
 		}
 
 		resp := lcp.AppleMusicPlaylistResponse{
