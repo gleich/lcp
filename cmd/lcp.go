@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -56,13 +57,17 @@ func main() {
 		cache.Steam:      func() { steam.Setup(mux, client, rdb) },
 		cache.AppleMusic: func() { applemusic.Setup(mux, client, rdb) },
 	}
+	var wg sync.WaitGroup
 	for cacheInstance, setup := range setups {
-		start := time.Now()
-		logAttr := cacheInstance.LogAttr()
-		timber.Info("setting up", logAttr)
-		setup()
-		timber.InfoSince(start, "setup", logAttr)
+		wg.Go(func() {
+			start := time.Now()
+			logAttr := cacheInstance.LogAttr()
+			timber.Info("setting up", logAttr)
+			setup()
+			timber.InfoSince(start, "setup", logAttr)
+		})
 	}
+	wg.Wait()
 
 	timber.InfoSince(start, "starting server")
 	server := &http.Server{
