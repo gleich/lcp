@@ -135,6 +135,9 @@ func fetchPlaylist(
 	}, nil
 }
 
+// max number of tracks that should be returned in a single response when fetching a given playlist.
+const playlistTrackLimit = 50
+
 func playlistEndpoint(c *cache.Cache[lcp.AppleMusicCache]) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		auth.SetCorsPolicy(w, r)
@@ -163,7 +166,7 @@ func playlistEndpoint(c *cache.Cache[lcp.AppleMusicCache]) http.HandlerFunc {
 				http.Error(w, "invalid last", http.StatusBadRequest)
 				return
 			}
-			n = min(n, 100)
+			n = min(n, playlistTrackLimit)
 			start := max(0, len(p.Tracks)-n)
 			p.Tracks = p.Tracks[start:]
 
