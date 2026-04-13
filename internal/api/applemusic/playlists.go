@@ -37,7 +37,7 @@ var playlists = []syncedPlaylist{
 		SpotifyID:    "1NMII2bpE3l7CvBxYVK7Fu",
 	},
 	{Name: "classics", AppleMusicID: "p.gek1E8efLa68Adp", SpotifyID: "2HYOAlwB570McLyD3nIJKG"},
-	{Name: "wii resort", AppleMusicID: "p.ZOAXx8zt4KMD6ob", SpotifyID: "7uvn0NulDH3me9WoPZY2nD"},
+	{Name: "loading...", AppleMusicID: "p.ZOAXx8zt4KMD6ob", SpotifyID: "7uvn0NulDH3me9WoPZY2nD"},
 	{Name: "80s", AppleMusicID: "p.qQXLxPLtA75zg8e", SpotifyID: "1DB0cG12kphRKvNzKPGmpf"},
 	{Name: "alt", AppleMusicID: "p.AWXoXPYSLrvpJlY", SpotifyID: "7tN57nLbiiw4bliUyw2oYL"},
 	{
