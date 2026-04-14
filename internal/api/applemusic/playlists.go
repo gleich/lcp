@@ -135,9 +135,6 @@ func fetchPlaylist(
 	}, nil
 }
 
-// max number of tracks that should be returned in a single response when fetching a given playlist.
-const playlistTrackLimit = 50
-
 func playlistEndpoint(c *cache.Cache[lcp.AppleMusicCache]) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		auth.SetCorsPolicy(w, r)
@@ -159,33 +156,9 @@ func playlistEndpoint(c *cache.Cache[lcp.AppleMusicCache]) http.HandlerFunc {
 			return
 		}
 
-		rawLast := r.URL.Query().Get("last")
-		if rawLast != "" {
-			n, err := strconv.Atoi(rawLast)
-			if err != nil {
-				http.Error(w, "invalid last", http.StatusBadRequest)
-				return
-			}
-			n = min(n, playlistTrackLimit)
-			start := max(0, len(p.Tracks)-n)
-			p.Tracks = p.Tracks[start:]
-
-			resp := lcp.AppleMusicPlaylistResponse{
-				Pagination: lcp.Pagination{Current: 1, Total: 1},
-				Playlist:   *p,
-			}
-			w.Header().Set("Content-Type", "application/json")
-			err = json.NewEncoder(w).Encode(resp)
-			if err != nil {
-				err = fmt.Errorf("writing json to request: %w", err)
-				util.InternalServerError(w, err, logAttr, "failed to encode json data")
-			}
-			return
-		}
-
 		var (
 			page  = 1
-			limit = 100
+			limit = 50
 			total = int(math.Ceil(float64(len(p.Tracks)) / float64(limit)))
 			next  *int
 		)
