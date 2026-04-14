@@ -38,9 +38,8 @@ func main() {
 		client = api.IPV4OnlyClient()
 		mux    = http.NewServeMux()
 		rdb    = redis.NewClient(&redis.Options{
-			Addr:     secrets.ENV.RedisAddress,
-			Password: secrets.ENV.RedisPassword,
-			DB:       0,
+			Addr: secrets.ENV.RedisAddress,
+			DB:   0,
 			MaintNotificationsConfig: &maintnotifications.Config{
 				Mode: maintnotifications.ModeDisabled,
 			},

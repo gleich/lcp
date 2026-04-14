@@ -49,8 +49,7 @@ type Secrets struct {
 	MinioSecretKey   string `env:"MINIO_SECRET_KEY"`
 
 	// redis
-	RedisAddress  string `env:"REDIS_ADDRESS"`
-	RedisPassword string `env:"REDIS_PASSWORD"`
+	RedisAddress string `env:"REDIS_ADDRESS"`
 }
 
 func Load() {
