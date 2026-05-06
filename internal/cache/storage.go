@@ -3,6 +3,7 @@ package cache
 import (
 	"encoding/json"
 	"os"
+	"path/filepath"
 
 	"go.mattglei.ch/lcp/pkg/lcp"
 	"go.mattglei.ch/timber"
@@ -16,7 +17,18 @@ func (c *Cache[T]) persistToFile() {
 		timber.Error(err, "encoding data to json failed", c.LogAttr)
 		return
 	}
-	if err = os.WriteFile(c.filePath, bin, 0666); err != nil {
+	err = os.MkdirAll(filepath.Dir(c.filePath), 0755)
+	if err != nil {
+		timber.Error(
+			err,
+			"creating cache directory failed",
+			timber.A("path", c.filePath),
+			c.LogAttr,
+		)
+		return
+	}
+	err = os.WriteFile(c.filePath, bin, 0666)
+	if err != nil {
 		timber.Error(err, "writing cache file failed", timber.A("path", c.filePath), c.LogAttr)
 	}
 }
