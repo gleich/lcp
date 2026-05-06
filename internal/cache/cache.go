@@ -22,6 +22,7 @@ const (
 	Workouts
 	GitHub
 	Steam
+	Jellyfin
 )
 
 func (i CacheInstance) String() string {
@@ -34,6 +35,8 @@ func (i CacheInstance) String() string {
 		return "github"
 	case Steam:
 		return "steam"
+	case Jellyfin:
+		return "jellyfin"
 	}
 	return "unknown"
 }

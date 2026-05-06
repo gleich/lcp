@@ -9,7 +9,7 @@ import (
 	"go.mattglei.ch/lcp/internal/secrets"
 )
 
-func sendAppleMusicAPIRequest[T any](client *http.Client, path string) (T, error) {
+func sendAppleMusicRequest[T any](client *http.Client, path string) (T, error) {
 	var zero T
 	req, err := http.NewRequest(
 		http.MethodGet,

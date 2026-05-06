@@ -43,6 +43,10 @@ type Secrets struct {
 	AppleMusicAppToken  string `env:"APPLE_MUSIC_APP_TOKEN"`
 	AppleMusicUserToken string `env:"APPLE_MUSIC_USER_TOKEN"`
 
+	// jellyfin
+	JellyfinKey    string `env:"JELLYFIN_KEY"`
+	JellyfinUserID string `env:"JELLYFIN_USER_ID"`
+
 	// minio
 	MinioEndpoint    string `env:"MINIO_ENDPOINT"`
 	MinioAccessKeyID string `env:"MINIO_ACCESS_KEY_ID"`

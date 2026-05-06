@@ -75,7 +75,7 @@ func fetchPlaylist(
 	rdb *redis.Client,
 	playlist syncedPlaylist,
 ) (lcp.AppleMusicPlaylist, error) {
-	playlistData, err := sendAppleMusicAPIRequest[playlistResponse](
+	playlistData, err := sendAppleMusicRequest[playlistResponse](
 		client,
 		fmt.Sprintf("/v1/me/library/playlists/%s", playlist.AppleMusicID),
 	)
@@ -90,7 +90,7 @@ func fetchPlaylist(
 	var tracks []lcp.AppleMusicSong
 	path := fmt.Sprintf("/v1/me/library/playlists/%s/tracks", playlist.AppleMusicID)
 	for {
-		trackData, err := sendAppleMusicAPIRequest[playlistTracksResponse](client, path)
+		trackData, err := sendAppleMusicRequest[playlistTracksResponse](client, path)
 		if err != nil {
 			return lcp.AppleMusicPlaylist{}, fmt.Errorf(
 				"fetching playlist data for %s: %w",

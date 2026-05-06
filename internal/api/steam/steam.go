@@ -17,7 +17,7 @@ var logAttr = cacheInstance.LogAttr()
 func Setup(mux *http.ServeMux, client *http.Client, rdb *redis.Client) {
 	games, err := fetchRecentlyPlayedGames(client, rdb)
 	if err != nil {
-		timber.Error(err, "initial fetch of steam games failed")
+		timber.Error(err, "initial fetch of steam games failed", logAttr)
 	}
 
 	steamCache := cache.New(cacheInstance, games, err == nil)
