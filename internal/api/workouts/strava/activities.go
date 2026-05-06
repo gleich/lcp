@@ -57,7 +57,7 @@ func FetchActivities(
 	rdb *redis.Client,
 	tokens Tokens,
 ) ([]lcp.Workout, error) {
-	stravaActivities, err := sendStravaAPIRequest[[]activity](
+	stravaActivities, err := sendStravaRequest[[]activity](
 		client,
 		"api/v3/athlete/activities",
 		tokens,
@@ -99,7 +99,7 @@ func FetchHeartrate(client *http.Client, id string, tokens Tokens) ([]int, error
 		"keys":        {"heartrate"},
 		"resolution":  {"low"},
 	}
-	stream, err := sendStravaAPIRequest[struct{ Heartrate activityStream }](
+	stream, err := sendStravaRequest[struct{ Heartrate activityStream }](
 		client,
 		fmt.Sprintf("api/v3/activities/%s/streams?%s", id, params.Encode()),
 		tokens,
@@ -116,7 +116,7 @@ func FetchActivityDetails(
 	id string,
 	tokens Tokens,
 ) (detailedStravaActivity, error) {
-	details, err := sendStravaAPIRequest[detailedStravaActivity](
+	details, err := sendStravaRequest[detailedStravaActivity](
 		client,
 		fmt.Sprintf("api/v3/activities/%s", id),
 		tokens,

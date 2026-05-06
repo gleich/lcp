@@ -16,7 +16,7 @@ func fetchRecentlyPlayed(
 	client *http.Client,
 	rdb *redis.Client,
 ) ([]lcp.AppleMusicSong, error) {
-	response, err := sendAppleMusicAPIRequest[recentlyPlayedResponse](
+	response, err := sendAppleMusicRequest[recentlyPlayedResponse](
 		client,
 		"/v1/me/recent/played/tracks",
 	)

@@ -9,9 +9,8 @@ import (
 	"go.mattglei.ch/lcp/internal/cache"
 )
 
-func sendStravaAPIRequest[T any](client *http.Client, path string, tokens Tokens) (T, error) {
+func sendStravaRequest[T any](client *http.Client, path string, tokens Tokens) (T, error) {
 	var zero T
-
 	req, err := http.NewRequest(
 		http.MethodGet,
 		fmt.Sprintf("https://www.strava.com/%s", strings.TrimLeft(path, "/")),

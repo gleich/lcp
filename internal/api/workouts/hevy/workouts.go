@@ -38,7 +38,7 @@ func FetchWorkouts(client *http.Client) ([]lcp.Workout, error) {
 	for page < 3 {
 		page++
 		params := url.Values{"page": {strconv.Itoa(page)}}
-		workouts, err := sendHevyAPIRequest[workoutsResponse](
+		workouts, err := sendHevyRequest[workoutsResponse](
 			client,
 			"/v1/workouts?"+params.Encode(),
 		)
