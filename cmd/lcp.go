@@ -5,6 +5,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/redis/go-redis/v9"
 	"github.com/redis/go-redis/v9/maintnotifications"
 	"go.mattglei.ch/lcp/internal/api"
@@ -35,6 +37,18 @@ func main() {
 
 	timber.InfoSince(start, "booted")
 
+	minioClient, err := minio.New(secrets.ENV.MinioEndpoint, &minio.Options{
+		Creds: credentials.NewStaticV4(
+			secrets.ENV.MinioAccessKeyID,
+			secrets.ENV.MinioSecretKey,
+			"",
+		),
+		Secure: true,
+	})
+	if err != nil {
+		timber.Fatal(err, "failed to create minio client")
+	}
+
 	var (
 		client = api.IPV4OnlyClient()
 		mux    = http.NewServeMux()
@@ -53,10 +67,10 @@ func main() {
 
 	setups := map[cache.CacheInstance]func(){
 		cache.GitHub:     func() { github.Setup(mux) },
-		cache.Workouts:   func() { workouts.Setup(mux, client, rdb) },
+		cache.Workouts:   func() { workouts.Setup(mux, client, minioClient, rdb) },
 		cache.Steam:      func() { steam.Setup(mux, client, rdb) },
 		cache.AppleMusic: func() { applemusic.Setup(mux, client, rdb) },
-		cache.Jellyfin:   func() { jellyfin.Setup(mux, client) },
+		cache.Jellyfin:   func() { jellyfin.Setup(mux, client, minioClient) },
 	}
 	var wg sync.WaitGroup
 	for cacheInstance, setup := range setups {
@@ -78,7 +92,7 @@ func main() {
 		WriteTimeout: 20 * time.Second,
 		IdleTimeout:  60 * time.Second,
 	}
-	err := server.ListenAndServe()
+	err = server.ListenAndServe()
 	if err != nil {
 		timber.Fatal(err, "failed to start router")
 	}
