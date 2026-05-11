@@ -81,12 +81,7 @@ func fetchRecentlyPlayed(
 			}
 			imageIDs = append(imageIDs, imageID)
 
-			imageURL := fmt.Sprintf(
-				"https://%s/%s/%s.jpg",
-				secrets.ENV.MinioEndpoint,
-				bucketName,
-				imageID,
-			)
+			imageURL := fmt.Sprintf("https://s3.mattglei.ch/%s/%s.jpg", bucketName, imageID)
 			normalized.ImageURL = &imageURL
 
 			if imageID == item.ID {
