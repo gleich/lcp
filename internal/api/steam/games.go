@@ -19,11 +19,12 @@ import (
 type ownedGamesResponse struct {
 	Response struct {
 		Games []struct {
-			Name            string `json:"name"`
-			AppID           int    `json:"appid"`
-			LastPlayed      int64  `json:"rtime_last_played"`
-			ImgIconURL      string `json:"img_icon_url"`
-			PlaytimeForever int    `json:"playtime_forever"`
+			Name                     string `json:"name"`
+			AppID                    int    `json:"appid"`
+			LastPlayed               int64  `json:"rtime_last_played"`
+			ImgIconURL               string `json:"img_icon_url"`
+			PlaytimeForever          int    `json:"playtime_forever"`
+			HasCommunityVisibleStats bool   `json:"has_community_visible_stats"`
 		} `json:"games"`
 	} `json:"response"`
 }
@@ -57,21 +58,7 @@ func fetchRecentlyPlayedGames(client *http.Client, rdb *redis.Client) ([]lcp.Ste
 
 	var games []lcp.SteamGame
 	for _, g := range ownedGames.Response.Games[:10] {
-		achievementPercentage, err := fetchAchievementsPercentage(client, g.AppID)
-		if err != nil {
-			return nil, err
-		}
-
-		headerURL := fmt.Sprintf(
-			"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/%d/header.jpg",
-			g.AppID,
-		)
-		headerBlurHash, err := images.BlurHash(client, rdb, headerURL, jpeg.Decode, logAttr)
-		if err != nil {
-			return nil, fmt.Errorf("loading blurhash image data for library hero: %w", err)
-		}
-
-		games = append(games, lcp.SteamGame{
+		game := lcp.SteamGame{
 			Name:  g.Name,
 			AppID: g.AppID,
 			IconURL: fmt.Sprintf(
@@ -86,7 +73,6 @@ func fetchRecentlyPlayedGames(client *http.Client, rdb *redis.Client) ([]lcp.Ste
 				"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/%d/header.jpg",
 				g.AppID,
 			),
-			HeaderBlurHash: headerBlurHash,
 			LibraryHeroURL: fmt.Sprintf(
 				"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/%d/library_hero.jpg",
 				g.AppID,
@@ -95,8 +81,27 @@ func fetchRecentlyPlayedGames(client *http.Client, rdb *redis.Client) ([]lcp.Ste
 				"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/%d/logo.png",
 				g.AppID,
 			),
-			AchievementProgress: achievementPercentage,
-		})
+		}
+
+		if g.HasCommunityVisibleStats {
+			achievementPercentage, err := fetchAchievementsPercentage(client, g.AppID)
+			if err != nil {
+				return nil, err
+			}
+			game.AchievementProgress = achievementPercentage
+		}
+
+		headerURL := fmt.Sprintf(
+			"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/%d/header.jpg",
+			g.AppID,
+		)
+		headerBlurHash, err := images.BlurHash(client, rdb, headerURL, jpeg.Decode, logAttr)
+		if err != nil {
+			return nil, fmt.Errorf("loading blurhash image data for library hero: %w", err)
+		}
+		game.HeaderBlurHash = headerBlurHash
+
+		games = append(games, game)
 
 	}
 
