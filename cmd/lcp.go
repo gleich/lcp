@@ -12,7 +12,6 @@ import (
 	"go.mattglei.ch/lcp/internal/api"
 	"go.mattglei.ch/lcp/internal/api/applemusic"
 	"go.mattglei.ch/lcp/internal/api/github"
-	"go.mattglei.ch/lcp/internal/api/jellyfin"
 	"go.mattglei.ch/lcp/internal/api/steam"
 	"go.mattglei.ch/lcp/internal/api/workouts"
 	"go.mattglei.ch/lcp/internal/cache"
@@ -70,7 +69,6 @@ func main() {
 		cache.Workouts:   func() { workouts.Setup(mux, client, minioClient, rdb) },
 		cache.Steam:      func() { steam.Setup(mux, client, rdb) },
 		cache.AppleMusic: func() { applemusic.Setup(mux, client, rdb) },
-		cache.Jellyfin:   func() { jellyfin.Setup(mux, client, minioClient) },
 	}
 	var wg sync.WaitGroup
 	for cacheInstance, setup := range setups {
