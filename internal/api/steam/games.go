@@ -102,7 +102,6 @@ func fetchRecentlyPlayedGames(client *http.Client, rdb *redis.Client) ([]lcp.Ste
 		game.HeaderBlurHash = headerBlurHash
 
 		games = append(games, game)
-
 	}
 
 	return games, nil
