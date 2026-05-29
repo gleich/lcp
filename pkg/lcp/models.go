@@ -3,11 +3,11 @@ package lcp
 import "time"
 
 type CacheResponseData interface {
-	AppleMusicCacheResponse | []GitHubRepository | []SteamGame | []Workout | []JellyfinItem
+	AppleMusicCacheResponse | []GitHubRepository | []SteamGame | []Workout
 }
 
 type CacheData interface {
-	AppleMusicCache | []GitHubRepository | []SteamGame | []Workout | []JellyfinItem
+	AppleMusicCache | []GitHubRepository | []SteamGame | []Workout
 }
 
 type AppleMusicCache struct {
@@ -122,18 +122,6 @@ type HevySet struct {
 	Reps            int     `json:"reps"`
 	Type            string  `json:"type"`
 	DurationSeconds *int    `json:"duration_seconds"`
-}
-
-type JellyfinItem struct {
-	ID              string  `json:"id"`
-	Type            string  `json:"type"`
-	Name            string  `json:"name"`
-	SeriesName      string  `json:"series_name,omitempty"`
-	SeriesID        string  `json:"series_id,omitempty"`
-	SeasonNumber    int     `json:"season_number,omitempty"`
-	EpisodeNumber   int     `json:"episode_number,omitempty"`
-	ImageURL        *string `json:"image_url,omitempty"`
-	ImageBlurhash   *string `json:"image_blurhash,omitempty"`
 }
 
 type Pagination struct {
