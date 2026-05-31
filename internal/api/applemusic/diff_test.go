@@ -19,37 +19,114 @@ func TestDiffSongList(t *testing.T) {
 	}{
 		{
 			name: "identical songs",
-			old:  []lcp.AppleMusicSong{{Track: "Song A", Artist: "Artist A", DurationInMillis: 1000, URL: "https://music.apple.com/a"}},
-			new:  []lcp.AppleMusicSong{{Track: "Song A", Artist: "Artist A", DurationInMillis: 1000, URL: "https://music.apple.com/a"}},
+			old: []lcp.AppleMusicSong{
+				{
+					Track:            "Song A",
+					Artist:           "Artist A",
+					DurationInMillis: 1000,
+					URL:              "https://music.apple.com/a",
+				},
+			},
+			new: []lcp.AppleMusicSong{
+				{
+					Track:            "Song A",
+					Artist:           "Artist A",
+					DurationInMillis: 1000,
+					URL:              "https://music.apple.com/a",
+				},
+			},
 			want: false,
 		},
 		{
 			name: "different track name",
-			old:  []lcp.AppleMusicSong{{Track: "Song A", Artist: "Artist A", DurationInMillis: 1000, URL: "https://music.apple.com/a"}},
-			new:  []lcp.AppleMusicSong{{Track: "Song B", Artist: "Artist A", DurationInMillis: 1000, URL: "https://music.apple.com/a"}},
+			old: []lcp.AppleMusicSong{
+				{
+					Track:            "Song A",
+					Artist:           "Artist A",
+					DurationInMillis: 1000,
+					URL:              "https://music.apple.com/a",
+				},
+			},
+			new: []lcp.AppleMusicSong{
+				{
+					Track:            "Song B",
+					Artist:           "Artist A",
+					DurationInMillis: 1000,
+					URL:              "https://music.apple.com/a",
+				},
+			},
 			want: true,
 		},
 		{
 			name: "different artist",
-			old:  []lcp.AppleMusicSong{{Track: "Song A", Artist: "Artist A", DurationInMillis: 1000, URL: "https://music.apple.com/a"}},
-			new:  []lcp.AppleMusicSong{{Track: "Song A", Artist: "Artist B", DurationInMillis: 1000, URL: "https://music.apple.com/a"}},
+			old: []lcp.AppleMusicSong{
+				{
+					Track:            "Song A",
+					Artist:           "Artist A",
+					DurationInMillis: 1000,
+					URL:              "https://music.apple.com/a",
+				},
+			},
+			new: []lcp.AppleMusicSong{
+				{
+					Track:            "Song A",
+					Artist:           "Artist B",
+					DurationInMillis: 1000,
+					URL:              "https://music.apple.com/a",
+				},
+			},
 			want: true,
 		},
 		{
 			name: "different duration",
-			old:  []lcp.AppleMusicSong{{Track: "Song A", Artist: "Artist A", DurationInMillis: 1000, URL: "https://music.apple.com/a"}},
-			new:  []lcp.AppleMusicSong{{Track: "Song A", Artist: "Artist A", DurationInMillis: 2000, URL: "https://music.apple.com/a"}},
+			old: []lcp.AppleMusicSong{
+				{
+					Track:            "Song A",
+					Artist:           "Artist A",
+					DurationInMillis: 1000,
+					URL:              "https://music.apple.com/a",
+				},
+			},
+			new: []lcp.AppleMusicSong{
+				{
+					Track:            "Song A",
+					Artist:           "Artist A",
+					DurationInMillis: 2000,
+					URL:              "https://music.apple.com/a",
+				},
+			},
 			want: true,
 		},
 		{
 			name: "different url",
-			old:  []lcp.AppleMusicSong{{Track: "Song A", Artist: "Artist A", DurationInMillis: 1000, URL: "https://music.apple.com/a"}},
-			new:  []lcp.AppleMusicSong{{Track: "Song A", Artist: "Artist A", DurationInMillis: 1000, URL: "https://music.apple.com/b"}},
+			old: []lcp.AppleMusicSong{
+				{
+					Track:            "Song A",
+					Artist:           "Artist A",
+					DurationInMillis: 1000,
+					URL:              "https://music.apple.com/a",
+				},
+			},
+			new: []lcp.AppleMusicSong{
+				{
+					Track:            "Song A",
+					Artist:           "Artist A",
+					DurationInMillis: 1000,
+					URL:              "https://music.apple.com/b",
+				},
+			},
 			want: true,
 		},
 		{
 			name: "different list length",
-			old:  []lcp.AppleMusicSong{{Track: "Song A", Artist: "Artist A", DurationInMillis: 1000, URL: "https://music.apple.com/a"}},
+			old: []lcp.AppleMusicSong{
+				{
+					Track:            "Song A",
+					Artist:           "Artist A",
+					DurationInMillis: 1000,
+					URL:              "https://music.apple.com/a",
+				},
+			},
 			new:  []lcp.AppleMusicSong{},
 			want: true,
 		},
@@ -61,41 +138,94 @@ func TestDiffSongList(t *testing.T) {
 		},
 		{
 			name: "preview audio url changed",
-			old:  []lcp.AppleMusicSong{{Track: "Song A", Artist: "A", DurationInMillis: 1000, URL: "u", PreviewAudioURL: ptr("https://preview.com/old.m4a")}},
-			new:  []lcp.AppleMusicSong{{Track: "Song A", Artist: "A", DurationInMillis: 1000, URL: "u", PreviewAudioURL: ptr("https://preview.com/new.m4a")}},
+			old: []lcp.AppleMusicSong{
+				{
+					Track:            "Song A",
+					Artist:           "A",
+					DurationInMillis: 1000,
+					URL:              "u",
+					PreviewAudioURL:  ptr("https://preview.com/old.m4a"),
+				},
+			},
+			new: []lcp.AppleMusicSong{
+				{
+					Track:            "Song A",
+					Artist:           "A",
+					DurationInMillis: 1000,
+					URL:              "u",
+					PreviewAudioURL:  ptr("https://preview.com/new.m4a"),
+				},
+			},
 			want: true,
 		},
 		{
 			name: "album art url same base different query params - not changed",
-			old: []lcp.AppleMusicSong{{
-				Track: "Song A", Artist: "A", DurationInMillis: 1000, URL: "u",
-				AlbumArtURL: ptr("https://is1-ssl.mzstatic.com/image/thumb/abc/source/100x100bb.jpg?token=old"),
-			}},
-			new: []lcp.AppleMusicSong{{
-				Track: "Song A", Artist: "A", DurationInMillis: 1000, URL: "u",
-				AlbumArtURL: ptr("https://is1-ssl.mzstatic.com/image/thumb/abc/source/100x100bb.jpg?token=new"),
-			}},
+			old: []lcp.AppleMusicSong{
+				{
+					Track:            "Song A",
+					Artist:           "A",
+					DurationInMillis: 1000,
+					URL:              "u",
+					AlbumArtURL: ptr(
+						"https://is1-ssl.mzstatic.com/image/thumb/abc/source/100x100bb.jpg?token=old",
+					),
+				},
+			},
+			new: []lcp.AppleMusicSong{
+				{
+					Track:            "Song A",
+					Artist:           "A",
+					DurationInMillis: 1000,
+					URL:              "u",
+					AlbumArtURL: ptr(
+						"https://is1-ssl.mzstatic.com/image/thumb/abc/source/100x100bb.jpg?token=new",
+					),
+				},
+			},
 			want: false,
 		},
 		{
 			name: "album art url base path changed",
-			old: []lcp.AppleMusicSong{{
-				Track: "Song A", Artist: "A", DurationInMillis: 1000, URL: "u",
-				AlbumArtURL: ptr("https://is1-ssl.mzstatic.com/image/thumb/old/source/100x100bb.jpg?token=x"),
-			}},
-			new: []lcp.AppleMusicSong{{
-				Track: "Song A", Artist: "A", DurationInMillis: 1000, URL: "u",
-				AlbumArtURL: ptr("https://is1-ssl.mzstatic.com/image/thumb/new/source/100x100bb.jpg?token=x"),
-			}},
+			old: []lcp.AppleMusicSong{
+				{
+					Track:            "Song A",
+					Artist:           "A",
+					DurationInMillis: 1000,
+					URL:              "u",
+					AlbumArtURL: ptr(
+						"https://is1-ssl.mzstatic.com/image/thumb/old/source/100x100bb.jpg?token=x",
+					),
+				},
+			},
+			new: []lcp.AppleMusicSong{
+				{
+					Track:            "Song A",
+					Artist:           "A",
+					DurationInMillis: 1000,
+					URL:              "u",
+					AlbumArtURL: ptr(
+						"https://is1-ssl.mzstatic.com/image/thumb/new/source/100x100bb.jpg?token=x",
+					),
+				},
+			},
 			want: true,
 		},
 		{
 			name: "expired permissions with different url - changed",
-			old: []lcp.AppleMusicSong{{
-				Track: "Song A", Artist: "A", DurationInMillis: 1000, URL: "u",
-				AlbumArtURL:                   ptr("https://is1-ssl.mzstatic.com/image/thumb/old/100x100bb.jpg"),
-				AlbumArtPermissionsExpiration: ptr(time.Now().Add(-10 * time.Minute)), // already expired
-			}},
+			old: []lcp.AppleMusicSong{
+				{
+					Track:            "Song A",
+					Artist:           "A",
+					DurationInMillis: 1000,
+					URL:              "u",
+					AlbumArtURL: ptr(
+						"https://is1-ssl.mzstatic.com/image/thumb/old/100x100bb.jpg",
+					),
+					AlbumArtPermissionsExpiration: ptr(
+						time.Now().Add(-10 * time.Minute),
+					), // already expired
+				},
+			},
 			new: []lcp.AppleMusicSong{{
 				Track: "Song A", Artist: "A", DurationInMillis: 1000, URL: "u",
 				AlbumArtURL: ptr("https://is1-ssl.mzstatic.com/image/thumb/new/100x100bb.jpg"),
@@ -119,7 +249,12 @@ func TestDiffSongList(t *testing.T) {
 
 func TestDiff(t *testing.T) {
 	song := func(track, artist string) lcp.AppleMusicSong {
-		return lcp.AppleMusicSong{Track: track, Artist: artist, DurationInMillis: 1000, URL: "https://music.apple.com/x"}
+		return lcp.AppleMusicSong{
+			Track:            track,
+			Artist:           artist,
+			DurationInMillis: 1000,
+			URL:              "https://music.apple.com/x",
+		}
 	}
 	playlist := func(name string, tracks ...lcp.AppleMusicSong) lcp.AppleMusicPlaylist {
 		return lcp.AppleMusicPlaylist{
@@ -140,8 +275,14 @@ func TestDiff(t *testing.T) {
 	}{
 		{
 			name: "identical caches",
-			old:  lcp.AppleMusicCache{RecentlyPlayed: []lcp.AppleMusicSong{song("A", "B")}, Playlists: []lcp.AppleMusicPlaylist{playlist("Mix", song("A", "B"))}},
-			new:  lcp.AppleMusicCache{RecentlyPlayed: []lcp.AppleMusicSong{song("A", "B")}, Playlists: []lcp.AppleMusicPlaylist{playlist("Mix", song("A", "B"))}},
+			old: lcp.AppleMusicCache{
+				RecentlyPlayed: []lcp.AppleMusicSong{song("A", "B")},
+				Playlists:      []lcp.AppleMusicPlaylist{playlist("Mix", song("A", "B"))},
+			},
+			new: lcp.AppleMusicCache{
+				RecentlyPlayed: []lcp.AppleMusicSong{song("A", "B")},
+				Playlists:      []lcp.AppleMusicPlaylist{playlist("Mix", song("A", "B"))},
+			},
 			want: false,
 		},
 		{
@@ -153,7 +294,9 @@ func TestDiff(t *testing.T) {
 		{
 			name: "playlist count changed",
 			old:  lcp.AppleMusicCache{Playlists: []lcp.AppleMusicPlaylist{playlist("Mix")}},
-			new:  lcp.AppleMusicCache{Playlists: []lcp.AppleMusicPlaylist{playlist("Mix"), playlist("Chill")}},
+			new: lcp.AppleMusicCache{
+				Playlists: []lcp.AppleMusicPlaylist{playlist("Mix"), playlist("Chill")},
+			},
 			want: true,
 		},
 		{
@@ -164,17 +307,29 @@ func TestDiff(t *testing.T) {
 		},
 		{
 			name: "playlist track changed",
-			old:  lcp.AppleMusicCache{Playlists: []lcp.AppleMusicPlaylist{playlist("Mix", song("A", "B"))}},
-			new:  lcp.AppleMusicCache{Playlists: []lcp.AppleMusicPlaylist{playlist("Mix", song("C", "D"))}},
+			old: lcp.AppleMusicCache{
+				Playlists: []lcp.AppleMusicPlaylist{playlist("Mix", song("A", "B"))},
+			},
+			new: lcp.AppleMusicCache{
+				Playlists: []lcp.AppleMusicPlaylist{playlist("Mix", song("C", "D"))},
+			},
 			want: true,
 		},
 		{
 			name: "playlist last modified changed",
 			old: lcp.AppleMusicCache{Playlists: []lcp.AppleMusicPlaylist{
-				{Name: "Mix", LastModified: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC), ID: "pl-1"},
+				{
+					Name:         "Mix",
+					LastModified: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
+					ID:           "pl-1",
+				},
 			}},
 			new: lcp.AppleMusicCache{Playlists: []lcp.AppleMusicPlaylist{
-				{Name: "Mix", LastModified: time.Date(2024, 2, 1, 0, 0, 0, 0, time.UTC), ID: "pl-1"},
+				{
+					Name:         "Mix",
+					LastModified: time.Date(2024, 2, 1, 0, 0, 0, 0, time.UTC),
+					ID:           "pl-1",
+				},
 			}},
 			want: true,
 		},

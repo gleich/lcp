@@ -34,7 +34,15 @@ func BlurHash(
 	}
 	result, err := rdb.Get(ctx, cacheKey.String()).Result()
 	if err == redis.Nil {
-		blurhash, err := createCacheEntry(client, rdb, url, cacheKey.String(), decoder, ctx, cacheLogAttr)
+		blurhash, err := createCacheEntry(
+			client,
+			rdb,
+			url,
+			cacheKey.String(),
+			decoder,
+			ctx,
+			cacheLogAttr,
+		)
 		if err != nil {
 			return "", fmt.Errorf("generating blurhash for %s: %w", url, err)
 		}
