@@ -26,8 +26,7 @@ type Secrets struct {
 	MapboxAccessToken    string `env:"MAPBOX_ACCESS_TOKEN"`
 
 	// hevy
-	HevyAccessToken   string  `env:"HEVY_ACCESS_TOKEN"`
-	HevyBodyWeightLBS float64 `env:"HEVY_BODY_WEIGHT_LBS"`
+	HevyAccessToken string `env:"HEVY_ACCESS_TOKEN"`
 
 	// opencagedata
 	OpenCageDataKey string `env:"OPEN_CAGE_DATA_KEY"`
