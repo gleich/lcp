@@ -9,7 +9,6 @@ import (
 
 	"slices"
 
-	"go.mattglei.ch/lcp/internal/secrets"
 	"go.mattglei.ch/lcp/pkg/lcp"
 )
 
@@ -31,6 +30,11 @@ type workoutsResponse struct {
 }
 
 func FetchWorkouts(client *http.Client) ([]lcp.Workout, error) {
+	bodyweight, err := fetchBodyWeight(client)
+	if err != nil {
+		return []lcp.Workout{}, fmt.Errorf("fetching bodyweight: %w", err)
+	}
+
 	var (
 		page       = 0
 		activities []lcp.Workout
@@ -53,7 +57,7 @@ func FetchWorkouts(client *http.Client) ([]lcp.Workout, error) {
 				for i, set := range exercise.Sets {
 					// account for bodyweight exercises which are (body weight - weight)
 					if slices.Contains(bodyWeightExercises, exercise.Title) {
-						totalVolume += (secrets.ENV.HevyBodyWeightLBS*0.45359237 - set.WeightKg) * float64(
+						totalVolume += (bodyweight - set.WeightKg) * float64(
 							set.Reps,
 						)
 						exercise.Sets[i].WeightKg = -set.WeightKg
