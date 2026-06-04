@@ -17,10 +17,12 @@ type locationResponse struct {
 		Components struct {
 			Borough      string `json:"borough"`
 			City         string `json:"city"`
+			State        string `json:"state"`
 			StateCode    string `json:"state_code"`
 			Municipality string `json:"municipality"`
 			Town         string `json:"town"`
 			Village      string `json:"village"`
+			Country      string `json:"country"`
 		} `json:"components"`
 	} `json:"results"`
 }
@@ -34,9 +36,7 @@ func FetchLocation(client *http.Client, workout lcp.Workout) (*string, error) {
 
 	params := url.Values{
 		"key": {secrets.ENV.OpenCageDataKey},
-		"q": {
-			fmt.Sprintf("%f,%f", latitude, longitude),
-		},
+		"q":   {fmt.Sprintf("%f,%f", latitude, longitude)},
 	}
 
 	req, err := http.NewRequest(
@@ -71,22 +71,17 @@ func FetchLocation(client *http.Client, workout lcp.Workout) (*string, error) {
 		}
 	}
 
-	var location string
+	var locality string
 	if components.Borough != "" {
-		location = fmt.Sprintf(
-			"%s, %s %s",
-			components.Borough,
-			components.City,
-			components.StateCode,
-		)
+		locality = fmt.Sprintf("%s, %s", components.Borough, components.City)
 	} else if components.Town != "" {
-		location = fmt.Sprintf("%s, %s", components.Town, components.StateCode)
+		locality = components.Town
 	} else if components.Municipality != "" {
-		location = fmt.Sprintf("%s, %s", components.Municipality, components.StateCode)
+		locality = components.Municipality
 	} else if components.City != "" {
-		location = fmt.Sprintf("%s, %s", components.City, components.StateCode)
+		locality = components.City
 	} else if components.Village != "" {
-		location = fmt.Sprintf("%s, %s", components.Village, components.StateCode)
+		locality = components.Village
 	} else {
 		timber.Warning(
 			"unable to create location",
@@ -97,7 +92,15 @@ func FetchLocation(client *http.Client, workout lcp.Workout) (*string, error) {
 		return nil, nil
 	}
 
-	location = strings.TrimSpace(location)
+	region := components.StateCode
+	if components.Country != "United States of America" {
+		region = components.Country
+		if components.State != "" && components.State != locality {
+			region = fmt.Sprintf("%s, %s", components.State, components.Country)
+		}
+	}
+
+	location := strings.TrimSpace(fmt.Sprintf("%s, %s", locality, region))
 
 	return &location, nil
 }
