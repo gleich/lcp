@@ -105,7 +105,7 @@ func fetch(
 				"https://s3.mattglei.ch/mapbox-maps/%s.png",
 				activity.ID,
 			)
-			mapBlurHash, err := images.BlurHash(client, rdb, imgURL, png.Decode, logAttr)
+			mapBlurHash, err := images.BlurHash(client, rdb, imgURL, png.Decode, logger())
 			if err != nil {
 				return nil, fmt.Errorf("creating blurhash for map: %w", err)
 			}

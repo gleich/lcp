@@ -7,7 +7,6 @@ import (
 	"go.mattglei.ch/lcp/internal/cache"
 	"go.mattglei.ch/lcp/internal/util"
 	"go.mattglei.ch/lcp/pkg/lcp"
-	"go.mattglei.ch/timber"
 )
 
 // We need a custom diff check function due to the fact that the apple music image service returns
@@ -71,11 +70,10 @@ func diffSongList(oldSongs, newSongs []lcp.AppleMusicSong) (bool, error) {
 					newURL = new.AlbumArtURL
 				)
 				if *oldURL == *newURL {
-					timber.Warning(
-						"album art did not update even though it expired",
-						timber.A("old-url", *oldURL),
-						timber.A("new-url", *newURL),
-					)
+					logger().Warn().
+						Str("old-url", *oldURL).
+						Str("new-url", *newURL).
+						Msg("album art did not update even though it expired")
 				} else {
 					return true, nil
 				}

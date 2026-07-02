@@ -3,18 +3,19 @@ package github
 import (
 	"context"
 	"net/http"
+	"sync"
 	"time"
 
+	"github.com/rs/zerolog"
 	"github.com/shurcooL/githubv4"
 	"go.mattglei.ch/lcp/internal/cache"
 	"go.mattglei.ch/lcp/internal/secrets"
-	"go.mattglei.ch/timber"
 	"golang.org/x/oauth2"
 )
 
 const cacheInstance = cache.GitHub
 
-var logAttr = cacheInstance.LogAttr()
+var logger = sync.OnceValue(func() *zerolog.Logger { return cacheInstance.Logger() })
 
 func Setup(mux *http.ServeMux) {
 	githubTokenSource := oauth2.StaticTokenSource(
@@ -25,7 +26,7 @@ func Setup(mux *http.ServeMux) {
 
 	pinnedRepos, err := fetchPinnedRepos(githubClient)
 	if err != nil {
-		timber.Error(err, "fetching initial pinned repos failed", logAttr)
+		logger().Error().Err(err).Msg("fetching initial pinned repos failed")
 	}
 
 	githubCache := cache.New(cacheInstance, pinnedRepos, err == nil)

@@ -196,7 +196,7 @@ func playlistEndpoint(c *cache.Cache[lcp.AppleMusicCache]) http.HandlerFunc {
 		err := json.NewEncoder(w).Encode(resp)
 		if err != nil {
 			err = fmt.Errorf("writing json to request: %w", err)
-			util.InternalServerError(w, err, logAttr, "failed to encode json data")
+			util.InternalServerError(w, err, logger(), "failed to encode json data")
 		}
 	})
 }

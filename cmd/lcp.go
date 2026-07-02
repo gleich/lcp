@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"os"
 	"sync"
 	"time"
 
@@ -9,6 +10,8 @@ import (
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/redis/go-redis/v9"
 	"github.com/redis/go-redis/v9/maintnotifications"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"go.mattglei.ch/lcp/internal/api"
 	"go.mattglei.ch/lcp/internal/api/applemusic"
 	"go.mattglei.ch/lcp/internal/api/github"
@@ -17,24 +20,24 @@ import (
 	"go.mattglei.ch/lcp/internal/cache"
 	"go.mattglei.ch/lcp/internal/middleware"
 	"go.mattglei.ch/lcp/internal/secrets"
-	"go.mattglei.ch/timber"
 )
 
 func main() {
 	start := time.Now()
 	secrets.Load()
-	if secrets.ENV.StructuredLogging {
-		timber.Structured(true)
-	} else {
+	if !secrets.ENV.StructuredLogging {
 		ny, err := time.LoadLocation("America/New_York")
 		if err != nil {
-			timber.Fatal(err, "failed to load new york timezone")
+			log.Fatal().Err(err).Msg("failed to load new york timezone")
 		}
-		timber.Timezone(ny)
-		timber.TimeFormat("01/02 03:04:05 PM MST")
+		log.Logger = log.Output(zerolog.ConsoleWriter{
+			Out:          os.Stderr,
+			TimeFormat:   "01/02 03:04:05 PM MST",
+			TimeLocation: ny,
+		})
 	}
 
-	timber.InfoSince(start, "booted")
+	log.Info().Dur("duration", time.Since(start)).Msg("booted")
 
 	minioClient, err := minio.New(secrets.ENV.MinioEndpoint, &minio.Options{
 		Creds: credentials.NewStaticV4(
@@ -45,7 +48,7 @@ func main() {
 		Secure: true,
 	})
 	if err != nil {
-		timber.Fatal(err, "failed to create minio client")
+		log.Fatal().Err(err).Msg("failed to create minio client")
 	}
 
 	var (
@@ -74,15 +77,15 @@ func main() {
 	for cacheInstance, setup := range setups {
 		wg.Go(func() {
 			start := time.Now()
-			logAttr := cacheInstance.LogAttr()
-			timber.Info("setting up", logAttr)
+			logger := cacheInstance.Logger()
+			logger.Info().Msg("setting up")
 			setup()
-			timber.InfoSince(start, "setup", logAttr)
+			logger.Info().Dur("duration", time.Since(start)).Msg("setup")
 		})
 	}
 	wg.Wait()
 
-	timber.InfoSince(start, "starting server")
+	log.Info().Dur("duration", time.Since(start)).Msg("starting server")
 	server := &http.Server{
 		Addr:         ":8000",
 		Handler:      middleware.Log(mux),
@@ -92,6 +95,6 @@ func main() {
 	}
 	err = server.ListenAndServe()
 	if err != nil {
-		timber.Fatal(err, "failed to start router")
+		log.Fatal().Err(err).Msg("failed to start router")
 	}
 }

@@ -3,10 +3,10 @@ package util
 import (
 	"net/http"
 
-	"go.mattglei.ch/timber"
+	"github.com/rs/zerolog"
 )
 
-func InternalServerError(w http.ResponseWriter, err error, cacheLogAttr timber.Attr, msg string) {
-	timber.Error(err, msg, cacheLogAttr)
+func InternalServerError(w http.ResponseWriter, err error, logger *zerolog.Logger, msg string) {
+	logger.Error().Err(err).Msg(msg)
 	http.Error(w, err.Error(), http.StatusInternalServerError)
 }

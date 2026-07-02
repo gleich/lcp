@@ -12,7 +12,6 @@ import (
 	"github.com/shurcooL/githubv4"
 	"go.mattglei.ch/lcp/internal/api"
 	"go.mattglei.ch/lcp/pkg/lcp"
-	"go.mattglei.ch/timber"
 )
 
 type pinnedItemsQuery struct {
@@ -44,34 +43,33 @@ func fetchPinnedRepos(client *githubv4.Client) ([]lcp.GitHubRepository, error) {
 	start := time.Now()
 	err := client.Query(context.Background(), &query, nil)
 	if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
-		timber.Warning("connection timed out for getting pinned repos")
+		logger().Warn().Msg("connection timed out for getting pinned repos")
 		return []lcp.GitHubRepository{}, api.ErrWarning
 	}
 	if err != nil && (errors.Is(err, syscall.ECONNRESET) ||
 		strings.Contains(err.Error(), "connection reset by peer")) {
-		timber.Warning(
-			"connection reset by peer while getting pinned repos", logAttr)
+		logger().Warn().Msg("connection reset by peer while getting pinned repos")
 		return []lcp.GitHubRepository{}, api.ErrWarning
 	}
 	if err != nil {
 		errMsg := err.Error()
 		if strings.Contains(errMsg, "non-200 OK status code") {
 			if strings.Contains(errMsg, "500 Internal Server Error body") {
-				timber.Warning("500 internal server error", logAttr)
+				logger().Warn().Msg("500 internal server error")
 				return []lcp.GitHubRepository{}, api.ErrWarning
 			}
 			if strings.Contains(errMsg, "502 Bad Gateway body") {
-				timber.Warning("502 bad gateway", logAttr)
+				logger().Warn().Msg("502 bad gateway")
 				return []lcp.GitHubRepository{}, api.ErrWarning
 			}
 			if strings.Contains(errMsg, "503 Service Unavailable body") {
-				timber.Warning("503 service unavailable", logAttr)
+				logger().Warn().Msg("503 service unavailable")
 				return []lcp.GitHubRepository{}, api.ErrWarning
 			}
 		}
 		return nil, fmt.Errorf("querying github's graphql API: %w", err)
 	}
-	timber.InfoSince(start, "made request", logAttr)
+	logger().Info().Dur("duration", time.Since(start)).Msg("made request")
 
 	var repositories []lcp.GitHubRepository
 	for _, node := range query.Viewer.PinnedItems.Nodes {

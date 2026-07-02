@@ -14,7 +14,6 @@ import (
 	"github.com/redis/go-redis/v9"
 	"go.mattglei.ch/lcp/internal/images"
 	"go.mattglei.ch/lcp/pkg/lcp"
-	"go.mattglei.ch/timber"
 )
 
 type songResponse struct {
@@ -80,12 +79,11 @@ func (s songResponse) ToAppleMusicSong(
 		id = s.Attributes.PlayParams.CatalogID
 	}
 	if s.Attributes.Artwork.URL != "" {
-		blurhash, err := images.BlurHash(client, rdb, *artURL, jpeg.Decode, logAttr)
+		blurhash, err := images.BlurHash(client, rdb, *artURL, jpeg.Decode, logger())
 		if err != nil && strings.Contains(err.Error(), "unexpected EOF") {
-			timber.Warning(
-				"unexpected EOF occurred while trying to create blur hash",
-				timber.A("url", albumArtURL),
-			)
+			logger().Warn().
+				Str("url", *artURL).
+				Msg("unexpected EOF occurred while trying to create blur hash")
 		} else if err != nil {
 			return lcp.AppleMusicSong{}, fmt.Errorf(
 				"getting blur hash for \"%s\" (%s): %w",

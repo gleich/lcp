@@ -9,7 +9,6 @@ import (
 
 	"go.mattglei.ch/lcp/internal/api"
 	"go.mattglei.ch/lcp/internal/secrets"
-	"go.mattglei.ch/timber"
 )
 
 type playerAchievementsResponse struct {
@@ -59,7 +58,7 @@ func fetchAchievementsPercentage(
 		return nil, fmt.Errorf("creating request for player achievements: %w", err)
 	}
 
-	body, err := api.Request(client, req, logAttr)
+	body, err := api.Request(client, req, logger())
 	if err != nil {
 		return nil, fmt.Errorf("sending request for player achievements from %d: %w", appID, err)
 	}
@@ -72,7 +71,7 @@ func fetchAchievementsPercentage(
 	err = json.Unmarshal(body, &playerAchievements)
 	if err != nil {
 		err = fmt.Errorf("parsing json for player achievements (id: %d): %w", appID, err)
-		timber.Debug("body:", timber.A("body", string(body)), logAttr)
+		logger().Debug().Str("body", string(body)).Msg("body:")
 		return nil, err
 	}
 
@@ -93,7 +92,7 @@ func fetchAchievementsPercentage(
 	if err != nil {
 		return nil, fmt.Errorf("creating request for owned gamed (id: %d): %w", appID, err)
 	}
-	gameSchema, err := api.RequestJSON[schemaGameResponse](client, req, logAttr)
+	gameSchema, err := api.RequestJSON[schemaGameResponse](client, req, logger())
 	if err != nil {
 		return nil, fmt.Errorf("getting game schema (id: %d): %w", appID, err)
 	}

@@ -8,10 +8,11 @@ import (
 	"strings"
 	"testing"
 
-	"go.mattglei.ch/timber"
+	"github.com/rs/zerolog/log"
 )
 
-var testLogAttr = timber.A("cache", "test")
+var testLoggerValue = log.With().Str("cache", "test").Logger()
+var testLogger = &testLoggerValue
 
 func TestRequest_Success(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -21,7 +22,7 @@ func TestRequest_Success(t *testing.T) {
 	defer server.Close()
 
 	req, _ := http.NewRequest(http.MethodGet, server.URL, nil)
-	body, err := Request(server.Client(), req, testLogAttr)
+	body, err := Request(server.Client(), req, testLogger)
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
@@ -44,7 +45,7 @@ func TestRequest_Non2xxReturnsErrWarning(t *testing.T) {
 			defer server.Close()
 
 			req, _ := http.NewRequest(http.MethodGet, server.URL, nil)
-			_, err := Request(server.Client(), req, testLogAttr)
+			_, err := Request(server.Client(), req, testLogger)
 			if !errors.Is(err, ErrWarning) {
 				t.Errorf("status %d: expected ErrWarning, got %v", code, err)
 			}
@@ -60,7 +61,7 @@ func TestRequest_204NoContentIsNotErrWarning(t *testing.T) {
 	defer server.Close()
 
 	req, _ := http.NewRequest(http.MethodGet, server.URL, nil)
-	_, err := Request(server.Client(), req, testLogAttr)
+	_, err := Request(server.Client(), req, testLogger)
 	if err == nil {
 		t.Fatal("expected an error for 204, got nil")
 	}
@@ -76,7 +77,7 @@ func TestRequest_ConnectionError(t *testing.T) {
 	server.Close() // close before making request
 
 	req, _ := http.NewRequest(http.MethodGet, server.URL, nil)
-	_, err := Request(server.Client(), req, testLogAttr)
+	_, err := Request(server.Client(), req, testLogger)
 	if err == nil {
 		t.Fatal("expected an error for closed server, got nil")
 	}
@@ -105,7 +106,7 @@ func TestRequest_UnexpectedEOFIsErrWarning(t *testing.T) {
 	defer server.Close()
 
 	req, _ := http.NewRequest(http.MethodGet, server.URL, nil)
-	_, err := Request(server.Client(), req, testLogAttr)
+	_, err := Request(server.Client(), req, testLogger)
 	// May return ErrWarning (unexpected EOF) or a wrapped error depending on OS timing
 	// The important thing is that it doesn't succeed
 	if err == nil {
@@ -125,7 +126,7 @@ func TestRequestJSON_ParsesBody(t *testing.T) {
 	defer server.Close()
 
 	req, _ := http.NewRequest(http.MethodGet, server.URL, nil)
-	result, err := RequestJSON[payload](server.Client(), req, testLogAttr)
+	result, err := RequestJSON[payload](server.Client(), req, testLogger)
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}
@@ -146,7 +147,7 @@ func TestRequestJSON_InvalidJSONReturnsError(t *testing.T) {
 	defer server.Close()
 
 	req, _ := http.NewRequest(http.MethodGet, server.URL, nil)
-	_, err := RequestJSON[payload](server.Client(), req, testLogAttr)
+	_, err := RequestJSON[payload](server.Client(), req, testLogger)
 	if err == nil {
 		t.Fatal("expected a JSON parse error, got nil")
 	}
@@ -164,7 +165,7 @@ func TestRequestJSON_PropagatesErrWarning(t *testing.T) {
 	defer server.Close()
 
 	req, _ := http.NewRequest(http.MethodGet, server.URL, nil)
-	_, err := RequestJSON[payload](server.Client(), req, testLogAttr)
+	_, err := RequestJSON[payload](server.Client(), req, testLogger)
 	if !errors.Is(err, ErrWarning) {
 		t.Errorf("expected ErrWarning to propagate, got %v", err)
 	}

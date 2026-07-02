@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"go.mattglei.ch/timber"
+	"github.com/rs/zerolog/log"
 )
 
 // wrappedWriter provides a custom interface that allows us to store the status code of a request
@@ -39,11 +39,10 @@ func Log(next http.Handler) http.Handler {
 		}
 
 		next.ServeHTTP(wrapped, r)
-		timber.InfoSince(
-			start,
-			"handled request",
-			timber.A("code", wrapped.statusCode),
-			timber.A("path", r.URL.Path),
-		)
+		log.Info().
+			Dur("duration", time.Since(start)).
+			Int("code", wrapped.statusCode).
+			Str("path", r.URL.Path).
+			Msg("handled request")
 	})
 }

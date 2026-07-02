@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"go.mattglei.ch/lcp/internal/api"
-	"go.mattglei.ch/lcp/internal/cache"
 )
 
 func sendStravaRequest[T any](client *http.Client, path string, tokens Tokens) (T, error) {
@@ -21,7 +20,7 @@ func sendStravaRequest[T any](client *http.Client, path string, tokens Tokens) (
 	}
 	req.Header.Set("Authorization", "Bearer "+tokens.Access)
 
-	resp, err := api.RequestJSON[T](client, req, cache.Workouts.LogAttr())
+	resp, err := api.RequestJSON[T](client, req, logger())
 	if err != nil {
 		return zero, fmt.Errorf("making strava api request: %w", err)
 	}

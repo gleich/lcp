@@ -8,7 +8,6 @@ import (
 
 	"go.mattglei.ch/lcp/internal/api"
 	"go.mattglei.ch/lcp/internal/secrets"
-	"go.mattglei.ch/timber"
 )
 
 type Tokens struct {
@@ -48,12 +47,15 @@ func (t *Tokens) RefreshIfExpired(client *http.Client) error {
 		return fmt.Errorf("creating request for new token: %w", err)
 	}
 
-	tokens, err := api.RequestJSON[Tokens](client, req, logAttr)
+	tokens, err := api.RequestJSON[Tokens](client, req, logger())
 	if err != nil {
 		return fmt.Errorf("making request for refresh tokens: %w", err)
 	}
 
 	*t = tokens
-	timber.InfoSince(start, "new access token", timber.A("token", t.Access))
+	logger().Info().
+		Dur("duration", time.Since(start)).
+		Str("token", t.Access).
+		Msg("new access token")
 	return nil
 }
