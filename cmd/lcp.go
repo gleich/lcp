@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"sync"
@@ -25,7 +26,9 @@ import (
 func main() {
 	start := time.Now()
 	secrets.Load()
-	if !secrets.ENV.StructuredLogging {
+	if secrets.ENV.StructuredLogging {
+		log.Logger = log.Output(logfmtWriter())
+	} else {
 		ny, err := time.LoadLocation("America/New_York")
 		if err != nil {
 			log.Fatal().Err(err).Msg("failed to load new york timezone")
@@ -96,5 +99,29 @@ func main() {
 	err = server.ListenAndServe()
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to start router")
+	}
+}
+
+// logfmtWriter renders logs as logfmt (key=value pairs) for structured logging
+// consumers like Loki and Grafana. zerolog's field writer already emits the
+// contextual fields as logfmt, so only the timestamp, level, and message parts
+// need to be keyed.
+func logfmtWriter() zerolog.ConsoleWriter {
+	return zerolog.ConsoleWriter{
+		Out:     os.Stderr,
+		NoColor: true,
+		PartsOrder: []string{
+			zerolog.TimestampFieldName,
+			zerolog.LevelFieldName,
+			zerolog.MessageFieldName,
+		},
+		FormatTimestamp: func(i any) string { return fmt.Sprintf("time=%v", i) },
+		FormatLevel:     func(i any) string { return fmt.Sprintf("level=%v", i) },
+		FormatMessage: func(i any) string {
+			if i == nil {
+				return ""
+			}
+			return fmt.Sprintf("msg=%q", i)
+		},
 	}
 }
