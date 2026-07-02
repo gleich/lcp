@@ -10,9 +10,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"go.mattglei.ch/lcp/internal/secrets"
 	"go.mattglei.ch/lcp/pkg/lcp"
-	"go.mattglei.ch/timber"
 )
 
 type CacheInstance int
@@ -38,14 +39,15 @@ func (i CacheInstance) String() string {
 	return "unknown"
 }
 
-func (i CacheInstance) LogAttr() timber.Attr {
-	return timber.A("cache", i.String())
+func (i CacheInstance) Logger() *zerolog.Logger {
+	logger := log.With().Str("cache", i.String()).Logger()
+	return &logger
 }
 
 type Cache[T lcp.CacheData] struct {
 	instance CacheInstance
 	filePath string
-	LogAttr  timber.Attr
+	Logger   *zerolog.Logger
 
 	Mutex   sync.RWMutex
 	Data    T
@@ -71,7 +73,7 @@ func New[T lcp.CacheData](instance CacheInstance, data T, update bool) *Cache[T]
 			secrets.ENV.CacheFolder,
 			fmt.Sprintf("%s.json", instance.String()),
 		),
-		LogAttr:     instance.LogAttr(),
+		Logger:      instance.Logger(),
 		connections: make(map[chan string]struct{}),
 		MarshalResponse: func(c *Cache[T]) ([]byte, error) {
 			data, err := json.Marshal(lcp.CacheResponse[T]{Data: c.Data, Updated: c.Updated})
@@ -108,7 +110,7 @@ func (c *Cache[T]) Update(start time.Time, data T) {
 	c.Mutex.RLock()
 	changed, err := c.Diff(c, data, c.Data)
 	if err != nil {
-		timber.Error(err, "checking for diff between old and new elements", c.LogAttr)
+		c.Logger.Error().Err(err).Msg("checking for diff between old and new elements")
 	}
 	c.Mutex.RUnlock()
 	if changed {
@@ -118,7 +120,7 @@ func (c *Cache[T]) Update(start time.Time, data T) {
 		c.Mutex.Unlock()
 
 		c.persistToFile()
-		timber.InfoSince(start, "updated", c.LogAttr)
+		c.Logger.Info().Dur("duration", time.Since(start)).Msg("updated")
 
 		if len(c.connections) != 0 {
 			start = time.Now()
@@ -126,7 +128,7 @@ func (c *Cache[T]) Update(start time.Time, data T) {
 			c.Mutex.RLock()
 			frame, err := c.MarshalResponse(c)
 			if err != nil {
-				timber.Error(err, "failed to create endpoint data")
+				c.Logger.Error().Err(err).Msg("failed to create endpoint data")
 				return
 			}
 			c.Mutex.RUnlock()
@@ -142,12 +144,10 @@ func (c *Cache[T]) Update(start time.Time, data T) {
 			}
 			c.connectionsMutex.Unlock()
 
-			timber.InfoSince(
-				start,
-				"updated streams",
-				timber.A("connections", len(c.connections)),
-				c.LogAttr,
-			)
+			c.Logger.Info().
+				Dur("duration", time.Since(start)).
+				Int("connections", len(c.connections)).
+				Msg("updated streams")
 		}
 	}
 
@@ -168,7 +168,7 @@ func UpdatePeriodically[T lcp.CacheData, C any](
 				ExpectedErrors,
 				func(e error) bool { return errors.Is(err, e) },
 			) {
-				timber.Error(err, "updating failed", cache.LogAttr)
+				cache.Logger.Error().Err(err).Msg("updating failed")
 			}
 		} else {
 			cache.Update(start, data)

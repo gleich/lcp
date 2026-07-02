@@ -6,7 +6,7 @@ import (
 
 	"github.com/caarlos0/env/v11"
 	"github.com/joho/godotenv"
-	"go.mattglei.ch/timber"
+	"github.com/rs/zerolog/log"
 )
 
 var ENV Secrets
@@ -54,12 +54,12 @@ type Secrets struct {
 func Load() {
 	err := godotenv.Load()
 	if err != nil && !errors.Is(err, fs.ErrNotExist) {
-		timber.Fatal(err, "loading .env file failed")
+		log.Fatal().Err(err).Msg("loading .env file failed")
 	}
 
 	secrets, err := env.ParseAsWithOptions[Secrets](env.Options{RequiredIfNoDef: true})
 	if err != nil {
-		timber.Fatal(err, "parsing required env vars failed")
+		log.Fatal().Err(err).Msg("parsing required env vars failed")
 	}
 	ENV = secrets
 }

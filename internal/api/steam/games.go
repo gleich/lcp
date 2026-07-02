@@ -43,7 +43,7 @@ func fetchRecentlyPlayedGames(client *http.Client, rdb *redis.Client) ([]lcp.Ste
 	if err != nil {
 		return nil, fmt.Errorf("creating request for steam API owned games: %w", err)
 	}
-	ownedGames, err := api.RequestJSON[ownedGamesResponse](client, req, logAttr)
+	ownedGames, err := api.RequestJSON[ownedGamesResponse](client, req, logger())
 	if err != nil {
 		return nil, fmt.Errorf("sending request for owned games: %w", err)
 	}
@@ -95,7 +95,7 @@ func fetchRecentlyPlayedGames(client *http.Client, rdb *redis.Client) ([]lcp.Ste
 			"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/%d/header.jpg",
 			g.AppID,
 		)
-		headerBlurHash, err := images.BlurHash(client, rdb, headerURL, jpeg.Decode, logAttr)
+		headerBlurHash, err := images.BlurHash(client, rdb, headerURL, jpeg.Decode, logger())
 		if err != nil {
 			return nil, fmt.Errorf("loading blurhash image data for library hero: %w", err)
 		}

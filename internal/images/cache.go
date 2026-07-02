@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
+	"github.com/rs/zerolog"
 	"go.mattglei.ch/lcp/internal/api"
 	"go.mattglei.ch/lcp/internal/util"
-	"go.mattglei.ch/timber"
 )
 
 type cacheEntry struct {
@@ -25,7 +25,7 @@ func BlurHash(
 	rdb *redis.Client,
 	url string,
 	decoder ImageDecoder,
-	cacheLogAttr timber.Attr,
+	logger *zerolog.Logger,
 ) (string, error) {
 	ctx := context.Background()
 	cacheKey, err := util.NormalizeURL(url)
@@ -41,7 +41,7 @@ func BlurHash(
 			cacheKey.String(),
 			decoder,
 			ctx,
-			cacheLogAttr,
+			logger,
 		)
 		if err != nil {
 			return "", fmt.Errorf("generating blurhash for %s: %w", url, err)
@@ -54,7 +54,7 @@ func BlurHash(
 	var cachedBlurhash *cacheEntry
 	err = json.Unmarshal([]byte(result), &cachedBlurhash)
 	if err != nil {
-		timber.Debug(result)
+		logger.Debug().Msg(result)
 		return "", fmt.Errorf("parsing json for blurhash: %w", err)
 	}
 	return cachedBlurhash.BlurHash, nil
@@ -69,7 +69,7 @@ func createCacheEntry(
 	cacheKey string,
 	decoder ImageDecoder,
 	ctx context.Context,
-	cacheLogAttr timber.Attr,
+	logger *zerolog.Logger,
 ) (string, error) {
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
@@ -80,7 +80,7 @@ func createCacheEntry(
 		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36",
 	)
 
-	body, err := api.Request(client, req, cacheLogAttr)
+	body, err := api.Request(client, req, logger)
 	if err != nil {
 		return "", fmt.Errorf("reading response body: %w", err)
 	}

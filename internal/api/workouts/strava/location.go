@@ -9,7 +9,6 @@ import (
 	"go.mattglei.ch/lcp/internal/api"
 	"go.mattglei.ch/lcp/internal/secrets"
 	"go.mattglei.ch/lcp/pkg/lcp"
-	"go.mattglei.ch/timber"
 )
 
 type locationResponse struct {
@@ -48,7 +47,7 @@ func FetchLocation(client *http.Client, workout lcp.Workout) (*string, error) {
 		return nil, fmt.Errorf("creating request for location: %w", err)
 	}
 
-	resp, err := api.RequestJSON[locationResponse](client, req, logAttr)
+	resp, err := api.RequestJSON[locationResponse](client, req, logger())
 	if err != nil {
 		return nil, fmt.Errorf("sending request for location: %w", err)
 	}
@@ -83,12 +82,11 @@ func FetchLocation(client *http.Client, workout lcp.Workout) (*string, error) {
 	} else if components.Village != "" {
 		locality = components.Village
 	} else {
-		timber.Warning(
-			"unable to create location",
-			timber.A("workout-name", workout.Name),
-			timber.A("latitude", latitude),
-			timber.A("longitude", longitude),
-		)
+		logger().Warn().
+			Str("workout-name", workout.Name).
+			Float32("latitude", latitude).
+			Float32("longitude", longitude).
+			Msg("unable to create location")
 		return nil, nil
 	}
 

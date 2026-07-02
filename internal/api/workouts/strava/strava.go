@@ -1,5 +1,10 @@
 package strava
 
-import "go.mattglei.ch/lcp/internal/cache"
+import (
+	"sync"
 
-var logAttr = cache.Workouts.LogAttr()
+	"github.com/rs/zerolog"
+	"go.mattglei.ch/lcp/internal/cache"
+)
+
+var logger = sync.OnceValue(func() *zerolog.Logger { return cache.Workouts.Logger() })

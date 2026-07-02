@@ -2,27 +2,30 @@ package workouts
 
 import (
 	"net/http"
+	"sync"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/redis/go-redis/v9"
+	"github.com/rs/zerolog"
 	"go.mattglei.ch/lcp/internal/api/workouts/strava"
 	"go.mattglei.ch/lcp/internal/cache"
-	"go.mattglei.ch/timber"
 )
 
 const cacheInstance = cache.Workouts
 
-var logAttr = cacheInstance.LogAttr()
+var logger = sync.OnceValue(func() *zerolog.Logger { return cacheInstance.Logger() })
 
 func Setup(mux *http.ServeMux, client *http.Client, minioClient *minio.Client, rdb *redis.Client) {
 	stravaTokens := strava.LoadTokens()
 	err := stravaTokens.RefreshIfExpired(client)
 	if err != nil {
-		timber.Error(err, "failed to refresh strava token data on boot")
+		logger().Error().Err(err).Msg("failed to refresh strava token data on boot")
 	}
 	activities, err := fetch(client, minioClient, rdb, stravaTokens)
 	if err != nil {
-		timber.Error(err, "failed to load initial data for workouts cache; not updating")
+		logger().Error().
+			Err(err).
+			Msg("failed to load initial data for workouts cache; not updating")
 	}
 	workoutsCache := cache.New(cacheInstance, activities, err == nil)
 
