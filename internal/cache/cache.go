@@ -44,6 +44,13 @@ func (i CacheInstance) Logger() *zerolog.Logger {
 	return &logger
 }
 
+// LazyLogger returns a memoized accessor for the instance's logger. The logger
+// is built on first call rather than at package-init time so it captures the
+// log output configured in main instead of the default.
+func (i CacheInstance) LazyLogger() func() *zerolog.Logger {
+	return sync.OnceValue(i.Logger)
+}
+
 type Cache[T lcp.CacheData] struct {
 	instance CacheInstance
 	filePath string
@@ -73,7 +80,6 @@ func New[T lcp.CacheData](instance CacheInstance, data T, update bool) *Cache[T]
 			secrets.ENV.CacheFolder,
 			fmt.Sprintf("%s.json", instance.String()),
 		),
-		Logger:      instance.Logger(),
 		connections: make(map[chan string]struct{}),
 		MarshalResponse: func(c *Cache[T]) ([]byte, error) {
 			data, err := json.Marshal(lcp.CacheResponse[T]{Data: c.Data, Updated: c.Updated})
