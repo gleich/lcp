@@ -2,18 +2,16 @@ package workouts
 
 import (
 	"net/http"
-	"sync"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/redis/go-redis/v9"
-	"github.com/rs/zerolog"
 	"go.mattglei.ch/lcp/internal/api/workouts/strava"
 	"go.mattglei.ch/lcp/internal/cache"
 )
 
 const cacheInstance = cache.Workouts
 
-var logger = sync.OnceValue(func() *zerolog.Logger { return cacheInstance.Logger() })
+var logger = cacheInstance.LazyLogger()
 
 func Setup(mux *http.ServeMux, client *http.Client, minioClient *minio.Client, rdb *redis.Client) {
 	stravaTokens := strava.LoadTokens()

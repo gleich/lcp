@@ -3,10 +3,8 @@ package github
 import (
 	"context"
 	"net/http"
-	"sync"
 	"time"
 
-	"github.com/rs/zerolog"
 	"github.com/shurcooL/githubv4"
 	"go.mattglei.ch/lcp/internal/cache"
 	"go.mattglei.ch/lcp/internal/secrets"
@@ -15,7 +13,7 @@ import (
 
 const cacheInstance = cache.GitHub
 
-var logger = sync.OnceValue(func() *zerolog.Logger { return cacheInstance.Logger() })
+var logger = cacheInstance.LazyLogger()
 
 func Setup(mux *http.ServeMux) {
 	githubTokenSource := oauth2.StaticTokenSource(

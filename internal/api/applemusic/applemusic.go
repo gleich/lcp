@@ -4,18 +4,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"sync"
 	"time"
 
 	"github.com/redis/go-redis/v9"
-	"github.com/rs/zerolog"
 	"go.mattglei.ch/lcp/internal/cache"
 	"go.mattglei.ch/lcp/pkg/lcp"
 )
 
 const cacheInstance = cache.AppleMusic
 
-var logger = sync.OnceValue(func() *zerolog.Logger { return cacheInstance.Logger() })
+var logger = cacheInstance.LazyLogger()
 
 func cacheUpdate(client *http.Client, rdb *redis.Client) (lcp.AppleMusicCache, error) {
 	recentlyPlayed, err := fetchRecentlyPlayed(client, rdb)
