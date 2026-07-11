@@ -80,6 +80,7 @@ func New[T lcp.CacheData](instance CacheInstance, data T, update bool) *Cache[T]
 			secrets.ENV.CacheFolder,
 			fmt.Sprintf("%s.json", instance.String()),
 		),
+		Logger:      instance.Logger(),
 		connections: make(map[chan string]struct{}),
 		MarshalResponse: func(c *Cache[T]) ([]byte, error) {
 			data, err := json.Marshal(lcp.CacheResponse[T]{Data: c.Data, Updated: c.Updated})
