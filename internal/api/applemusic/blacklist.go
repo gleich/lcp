@@ -1,7 +1,10 @@
 package applemusic
 
 import (
+	"fmt"
 	"net/http"
+	"slices"
+	"strings"
 	"sync"
 	"time"
 
@@ -15,18 +18,26 @@ type blacklistCache struct {
 	ReplacementPool []lcp.AppleMusicSong
 }
 
-func (b *blacklistCache) Refresh(client *http.Client, rdb *redis.Client) error {
-	b.Mutex.Lock()
-	defer b.Mutex.Unlock()
-	// refreshing pool
-	const source = "p.PkxVvRoH2zv9xE8" // sleep sounds
-	poolSongs, err := fetchPlaylistTracks(client, rdb, source)
-	if err != nil {
-		return err
-	}
-	b.ReplacementPool = poolSongs
+// Contains reports if a song is blacklisted. Library and catalog versions of
+// the same track can carry different IDs, so fall back to track and artist.
+// Callers must hold the read lock.
+func (b *blacklistCache) Contains(song lcp.AppleMusicSong) bool {
+	return slices.ContainsFunc(b.Songs, func(s lcp.AppleMusicSong) bool {
+		return s.ID == song.ID || songIdentity(s) == songIdentity(song)
+	})
+}
 
-	// refreshing songs
+func songIdentity(s lcp.AppleMusicSong) string {
+	return strings.ToLower(s.Track) + "|" + strings.ToLower(s.Artist)
+}
+
+func (b *blacklistCache) Refresh(client *http.Client, rdb *redis.Client) error {
+	const replacementPool = "p.PkxVvRoH2zv9xE8" // sleep sounds
+	pool, err := fetchPlaylistTracks(client, rdb, replacementPool)
+	if err != nil {
+		return fmt.Errorf("fetching replacement pool: %w", err)
+	}
+
 	playlists := []string{
 		"p.PkxVxXei2zv9xE8", // ttmwf
 		"p.1YeWLY8hqkred4L", // test
@@ -35,10 +46,14 @@ func (b *blacklistCache) Refresh(client *http.Client, rdb *redis.Client) error {
 	for _, id := range playlists {
 		playlistSongs, err := fetchPlaylistTracks(client, rdb, id)
 		if err != nil {
-			return err
+			return fmt.Errorf("fetching blacklist playlist %s: %w", id, err)
 		}
 		songs = append(songs, playlistSongs...)
 	}
+
+	b.Mutex.Lock()
+	defer b.Mutex.Unlock()
+	b.ReplacementPool = pool
 	b.Songs = songs
 	return nil
 }

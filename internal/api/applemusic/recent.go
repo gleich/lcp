@@ -3,7 +3,6 @@ package applemusic
 import (
 	"fmt"
 	"net/http"
-	"slices"
 
 	"github.com/redis/go-redis/v9"
 	"go.mattglei.ch/lcp/pkg/lcp"
@@ -57,23 +56,26 @@ func fetchRecentlyPlayed(
 	filteredSongs := []lcp.AppleMusicSong{}
 	blacklistedIndex := 0
 	for _, song := range uniqueSongs[:recentlyPlayedLimit] {
-		blacklisted := slices.ContainsFunc(
-			blacklist.Songs,
-			func(s lcp.AppleMusicSong) bool { return s.ID == song.ID },
-		)
-		if !blacklisted {
+		if !blacklist.Contains(song) {
 			filteredSongs = append(filteredSongs, song)
 			continue
 		}
 
+		for blacklistedIndex < len(blacklist.ReplacementPool) &&
+			seen[blacklist.ReplacementPool[blacklistedIndex].ID] {
+			blacklistedIndex++
+		}
 		if blacklistedIndex >= len(blacklist.ReplacementPool) {
 			return []lcp.AppleMusicSong{}, fmt.Errorf(
 				"no replacement left in pool for blacklisted song %s",
 				song.ID,
 			)
 		}
-		filteredSongs = append(filteredSongs, blacklist.ReplacementPool[blacklistedIndex])
+
+		replacement := blacklist.ReplacementPool[blacklistedIndex]
+		seen[replacement.ID] = true
 		blacklistedIndex++
+		filteredSongs = append(filteredSongs, replacement)
 	}
 
 	return filteredSongs, nil
