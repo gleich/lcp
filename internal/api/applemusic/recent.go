@@ -3,6 +3,7 @@ package applemusic
 import (
 	"fmt"
 	"net/http"
+	"slices"
 
 	"github.com/redis/go-redis/v9"
 	"go.mattglei.ch/lcp/pkg/lcp"
@@ -12,9 +13,12 @@ type recentlyPlayedResponse struct {
 	Data []songResponse `json:"data"`
 }
 
+const recentlyPlayedLimit = 10
+
 func fetchRecentlyPlayed(
 	client *http.Client,
 	rdb *redis.Client,
+	blacklist *blacklistCache,
 ) ([]lcp.AppleMusicSong, error) {
 	response, err := sendAppleMusicRequest[recentlyPlayedResponse](
 		client,
@@ -46,5 +50,31 @@ func fetchRecentlyPlayed(
 		}
 	}
 
-	return uniqueSongs[:10], nil
+	// remove and replace songs from blacklist
+	blacklist.Mutex.RLock()
+	defer blacklist.Mutex.RUnlock()
+
+	filteredSongs := []lcp.AppleMusicSong{}
+	blacklistedIndex := 0
+	for _, song := range uniqueSongs[:recentlyPlayedLimit] {
+		blacklisted := slices.ContainsFunc(
+			blacklist.Songs,
+			func(s lcp.AppleMusicSong) bool { return s.ID == song.ID },
+		)
+		if !blacklisted {
+			filteredSongs = append(filteredSongs, song)
+			continue
+		}
+
+		if blacklistedIndex >= len(blacklist.ReplacementPool) {
+			return []lcp.AppleMusicSong{}, fmt.Errorf(
+				"no replacement left in pool for blacklisted song %s",
+				song.ID,
+			)
+		}
+		filteredSongs = append(filteredSongs, blacklist.ReplacementPool[blacklistedIndex])
+		blacklistedIndex++
+	}
+
+	return filteredSongs, nil
 }

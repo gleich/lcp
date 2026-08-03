@@ -15,8 +15,12 @@ const cacheInstance = cache.AppleMusic
 
 var logger = cacheInstance.LazyLogger()
 
-func cacheUpdate(client *http.Client, rdb *redis.Client) (lcp.AppleMusicCache, error) {
-	recentlyPlayed, err := fetchRecentlyPlayed(client, rdb)
+func cacheUpdate(
+	client *http.Client,
+	rdb *redis.Client,
+	blacklist *blacklistCache,
+) (lcp.AppleMusicCache, error) {
+	recentlyPlayed, err := fetchRecentlyPlayed(client, rdb, blacklist)
 	if err != nil {
 		return lcp.AppleMusicCache{}, err
 	}
@@ -37,7 +41,13 @@ func cacheUpdate(client *http.Client, rdb *redis.Client) (lcp.AppleMusicCache, e
 }
 
 func Setup(mux *http.ServeMux, client *http.Client, rdb *redis.Client) {
-	data, err := cacheUpdate(client, rdb)
+	blacklist := blacklistCache{}
+	err := blacklist.Refresh(client, rdb)
+	if err != nil {
+		logger().Error().Err(err).Msg("initial fetch of applemusic blacklist data failed")
+	}
+
+	data, err := cacheUpdate(client, rdb, &blacklist)
 	if err != nil {
 		logger().Error().Err(err).Msg("initial fetch of applemusic cache data failed")
 	}
@@ -51,10 +61,11 @@ func Setup(mux *http.ServeMux, client *http.Client, rdb *redis.Client) {
 		applemusicCache,
 		client,
 		func(client *http.Client) (lcp.AppleMusicCache, error) {
-			return cacheUpdate(client, rdb)
+			return cacheUpdate(client, rdb, &blacklist)
 		},
 		10*time.Second,
 	)
+	go blacklist.UpdatePeriodically(client, rdb)
 }
 
 func marshalResponse(

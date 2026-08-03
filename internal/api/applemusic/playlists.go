@@ -87,32 +87,9 @@ func fetchPlaylist(
 		)
 	}
 
-	var tracks []lcp.AppleMusicSong
-	path := fmt.Sprintf("/v1/me/library/playlists/%s/tracks", playlist.AppleMusicID)
-	for {
-		trackData, err := sendAppleMusicRequest[playlistTracksResponse](client, path)
-		if err != nil {
-			return lcp.AppleMusicPlaylist{}, fmt.Errorf(
-				"fetching playlist data for %s: %w",
-				path,
-				err,
-			)
-		}
-		for _, track := range trackData.Data {
-			song, err := track.ToAppleMusicSong(client, rdb)
-			if err != nil {
-				return lcp.AppleMusicPlaylist{}, fmt.Errorf(
-					"creating song from apple music song response: %w",
-					err,
-				)
-			}
-			tracks = append(tracks, song)
-		}
-
-		if trackData.Next == "" {
-			break
-		}
-		path = trackData.Next
+	tracks, err := fetchPlaylistTracks(client, rdb, playlist.AppleMusicID)
+	if err != nil {
+		return lcp.AppleMusicPlaylist{}, err
 	}
 
 	duration := 0
@@ -133,6 +110,41 @@ func fetchPlaylist(
 		),
 		SpotifyID: playlist.SpotifyID,
 	}, nil
+}
+
+func fetchPlaylistTracks(
+	client *http.Client,
+	rdb *redis.Client,
+	id string,
+) ([]lcp.AppleMusicSong, error) {
+	var tracks []lcp.AppleMusicSong
+	path := fmt.Sprintf("/v1/me/library/playlists/%s/tracks", id)
+	for {
+		trackData, err := sendAppleMusicRequest[playlistTracksResponse](client, path)
+		if err != nil {
+			return []lcp.AppleMusicSong{}, fmt.Errorf(
+				"fetching tracks for playlist %s: %w",
+				path,
+				err,
+			)
+		}
+		for _, track := range trackData.Data {
+			song, err := track.ToAppleMusicSong(client, rdb)
+			if err != nil {
+				return []lcp.AppleMusicSong{}, fmt.Errorf(
+					"creating song from apple music song response: %w",
+					err,
+				)
+			}
+			tracks = append(tracks, song)
+		}
+
+		if trackData.Next == "" {
+			break
+		}
+		path = trackData.Next
+	}
+	return tracks, nil
 }
 
 func playlistEndpoint(c *cache.Cache[lcp.AppleMusicCache]) http.HandlerFunc {
