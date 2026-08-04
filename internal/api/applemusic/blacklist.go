@@ -58,7 +58,7 @@ func (b *blacklistCache) Refresh(client *http.Client, rdb *redis.Client) error {
 	return nil
 }
 
-func (b *blacklistCache) UpdatePeriodically(client *http.Client, rdb *redis.Client) error {
+func (b *blacklistCache) UpdatePeriodically(client *http.Client, rdb *redis.Client) {
 	for {
 		time.Sleep(5 * time.Minute)
 		err := b.Refresh(client, rdb)
