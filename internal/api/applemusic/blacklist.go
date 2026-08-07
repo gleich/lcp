@@ -37,6 +37,9 @@ func (b *blacklistCache) Refresh(client *http.Client, rdb *redis.Client) error {
 	if err != nil {
 		return fmt.Errorf("fetching replacement pool: %w", err)
 	}
+	if len(pool) == 0 {
+		logger().Warn().Msg("replacement pool is empty; blacklisted songs will be dropped")
+	}
 
 	playlists := []string{
 		"p.PkxVxXei2zv9xE8", // ttmwf

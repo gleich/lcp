@@ -54,27 +54,27 @@ func fetchRecentlyPlayed(
 	defer blacklist.Mutex.RUnlock()
 
 	filteredSongs := []lcp.AppleMusicSong{}
-	blacklistedIndex := 0
-	for _, song := range uniqueSongs[:recentlyPlayedLimit] {
+	poolIndex := 0
+	for _, song := range uniqueSongs[:min(len(uniqueSongs), recentlyPlayedLimit)] {
 		if !blacklist.Contains(song) {
 			filteredSongs = append(filteredSongs, song)
 			continue
 		}
 
-		for blacklistedIndex < len(blacklist.ReplacementPool) &&
-			seen[blacklist.ReplacementPool[blacklistedIndex].ID] {
-			blacklistedIndex++
+		for poolIndex < len(blacklist.ReplacementPool) &&
+			seen[blacklist.ReplacementPool[poolIndex].ID] {
+			poolIndex++
 		}
-		if blacklistedIndex >= len(blacklist.ReplacementPool) {
-			return []lcp.AppleMusicSong{}, fmt.Errorf(
-				"no replacement left in pool for blacklisted song %s",
-				song.ID,
-			)
+		if poolIndex >= len(blacklist.ReplacementPool) {
+			logger().Warn().
+				Str("song", song.ID).
+				Msg("no replacement left in pool for blacklisted song")
+			continue
 		}
 
-		replacement := blacklist.ReplacementPool[blacklistedIndex]
+		replacement := blacklist.ReplacementPool[poolIndex]
 		seen[replacement.ID] = true
-		blacklistedIndex++
+		poolIndex++
 		filteredSongs = append(filteredSongs, replacement)
 	}
 
