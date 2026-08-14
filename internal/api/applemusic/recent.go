@@ -3,6 +3,7 @@ package applemusic
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/redis/go-redis/v9"
 	"go.mattglei.ch/lcp/pkg/lcp"
@@ -19,9 +20,12 @@ func fetchRecentlyPlayed(
 	rdb *redis.Client,
 	blacklist *blacklistCache,
 ) ([]lcp.AppleMusicSong, error) {
+	params := url.Values{
+		"types": {"songs,library-songs"},
+	}
 	response, err := sendAppleMusicRequest[recentlyPlayedResponse](
 		client,
-		"/v1/me/recent/played/tracks",
+		"/v1/me/recent/played/tracks"+params.Encode(),
 	)
 	if err != nil {
 		return []lcp.AppleMusicSong{}, err
