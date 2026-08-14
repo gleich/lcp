@@ -25,7 +25,7 @@ func fetchRecentlyPlayed(
 	}
 	response, err := sendAppleMusicRequest[recentlyPlayedResponse](
 		client,
-		"/v1/me/recent/played/tracks"+params.Encode(),
+		"/v1/me/recent/played/tracks?"+params.Encode(),
 	)
 	if err != nil {
 		return []lcp.AppleMusicSong{}, err
