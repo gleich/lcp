@@ -43,7 +43,6 @@ func (b *blacklistCache) Refresh(client *http.Client, rdb *redis.Client) error {
 
 	playlists := []string{
 		"p.PkxVxXei2zv9xE8", // ttmwf
-		"p.1YeWLY8hqkred4L", // test
 	}
 	var songs []lcp.AppleMusicSong
 	for _, id := range playlists {
