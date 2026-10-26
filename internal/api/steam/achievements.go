@@ -43,13 +43,34 @@ func fetchAchievementsPercentage(
 	appID int,
 ) (*float32, error) {
 	params := url.Values{
+		"key":    {secrets.ENV.SteamKey},
+		"appid":  {fmt.Sprint(appID)},
+		"format": {"json"},
+	}
+	req, err := http.NewRequest(
+		http.MethodGet,
+		"https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2?"+params.Encode(),
+		nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("creating request for owned gamed (id: %d): %w", appID, err)
+	}
+	gameSchema, err := api.RequestJSON[schemaGameResponse](client, req, logger())
+	if err != nil {
+		return nil, fmt.Errorf("getting game schema (id: %d): %w", appID, err)
+	}
+
+	if len(gameSchema.Game.GameStats.Achievements) == 0 {
+		return nil, nil
+	}
+
+	params = url.Values{
 		"key":     {secrets.ENV.SteamKey},
 		"steamid": {secrets.ENV.SteamID},
 		"appid":   {strconv.Itoa(appID)},
 		"format":  {"json"},
 	}
-
-	req, err := http.NewRequest(
+	req, err = http.NewRequest(
 		http.MethodGet,
 		"https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v0001?"+params.Encode(),
 		nil,
@@ -77,24 +98,6 @@ func fetchAchievementsPercentage(
 
 	if playerAchievements.PlayerStats.Achievements == nil {
 		return nil, nil
-	}
-
-	params = url.Values{
-		"key":    {secrets.ENV.SteamKey},
-		"appid":  {fmt.Sprint(appID)},
-		"format": {"json"},
-	}
-	req, err = http.NewRequest(
-		http.MethodGet,
-		"https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2?"+params.Encode(),
-		nil,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("creating request for owned gamed (id: %d): %w", appID, err)
-	}
-	gameSchema, err := api.RequestJSON[schemaGameResponse](client, req, logger())
-	if err != nil {
-		return nil, fmt.Errorf("getting game schema (id: %d): %w", appID, err)
 	}
 
 	var achievements []achievement

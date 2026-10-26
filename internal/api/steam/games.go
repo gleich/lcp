@@ -21,25 +21,25 @@ import (
 
 const storeItemAssetsBaseURL = "https://shared.akamai.steamstatic.com/store_item_assets/"
 
-type ownedGamesResponse struct {
+type lastPlayedTimesResponse struct {
 	Response struct {
 		Games []struct {
-			Name                     string `json:"name"`
-			AppID                    int    `json:"appid"`
-			LastPlayed               int64  `json:"rtime_last_played"`
-			ImgIconURL               string `json:"img_icon_url"`
-			PlaytimeForever          int    `json:"playtime_forever"`
-			HasCommunityVisibleStats bool   `json:"has_community_visible_stats"`
+			AppID           int   `json:"appid"`
+			LastPlaytime    int64 `json:"last_playtime"`
+			PlaytimeForever int   `json:"playtime_forever"`
 		} `json:"games"`
 	} `json:"response"`
 }
 
+type storeItem struct {
+	AppID  int             `json:"appid"`
+	Name   string          `json:"name"`
+	Assets storeItemAssets `json:"assets"`
+}
+
 type storeItemsResponse struct {
 	Response struct {
-		StoreItems []struct {
-			AppID  int             `json:"appid"`
-			Assets storeItemAssets `json:"assets"`
-		} `json:"store_items"`
+		StoreItems []storeItem `json:"store_items"`
 	} `json:"response"`
 }
 
@@ -51,6 +51,7 @@ type storeItemAssets struct {
 	AssetURLFormat string `json:"asset_url_format"`
 	Header         string `json:"header"`
 	LibraryHero    string `json:"library_hero"`
+	CommunityIcon  string `json:"community_icon"`
 }
 
 func (a storeItemAssets) assetURL(appID int, filename string) string {
@@ -58,7 +59,7 @@ func (a storeItemAssets) assetURL(appID int, filename string) string {
 	return storeItemAssetsBaseURL + strings.Replace(format, "${FILENAME}", filename, 1)
 }
 
-func fetchStoreItemAssets(client *http.Client, appIDs []int) (map[int]storeItemAssets, error) {
+func fetchStoreItems(client *http.Client, appIDs []int) (map[int]storeItem, error) {
 	ids := make([]map[string]int, len(appIDs))
 	for i, id := range appIDs {
 		ids[i] = map[string]int{"appid": id}
@@ -91,76 +92,79 @@ func fetchStoreItemAssets(client *http.Client, appIDs []int) (map[int]storeItemA
 		return nil, fmt.Errorf("sending request for store items: %w", err)
 	}
 
-	assets := make(map[int]storeItemAssets, len(storeItems.Response.StoreItems))
+	items := make(map[int]storeItem, len(storeItems.Response.StoreItems))
 	for _, item := range storeItems.Response.StoreItems {
-		assets[item.AppID] = item.Assets
+		items[item.AppID] = item
 	}
-	return assets, nil
+	return items, nil
 }
 
+// fetchRecentlyPlayedGames uses ClientGetLastPlayedTimes instead of GetOwnedGames because it
+// also includes games borrowed through Steam Family Sharing. It has no steamid parameter and
+// always returns the games for the owner of the API key.
 func fetchRecentlyPlayedGames(client *http.Client, rdb *redis.Client) ([]lcp.SteamGame, error) {
-	params := url.Values{
-		"key":             {secrets.ENV.SteamKey},
-		"steamid":         {secrets.ENV.SteamID},
-		"include_appinfo": {"true"},
-	}
+	params := url.Values{"key": {secrets.ENV.SteamKey}}
 	req, err := http.NewRequest(
 		http.MethodGet,
-		"https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?"+params.Encode(),
+		"https://api.steampowered.com/IPlayerService/ClientGetLastPlayedTimes/v1/?"+params.Encode(),
 		nil,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("creating request for steam API owned games: %w", err)
+		return nil, fmt.Errorf("creating request for steam API last played times: %w", err)
 	}
-	ownedGames, err := api.RequestJSON[ownedGamesResponse](client, req, logger())
+	lastPlayedTimes, err := api.RequestJSON[lastPlayedTimesResponse](client, req, logger())
 	if err != nil {
-		return nil, fmt.Errorf("sending request for owned games: %w", err)
+		return nil, fmt.Errorf("sending request for last played times: %w", err)
 	}
 
-	sort.Slice(ownedGames.Response.Games, func(i, j int) bool {
-		return ownedGames.Response.Games[j].LastPlayed < ownedGames.Response.Games[i].LastPlayed
+	playedGames := lastPlayedTimes.Response.Games
+	sort.Slice(playedGames, func(i, j int) bool {
+		return playedGames[j].LastPlaytime < playedGames[i].LastPlaytime
 	})
 
-	if len(ownedGames.Response.Games) < 6 {
+	if len(playedGames) < 6 {
 		return nil, cache.ErrSteamOwnedGamesEmpty
 	}
 
-	topGames := ownedGames.Response.Games[:10]
+	topGames := playedGames[:10]
 	appIDs := make([]int, len(topGames))
 	for i, g := range topGames {
 		appIDs[i] = g.AppID
 	}
-	assets, err := fetchStoreItemAssets(client, appIDs)
+	storeItems, err := fetchStoreItems(client, appIDs)
 	if err != nil {
 		return nil, err
 	}
 
 	var games []lcp.SteamGame
 	for _, g := range topGames {
-		gameAssets := assets[g.AppID]
+		item := storeItems[g.AppID]
+		if item.Name == "" {
+			logger().Warn().Int("app_id", g.AppID).Msg("no store item found for game")
+			continue
+		}
+
 		game := lcp.SteamGame{
-			Name:  g.Name,
+			Name:  item.Name,
 			AppID: g.AppID,
 			IconURL: fmt.Sprintf(
 				"https://media.steampowered.com/steamcommunity/public/images/apps/%d/%s.jpg",
 				g.AppID,
-				g.ImgIconURL,
+				item.Assets.CommunityIcon,
 			),
-			RTimeLastPlayed:    time.Unix(g.LastPlayed, 0),
+			RTimeLastPlayed:    time.Unix(g.LastPlaytime, 0),
 			PlaytimeForever:    g.PlaytimeForever,
 			URL:                fmt.Sprintf("https://store.steampowered.com/app/%d/", g.AppID),
-			HeaderURL:          gameAssets.assetURL(g.AppID, cmp.Or(gameAssets.Header, "header.jpg")),
-			LibraryHeroURL:     gameAssets.assetURL(g.AppID, cmp.Or(gameAssets.LibraryHero, "library_hero.jpg")),
-			LibraryHeroLogoURL: gameAssets.assetURL(g.AppID, "logo.png"),
+			HeaderURL:          item.Assets.assetURL(g.AppID, cmp.Or(item.Assets.Header, "header.jpg")),
+			LibraryHeroURL:     item.Assets.assetURL(g.AppID, cmp.Or(item.Assets.LibraryHero, "library_hero.jpg")),
+			LibraryHeroLogoURL: item.Assets.assetURL(g.AppID, "logo.png"),
 		}
 
-		if g.HasCommunityVisibleStats {
-			achievementPercentage, err := fetchAchievementsPercentage(client, g.AppID)
-			if err != nil {
-				return nil, err
-			}
-			game.AchievementProgress = achievementPercentage
+		achievementPercentage, err := fetchAchievementsPercentage(client, g.AppID)
+		if err != nil {
+			return nil, err
 		}
+		game.AchievementProgress = achievementPercentage
 
 		headerBlurHash, err := images.BlurHash(client, rdb, game.HeaderURL, jpeg.Decode, logger())
 		if err != nil {
