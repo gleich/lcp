@@ -20,6 +20,20 @@ import (
 // rather than a full failure.
 var ErrWarning = errors.New("non-critical error encountered during request")
 
+// StatusError is returned by Request for non-2xx responses. It unwraps to ErrWarning so it is
+// still treated as non-critical, while letting callers react to specific status codes.
+type StatusError struct {
+	Code int
+}
+
+func (e StatusError) Error() string {
+	return fmt.Sprintf("%s: status code %d", ErrWarning, e.Code)
+}
+
+func (e StatusError) Unwrap() error {
+	return ErrWarning
+}
+
 // Request sends an HTTP request using the provided client with a 1-minute timeout and returns
 // the response body as a byte slice. It handles common transient network errors—including timeouts,
 // unexpected EOFs, and TCP connection resets—by logging warnings and returning a non-critical
@@ -56,7 +70,7 @@ func Request(client *http.Client, request *http.Request, logger *zerolog.Logger)
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		reqLogger.Warn().Int("code", resp.StatusCode).Msg("non-200 status code")
-		return []byte{}, ErrWarning
+		return []byte{}, StatusError{Code: resp.StatusCode}
 	} else if resp.StatusCode == http.StatusNoContent {
 		return []byte{}, fmt.Errorf(
 			"%d status no content returned when content is expected from %s",

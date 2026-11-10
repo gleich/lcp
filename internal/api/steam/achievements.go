@@ -2,6 +2,7 @@ package steam
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -80,6 +81,11 @@ func fetchAchievementsPercentage(
 	}
 
 	body, err := api.Request(client, req, logger())
+	// steam returns a 403 for games borrowed through family sharing since they aren't owned
+	var statusErr api.StatusError
+	if errors.As(err, &statusErr) && statusErr.Code == http.StatusForbidden {
+		return nil, nil
+	}
 	if err != nil {
 		return nil, fmt.Errorf("sending request for player achievements from %d: %w", appID, err)
 	}

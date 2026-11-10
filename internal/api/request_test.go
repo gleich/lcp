@@ -49,6 +49,10 @@ func TestRequest_Non2xxReturnsErrWarning(t *testing.T) {
 			if !errors.Is(err, ErrWarning) {
 				t.Errorf("status %d: expected ErrWarning, got %v", code, err)
 			}
+			var statusErr StatusError
+			if !errors.As(err, &statusErr) || statusErr.Code != code {
+				t.Errorf("status %d: expected StatusError with code %d, got %v", code, code, err)
+			}
 		})
 	}
 }
