@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"strconv"
 	"time"
 
 	"github.com/minio/minio-go/v7"
@@ -36,7 +35,7 @@ type activity struct {
 	SufferScore        float32    `json:"suffer_score,omitempty"`
 	PrCount            uint32     `json:"pr_count"`
 	Distance           float32    `json:"distance"`
-	ID                 uint64     `json:"id"`
+	ID                 string     `json:"id_str"`
 	HasHeartrate       bool       `json:"has_heartrate"`
 }
 
@@ -80,7 +79,7 @@ func FetchActivities(
 			TotalElevationGain: stravaActivity.TotalElevationGain,
 			MovingTime:         stravaActivity.MovingTime,
 			Distance:           stravaActivity.Distance,
-			ID:                 strconv.Itoa(int(stravaActivity.ID)),
+			ID:                 stravaActivity.ID,
 			AverageHeartrate:   stravaActivity.AverageHeartrate,
 			HasMap:             stravaActivity.Map.SummaryPolyline != "",
 			MapPolyline:        stravaActivity.Map.SummaryPolyline,
