@@ -14,11 +14,6 @@ const cacheInstance = cache.Workouts
 var logger = cacheInstance.LazyLogger()
 
 func Setup(mux *http.ServeMux, client *http.Client, minioClient *minio.Client, rdb *redis.Client) {
-	stravaTokens := strava.LoadTokens()
-	err := stravaTokens.RefreshIfExpired(client)
-	if err != nil {
-		logger().Error().Err(err).Msg("failed to refresh strava token data on boot")
-	}
 	activities, err := fetch(client, minioClient, rdb)
 	if err != nil {
 		logger().Error().

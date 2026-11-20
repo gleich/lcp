@@ -51,7 +51,7 @@ func sendStravaRequest[T any](client *http.Client, path string) (T, error) {
 func (t *tokens) RefreshIfExpired(client *http.Client) error {
 	t.Mutex.Lock()
 	defer t.Mutex.Unlock()
-	if t.ExpiresAt-60 >= time.Now().Unix() || t.AccessToken == "" {
+	if t.ExpiresAt-60 >= time.Now().Unix() {
 		return nil
 	}
 
@@ -76,14 +76,14 @@ func (t *tokens) RefreshIfExpired(client *http.Client) error {
 		return fmt.Errorf("creating request for new token: %w", err)
 	}
 
-	tokens, err := api.RequestJSON[tokens](client, req, logger())
+	resp, err := api.RequestJSON[tokens](client, req, logger())
 	if err != nil {
 		return fmt.Errorf("making request for refresh tokens: %w", err)
 	}
 
-	t.AccessToken = tokens.AccessToken
-	t.RefreshToken = tokens.RefreshToken
-	t.ExpiresAt = tokens.ExpiresAt
+	t.AccessToken = resp.AccessToken
+	t.RefreshToken = resp.RefreshToken
+	t.ExpiresAt = resp.ExpiresAt
 	logger().Info().
 		Dur("duration", time.Since(start)).
 		Str("token", t.AccessToken).
