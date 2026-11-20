@@ -19,9 +19,8 @@ func fetch(
 	client *http.Client,
 	minioClient *minio.Client,
 	rdb *redis.Client,
-	stravaTokens strava.Tokens,
 ) ([]lcp.Workout, error) {
-	stravaActivities, err := strava.FetchActivities(client, minioClient, rdb, stravaTokens)
+	stravaActivities, err := strava.FetchActivities(client, minioClient, rdb)
 	if err != nil {
 		return []lcp.Workout{}, err
 	}
@@ -68,7 +67,7 @@ func fetch(
 			continue
 		}
 
-		details, err := strava.FetchActivityDetails(client, activity.ID, stravaTokens)
+		details, err := strava.FetchActivityDetails(client, activity.ID)
 		if err != nil {
 			return nil, fmt.Errorf(
 				"fetching activity details (id: %s, name: %s): %w",
@@ -80,7 +79,7 @@ func fetch(
 		activity.Calories = details.Calories
 
 		if activity.HasHeartrate {
-			heartrateStream, err := strava.FetchHeartrate(client, activity.ID, stravaTokens)
+			heartrateStream, err := strava.FetchHeartrate(client, activity.ID)
 			if err != nil {
 				return nil, fmt.Errorf(
 					"fetching HR data for activity (id: %s, name: %s): %w",

@@ -54,12 +54,10 @@ func FetchActivities(
 	client *http.Client,
 	minioClient *minio.Client,
 	rdb *redis.Client,
-	tokens Tokens,
 ) ([]lcp.Workout, error) {
 	stravaActivities, err := sendStravaRequest[[]activity](
 		client,
 		"api/v3/athlete/activities",
-		tokens,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("sending request for activities: %w", err)
@@ -92,7 +90,7 @@ func FetchActivities(
 	return activities, nil
 }
 
-func FetchHeartrate(client *http.Client, id string, tokens Tokens) ([]int, error) {
+func FetchHeartrate(client *http.Client, id string) ([]int, error) {
 	params := url.Values{
 		"key_by_type": {"true"},
 		"keys":        {"heartrate"},
@@ -101,7 +99,6 @@ func FetchHeartrate(client *http.Client, id string, tokens Tokens) ([]int, error
 	stream, err := sendStravaRequest[struct{ Heartrate activityStream }](
 		client,
 		fmt.Sprintf("api/v3/activities/%s/streams?%s", id, params.Encode()),
-		tokens,
 	)
 	if err != nil {
 		return []int{}, fmt.Errorf("sending request for HR data for activity (id: %s): %w", id, err)
@@ -113,12 +110,10 @@ func FetchHeartrate(client *http.Client, id string, tokens Tokens) ([]int, error
 func FetchActivityDetails(
 	client *http.Client,
 	id string,
-	tokens Tokens,
 ) (detailedStravaActivity, error) {
 	details, err := sendStravaRequest[detailedStravaActivity](
 		client,
 		fmt.Sprintf("api/v3/activities/%s", id),
-		tokens,
 	)
 	if err != nil {
 		return detailedStravaActivity{}, fmt.Errorf(

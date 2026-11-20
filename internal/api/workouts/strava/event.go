@@ -32,8 +32,7 @@ func EventRoute(
 	fetch func(client *http.Client,
 		minioClient *minio.Client,
 		rdb *redis.Client,
-		stravaTokens Tokens) ([]lcp.Workout, error),
-	tokens Tokens,
+	) ([]lcp.Workout, error),
 ) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
@@ -59,13 +58,7 @@ func EventRoute(
 			return
 		}
 
-		err = tokens.RefreshIfExpired(client)
-		if err != nil {
-			util.InternalServerError(w, err, logger(), "failed to refresh token")
-			return
-		}
-
-		activities, err := fetch(client, minioClient, rdb, tokens)
+		activities, err := fetch(client, minioClient, rdb)
 		if err != nil {
 			util.InternalServerError(w, err, logger(), "failed to update strava cache")
 			return

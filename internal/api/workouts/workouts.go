@@ -19,7 +19,7 @@ func Setup(mux *http.ServeMux, client *http.Client, minioClient *minio.Client, r
 	if err != nil {
 		logger().Error().Err(err).Msg("failed to refresh strava token data on boot")
 	}
-	activities, err := fetch(client, minioClient, rdb, stravaTokens)
+	activities, err := fetch(client, minioClient, rdb)
 	if err != nil {
 		logger().Error().
 			Err(err).
@@ -30,7 +30,7 @@ func Setup(mux *http.ServeMux, client *http.Client, minioClient *minio.Client, r
 	workoutsCache.Endpoints(mux)
 	mux.HandleFunc(
 		"POST /strava/event",
-		strava.EventRoute(client, workoutsCache, minioClient, rdb, fetch, stravaTokens),
+		strava.EventRoute(client, workoutsCache, minioClient, rdb, fetch),
 	)
 	mux.HandleFunc("GET /strava/event", strava.ChallengeRoute)
 }
